@@ -156,4 +156,5 @@ unittest {
     assert( adjust_tick_width( new Axis( -0.1, 4 ), 8 ).tick_width == 0.5 );
     assert( adjust_tick_width( new Axis( -0.1, 4 ), 8 ).min_tick == 0.0 );
     assert( adjust_tick_width( new Axis( 0.1, 4 ), 8 ).min_tick == 0.5 );
+    assert( adjust_tick_width( new Axis( 1, 40 ), 8 ).min_tick == 5 );
 }
