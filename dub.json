@@ -5,7 +5,29 @@
 	"authors": ["Edwin van Leeuwen"],
 	"license": "GPL-3.0",
 	"dependencies": {
-		"tested": "~master"
+		"tested": "~master",
 	},
-	"targetType": "library"
+    "configurations": [
+        {
+            "name": "plotd",
+            "targetType": "library",
+        },
+        {
+            "name": "plotd_server",
+            "targetType": "executable",
+            "excludedSourceFiles": ["src/plotd_client.d"],
+            "mainSourceFile": "src/plotd_server.d",
+            "targetName": "plotd_server",
+            "targetPath": "bin/"
+        },
+        {
+            "name": "plotd_client",
+            "targetType": "executable",
+            "excludedSourceFiles": ["src/plotd_server.d"],
+            "mainSourceFile": "src/plotd_client.d",
+            "targetName": "plotd_client",
+            "targetPath": "bin/"
+        }
+ 
+    ]
 }
