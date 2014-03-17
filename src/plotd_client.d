@@ -2,16 +2,41 @@ import std.stdio;
 import std.socket;
 import std.string;
 import std.conv;
-import std.random;
-import std.outbuffer;
+import std.getopt;
 
-int main(string[] args) {
-  if (args.length != 3) {
-    writefln("usage: %s <server host> <port>",args[0]); 
-    return 0;
-  }
+import plotd.message;
+import plotd.primitives;
 
-  auto s = new UdpSocket();
+/**
+Convert:
+--action point --point 1 0.5
+--action color --color 0.4 0.5 0.1 0.9
+--action line --point 3 0.1 --id 2
+*/
+
+void main(string[] args) {
+    string action;
+    double[] coords;
+    double[] rgba;
+    int id;// Should initialize as NaN if possible;
+
+    getopt(
+            args,
+            "action", &action,
+            "point", &coords,
+            "color|colour", &rgba,
+            "id", &id
+          );
+
+    Message msg;
+    if (coords.length == 2) {
+        msg = toMessage( Point( coords[0], coords[1] ) );
+    }
+
+
+    writeln( msg );
+
+  /*auto s = new TcpSocket();
 
   auto addr = new InternetAddress(args[1], to!ushort(args[2]));
   s.connect(addr);
@@ -29,9 +54,5 @@ int main(string[] args) {
     s.receive(recv_buf);
 
     assert(r == *cast(int*)(send_buf.toBytes().ptr));
-  }
-
-
-
-  return 0;
+  }*/
 }
