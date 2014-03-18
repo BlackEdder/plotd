@@ -4,6 +4,7 @@
 	"copyright": "Copyright © 2014, Edwin van Leeuwen",
 	"authors": ["Edwin van Leeuwen"],
 	"license": "GPL-3.0",
+    "excludedSourceFiles": ["src/plotd_client.d","src/plotd_server.d"],
 	"dependencies": {
 		"tested": "~master",
 	},
@@ -15,14 +16,16 @@
         {
             "name": "plotd_server",
             "targetType": "executable",
-            "mainSourceFile": "exec/plotd_server.d",
+            "excludedSourceFiles": ["src/plotd_client.d"],
+            "mainSourceFile": "src/plotd_server.d",
             "targetName": "plotd_server",
             "targetPath": "bin/"
         },
         {
             "name": "plotd_client",
             "targetType": "executable",
-            "mainSourceFile": "exec/plotd_client.d",
+            "excludedSourceFiles": ["src/plotd_server.d"],
+            "mainSourceFile": "src/plotd_client.d",
             "targetName": "plotd_client",
             "targetPath": "bin/"
         }
