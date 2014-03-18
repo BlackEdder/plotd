@@ -79,7 +79,6 @@ struct Point {
         assert( Point( "1.0,0.1" ) == Point( 1.0, 0.1 ) );
     }
 
-
     bool opEquals( const Point point ) {
         return point.x == x && point.y == y;
     }
