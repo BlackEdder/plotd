@@ -19,18 +19,25 @@ void main(string[] args) {
     string action;
     int id;// Should initialize as NaN if possible;
 
-    Message msg;
+    Message[] parameters;
+    // Needed because delegate does not return void by default
+    void add_point_to_pars( string option, string value ) {
+        parameters = coordHandler( value, parameters );
+    }
+
+    void add_color_to_pars( string option, string value ) {
+        parameters = rgbaHandler( value, parameters );
+    }
+     
     getopt(
             args,
             "action", &action,
-            "point", 
-                delegate (string option, string value) => coordHandler( value, msg ),
-            "color|colour", 
-                delegate (string option, string value) => rgbaHandler( value, msg ),
+            "point", &add_point_to_pars,
+            "color|colour", &add_color_to_pars,
             "id", &id
           );
 
-    writeln( msg );
+    writeln( parameters );
 
   /*auto s = new TcpSocket();
 
