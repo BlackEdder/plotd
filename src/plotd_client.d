@@ -37,15 +37,22 @@ void main(string[] args) {
             "id", &id
           );
 
-    writeln( parameters );
 
-  /*auto s = new TcpSocket();
+    Message action_msg = [ "action": Message(action), 
+            "parameters": Message(parameters) ];
+    writeln( "Client sending the following message: ", action_msg );
 
-  auto addr = new InternetAddress(args[1], to!ushort(args[2]));
+  auto s = new TcpSocket();
+
+  auto addr = new InternetAddress( "localhost", 50001 );
+
   s.connect(addr);
+
   scope(exit) s.close();
 
-  for (int i = 0; i < 1000; i++){
+  s.send( action_msg.to!string );
+
+  /*for (int i = 0; i < 1000; i++){
     auto r = uniform(int.min,int.max);
     auto send_buf = new OutBuffer();
 
