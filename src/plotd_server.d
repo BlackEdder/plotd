@@ -23,14 +23,11 @@ void main() {
         char[1024] buffer;
         auto received = client.receive(buffer);
 
-        writefln("The client said:\n%s", buffer[0.. received]);
-
-        string response = "Hello World!\n";
-        client.send(response);
+        writeln( buffer[0.. received] );
 
         client.shutdown(SocketShutdown.BOTH);
         client.close();
-        if( (Clock.currTime() - startTime).get!"seconds"() > 1 )
+        if( (Clock.currTime() - startTime).get!"seconds"() > 1000 )
             wait = false;
     }
 }

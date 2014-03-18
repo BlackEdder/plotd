@@ -11,12 +11,13 @@
         {
             "name": "plotd",
             "targetType": "library",
-            "excludedSourceFiles": ["src/plotd_client.d","src/plotd_server.d"],
+            "excludedSourceFiles": [ "src/plotd_client.d","src/plotd_server.d",
+                "src/processing.d"],
         },
         {
             "name": "plotd_server",
             "targetType": "executable",
-            "excludedSourceFiles": ["src/plotd_client.d"],
+            "excludedSourceFiles": ["src/plotd_client.d", "src/processing.d"],
             "mainSourceFile": "src/plotd_server.d",
             "targetName": "plotd_server",
             "targetPath": "bin/"
@@ -24,11 +25,19 @@
         {
             "name": "plotd_client",
             "targetType": "executable",
-            "excludedSourceFiles": ["src/plotd_server.d"],
+            "excludedSourceFiles": ["src/plotd_server.d", "src/processing.d"],
             "mainSourceFile": "src/plotd_client.d",
             "targetName": "plotd_client",
             "targetPath": "bin/"
+        },
+        {
+            "name": "processing",
+            "targetType": "executable",
+            "excludedSourceFiles": ["src/plotd_server.d", "src/plotd_client.d"],
+            "mainSourceFile": "src/processing.d",
+            "targetName": "processing",
+            "targetPath": "bin/"
         }
- 
+  
     ]
 }
