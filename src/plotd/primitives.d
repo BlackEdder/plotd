@@ -2,11 +2,24 @@ module plotd.primitives;
 
 import std.math;
 import std.stdio;
+import std.string;
+import std.conv;
 
 class Color {
     double r = 1, g = 1, b = 1, a = 1;
     this( double red, double green, double blue, double alpha ) { 
         r = red; g = green; b = blue; a = alpha; }
+
+    this( string value ) {
+        auto rgba = value.split( "," );
+        assert( rgba.length == 4 );
+        r = to!double(rgba[0]); g = to!double(rgba[1]); 
+        b = to!double(rgba[2]); a = to!double(rgba[3]);
+    }
+
+    unittest {
+        assert( new Color( "0.1,0.2,0.3,0.4" ) == new Color( 0.1, 0.2, 0.3, 0.4 ) );
+    }
 
     override bool opEquals( Object o ) const {
         auto color = cast( typeof( this ) ) o;
@@ -54,6 +67,18 @@ struct Point {
         x = my_x;
         y = my_y;
     }
+
+    this( string value ) {
+        auto coords = value.split( "," );
+        assert( coords.length == 2 );
+        x = to!double(coords[0]); 
+        y = to!double(coords[1]);
+    }
+
+    unittest {
+        assert( Point( "1.0,0.1" ) == Point( 1.0, 0.1 ) );
+    }
+
 
     bool opEquals( const Point point ) {
         return point.x == x && point.y == y;
