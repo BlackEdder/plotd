@@ -15,16 +15,14 @@
         {
             "name": "plotd_server",
             "targetType": "executable",
-            "excludedSourceFiles": ["src/plotd_client.d"],
-            "mainSourceFile": "src/plotd_server.d",
+            "mainSourceFile": "exec/plotd_server.d",
             "targetName": "plotd_server",
             "targetPath": "bin/"
         },
         {
             "name": "plotd_client",
             "targetType": "executable",
-            "excludedSourceFiles": ["src/plotd_server.d"],
-            "mainSourceFile": "src/plotd_client.d",
+            "mainSourceFile": "exec/plotd_client.d",
             "targetName": "plotd_client",
             "targetPath": "bin/"
         }

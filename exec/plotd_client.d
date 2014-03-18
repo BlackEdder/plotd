@@ -13,26 +13,47 @@ Convert:
 --action color --color 0.4 0.5 0.1 0.9
 --action line --point 3 0.1 --id 2
 */
+void rgbaHandler2( string value, Message msg ) {
+    auto rgba = value.split( "," );
+    Color color;
+    color.r = to!double(rgba[0]);
+    color.g = to!double(rgba[1]);
+    color.b = to!double(rgba[2]);
+    color.a = to!double(rgba[3]);
+
+    msg = toMessage( color );
+}
+
+unittest {
+    Message msg;
+    rgbaHandler2( "0.1,0.3,0.4,0.5", msg );
+    Color color;
+    color.r = 0.1; color.g = 0.3, color.b = 0.4, color.a = 0.5;
+    assert( msg == toMessage( color ) );
+}
+
 
 void main(string[] args) {
     string action;
-    double[] coords;
-    double[] rgba;
     int id;// Should initialize as NaN if possible;
+
+    Message msg;
+    void coordHandler( string option, string value ) {
+        auto coords = value.split( "," );
+        msg = toMessage( Point( to!double(coords[0]), to!double(coords[1]) ) );
+    }
+
+    void rgbaHandler( string option, string value ) {
+        rgbaHandler2( value, msg );
+    }
 
     getopt(
             args,
             "action", &action,
-            "point", &coords,
-            "color|colour", &rgba,
+            "point", &coordHandler,
+            "color|colour", &rgbaHandler,
             "id", &id
           );
-
-    Message msg;
-    if (coords.length == 2) {
-        msg = toMessage( Point( coords[0], coords[1] ) );
-    }
-
 
     writeln( msg );
 
