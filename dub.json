@@ -4,8 +4,10 @@
 	"copyright": "Copyright © 2014, Edwin van Leeuwen",
 	"authors": ["Edwin van Leeuwen"],
 	"license": "GPL-3.0",
+    "libs": ["cairo"],
 	"dependencies": {
 		"tested": "~master",
+        "cairod": "~master"
 	},
     "configurations": [
         {
