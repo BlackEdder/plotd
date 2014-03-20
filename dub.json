@@ -7,7 +7,8 @@
     "libs": ["cairo"],
 	"dependencies": {
 		"tested": "~master",
-        "cairod": "~master"
+        "cairod": "~master",
+        "dmocks-revived": "~master"
 	},
     "configurations": [
         {
