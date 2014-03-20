@@ -84,7 +84,8 @@ struct Point {
     }
 }
 
-Point convert_coordinates( Point point, Bounds orig_bounds, Bounds new_bounds ) {
+Point convert_coordinates( const Point point, const Bounds orig_bounds, 
+        const Bounds new_bounds ) {
     double new_x = new_bounds.min_x + (new_bounds.max_x-new_bounds.min_x)*(point.x-orig_bounds.min_x)/(orig_bounds.max_x-orig_bounds.min_x);
     double new_y = new_bounds.min_y + (new_bounds.max_y-new_bounds.min_y)*(point.y-orig_bounds.min_y)/(orig_bounds.max_y-orig_bounds.min_y);
     return Point( new_x, new_y );

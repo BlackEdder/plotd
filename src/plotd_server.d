@@ -11,6 +11,7 @@ import std.socket;
 import cairo = cairo;
 
 import plotd.primitives;
+import plotd.drawing;
 
 void main() {
     Socket server = new TcpSocket();
@@ -30,11 +31,7 @@ void main() {
     auto axes_context = cairo.Context( axes_surface );
     
     auto pnt = Point( -1, -1 );
-    pnt = convert_coordinates( pnt, plot_bounds, surface_bounds );
-    axes_context.rectangle(
-            cairo.Rectangle!double(cairo.Point!double( pnt.x, pnt.y ), 10, 10));
-    axes_context.fill();
-
+    axes_context = draw_point( pnt, plot_bounds, axes_context );
     axes_surface.writeToPNG("example.png");
     axes_surface.dispose();
 
