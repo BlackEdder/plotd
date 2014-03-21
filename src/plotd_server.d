@@ -32,6 +32,12 @@ void main() {
     
     auto pnt = Point( -1, -1 );
     axes_context = draw_point( pnt, plot_bounds, axes_context );
+    pnt = Point( 0, 0 );
+    axes_context = draw_point( pnt, plot_bounds, axes_context );
+    pnt = Point( 1, 1 );
+    axes_context = draw_point( pnt, plot_bounds, axes_context );
+    axes_context = draw_line( Point( -1,0 ), Point( 0,1 ), 
+            plot_bounds, axes_context );
     axes_surface.writeToPNG("example.png");
     axes_surface.dispose();
 

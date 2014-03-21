@@ -91,3 +91,30 @@ unittest {
     draw_point( Point( -1, -1 ), Bounds( -1, 1, -1, 1 ), mock );
     mocker.verify;
 }
+
+CONTEXT draw_line(CONTEXT)( const Point from, const Point to, const Bounds bounds,
+        CONTEXT context ) {
+    auto surface_bounds = Bounds( 100, 400, 300, 0 );
+    auto pixel_from = convert_coordinates( from, bounds, surface_bounds );
+    context.moveTo( pixel_from.x, pixel_from.y );
+    auto pixel_to = convert_coordinates( to, bounds, surface_bounds );
+    context.lineTo( pixel_to.x, pixel_to.y );
+    context.stroke();
+    return context;
+}
+
+unittest {
+    import dmocks.mocks;
+    auto mocker = new Mocker();
+
+    auto surface = create_plot_surface();
+    auto mock = mocker.mockStruct!(cairo.Context, cairo.Surface )(
+            surface ); 
+
+    mocker.expect(mock.moveTo( 250.0, 150.0 )).repeat(1);
+    mocker.expect(mock.lineTo( 100.0, 300.0 )).repeat(1);
+    mocker.expect(mock.stroke()).repeat(1);
+    mocker.replay;
+    draw_line( Point( 0, 0 ), Point( -1, -1 ), Bounds( -1, 1, -1, 1 ), mock );
+    mocker.verify;
+}
