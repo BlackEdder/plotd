@@ -114,50 +114,61 @@ unittest {
     assert( mbins.mybins[1].mybins[3] == 6 );
     assert( mbins.max_size == 6 );
 }
-    /**
-      Resize the bins
+/**
+  Resize the bins
 
-      Again an array in case of resizing multidmensional arrays
-      */
-/*    void resize( const size_t[] new_length ) {
-        T default_value;
-        static if (type(T) != size_t) {
-            assert( mybins.length > 0, "Multidimensional need to have at least one bin to correctly resize" );
-            default_value = new Bins!T();
-            default_value.min = mybins[0].min;
-            default_value.width = mybins[0].width;
-            if ( new_length.length > 1 )
-                foreach ( ref T bin; mybins )
-                    bin.resize( new_length[1] );
-        } else
-            default_value = 0;
+  Again an array in case of resizing multidmensional arrays
+ */
+Bins!T resize( T )( Bins!T bins, const size_t[] new_length ) {
+    T default_value;
+    assert( bins.mybins.length > 0, 
+            "Multidimensional need to have at least one bin to correctly resize" );
+    default_value = new T;
+    default_value.min = bins.mybins[0].min;
+    default_value.width = bins.mybins[0].width;
+    while ( bins.mybins.length < new_length[0] )
+        bins.mybins ~= [default_value];
 
-        while ( mybins.length < new_length[0] )
-            mybins ~= [default_value];
-    }
+    if ( new_length.length > 1 )
+        foreach ( ref T bin; bins.mybins )
+            bin.resize( new_length[1..$] );
 
+    return bins;
+}
 
+Bins!T resize( T : size_t )( Bins!T bins, const size_t[] new_length ) {
+    T default_value = 0;
+
+    while ( bins.mybins.length < new_length[0] )
+        bins.mybins ~= [default_value];
+    return bins;
+}
 
 unittest {
-    Bins!size_t bins;
+    auto bins = new Bins!size_t;
     bins.min = -1;
     bins.width = 0.5;
     bins.mybins = [1,2,3,4];
 
-    bins.resize( 3 );
+    bins.resize( [3] );
     assert( bins.length == 4 );
-    bins.resize( 6 );
+    bins.resize( [6] );
     assert( bins.length == 6 );
 
-    Bins!(Bins!size_t) mbins;
+    auto mbins = new Bins!(Bins!size_t);
     mbins.min = -1;
     mbins.width = 0.5;
     mbins.mybins = [bins, bins.dup];
-    mbins.resize( 6 );
+    mbins.resize( [6] );
     assert( mbins.length == 6 );
     assert( mbins.mybins[5].min == bins.min );
     assert( mbins.mybins[5].width == bins.width );
-}*/
+    mbins.resize( [7,8] );
+    assert( mbins.length == 7 );
+
+    foreach( x, bin; mbins )
+        assert( bin.length == 8 );
+}
 
  
 /**
