@@ -183,3 +183,13 @@ unittest {
     assert( adjust_tick_width( new Axis( 0.1, 4 ), 8 ).min_tick == 0.5 );
     assert( adjust_tick_width( new Axis( 1, 40 ), 8 ).min_tick == 5 );
 }
+
+/// Calculate tick length
+double tick_length( const Axis axis ) {
+    return (axis.max-axis.min)/25.0;
+}
+
+unittest {
+    auto axis = new Axis( -1, 1 );
+    assert( tick_length( axis ) == 0.08);
+}

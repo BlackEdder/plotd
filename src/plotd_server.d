@@ -28,7 +28,9 @@ void main() {
 
     auto axes_surface = new cairo.ImageSurface(
             cairo.Format.CAIRO_FORMAT_ARGB32, 400, 400);
-    auto axes_context = cairo.Context( axes_surface );
+    auto axes_context = axes_context_from_surface( axes_surface );
+
+    axes_context = draw_axes( plot_bounds, axes_context );
     
     auto pnt = Point( -1, -1 );
     axes_context = draw_point( pnt, plot_bounds, axes_context );
