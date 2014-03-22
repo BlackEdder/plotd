@@ -174,25 +174,61 @@ unittest {
 /**
   Calculate bin id based on data value and Bins
   */
-/*
-size_t bin_id(T)( double data, const Bins!T bins ) {
+size_t bin_id(T)( const Bins!T bins, double data ) {
     assert( data >= bins.min );
-
-    return 0;
-}*/
-/*
+    return cast(size_t)( (data-bins.min)/bins.width );
+}
 unittest {
     auto bins = new Bins!size_t;
     bins.min = -1;
     bins.width = 0.5;
-    assert( bin_id( -1, bins ) == 0 );
-    assert( bin_id( -0.5, bins ) == 1 );
-    assert( bin_id( -0.25, bins ) == 1 );
+    assert( bin_id( bins, -1 ) == 0 );
+    assert( bin_id( bins, -0.5 ) == 1 );
+    assert( bin_id( bins, -0.25 ) == 1 );
 }
-*/
 /**
   Add data to existing Bins
   */
+Bins!T add_data( T )( Bins!T bins, const double[] data ) {
+    size_t[] ids;
+    auto bins_step = bins;
+    writeln( "bla" );
+    for ( size_t i = 0; i < data.length; i++ ) {
+        ids ~= bin_id( bins_step, data[i] );
+        if (i < data.length -1)
+            bins_step = bins_step.mybins[0];
+    }
+    return add_data_to_bin( bins, ids.reverse );
+}
+
+Bins!T add_data( T : size_t )( Bins!T bins, const double[] data ) {
+    return add_data_to_bin( bins, [bin_id( bins, data[0] )] );
+}
+
+unittest {
+    auto bins = new Bins!size_t;
+    bins.min = -1;
+    bins.width = 0.5;
+    bins.max_size = 4;
+    bins.mybins = [1,2,3,4];
+
+    bins = bins.add_data( [-0.25] );
+    assert( bins.mybins[1] == 3 );
+    bins = add_data( bins, [0.75] );
+    assert( bins.mybins[3] == 5 );
+    assert( bins.max_size == 5 );
+
+    auto mbins = new Bins!(Bins!size_t);
+    mbins.min = -1;
+    mbins.width = 0.5;
+    mbins.mybins = [bins, bins.dup];
+    mbins.max_size = 5;
+    mbins.add_data_to_bin( [1,2] );
+    assert( mbins.mybins[1].mybins[2] == 4 );
+    mbins.add_data_to_bin( [1,3] );
+    assert( mbins.mybins[1].mybins[3] == 6 );
+    assert( mbins.max_size == 6 );
+}
 
 /**
   Bin an array of data
