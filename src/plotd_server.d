@@ -34,13 +34,12 @@ void main() {
     auto plot_context = plot_context_from_surface( surface, plot_bounds );
 
     auto pnt = Point( -1, -1 );
-    plot_context = draw_point( pnt, plot_bounds, plot_context );
+    plot_context = draw_point( pnt, plot_context );
     pnt = Point( 0, 0 );
-    plot_context = draw_point( pnt, plot_bounds, plot_context );
+    plot_context = draw_point( pnt, plot_context );
     pnt = Point( 1, 1 );
-    plot_context = draw_point( pnt, plot_bounds, plot_context );
-    plot_context = draw_line( Point( -1,0 ), Point( 0,1 ), 
-            plot_bounds, plot_context );
+    plot_context = draw_point( pnt, plot_context );
+    plot_context = draw_line( Point( -1,0 ), Point( 0,1 ), plot_context );
     save( surface );
     surface.dispose();
 

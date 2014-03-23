@@ -91,8 +91,7 @@ cairo.Context plot_context_from_surface( cairo.Surface surface, Bounds bounds ) 
   Template function to make it Mockable
 
   */
-CONTEXT draw_point(CONTEXT)( const Point point, const Bounds bounds, 
-        CONTEXT context ) {
+CONTEXT draw_point(CONTEXT)( const Point point, CONTEXT context ) {
     auto width_height = context.deviceToUserDistance( 
             cairo.Point!double( 10.0, 10.0 ) );
     context.rectangle(
@@ -119,8 +118,7 @@ unittest {
     mocker.verify;
 }
 
-CONTEXT draw_line(CONTEXT)( const Point from, const Point to, const Bounds bounds,
-        CONTEXT context ) {
+CONTEXT draw_line(CONTEXT)( const Point from, const Point to, CONTEXT context ) {
     context.moveTo( from.x, from.y );
     context.lineTo( to.x, to.y );
     context.save();
@@ -142,7 +140,7 @@ unittest {
     mocker.expect(mock.lineTo( 100.0, 300.0 )).repeat(1);
     mocker.expect(mock.stroke()).repeat(1);
     mocker.replay;
-    draw_line( Point( 0, 0 ), Point( -1, -1 ), Bounds( -1, 1, -1, 1 ), mock );
+    draw_line( Point( 0, 0 ), Point( -1, -1 ), mock );
     mocker.verify;
 }
 
@@ -158,39 +156,36 @@ CONTEXT draw_axes(CONTEXT)( const Bounds bounds, CONTEXT context ) {
 
     // Draw xaxis
     context = draw_line( Point( xaxis.min, yaxis.min ), 
-            Point( xaxis.max, yaxis.min ), bounds, context );
+            Point( xaxis.max, yaxis.min ), context );
     // Draw ticks
     auto tick_x = xaxis.min_tick;
     auto tick_size = tick_length(yaxis);
     while( tick_x < xaxis.max ) {
         context = draw_line( Point( tick_x, yaxis.min ),
-            Point( tick_x, yaxis.min + tick_size ), bounds, context );
+            Point( tick_x, yaxis.min + tick_size ), context );
         context = draw_text( tick_x.to!string, 
-                Point( tick_x, yaxis.min - 1.5*tick_size ), 
-                bounds, context );
+                Point( tick_x, yaxis.min - 1.5*tick_size ), context );
         tick_x += xaxis.tick_width;
     }
 
     // Draw yaxis
     context = draw_line( Point( xaxis.min, yaxis.min ), 
-            Point( xaxis.min, yaxis.max ), bounds, context );
+            Point( xaxis.min, yaxis.max ), context );
     // Draw ticks
     auto tick_y = yaxis.min_tick;
     tick_size = tick_length(yaxis);
     while( tick_y < yaxis.max ) {
         context = draw_line( Point( xaxis.min, tick_y ),
-            Point( xaxis.min + tick_size, tick_y ), bounds, context );
+            Point( xaxis.min + tick_size, tick_y ), context );
         context = draw_text( tick_y.to!string, 
-                Point( xaxis.min - 1.5*tick_size, tick_y ), 
-                bounds, context );
+                Point( xaxis.min - 1.5*tick_size, tick_y ), context );
         tick_y += yaxis.tick_width;
     }
 
     return context;
 }
 
-CONTEXT draw_text(CONTEXT)( string text, const Point location, const Bounds bounds,
-        CONTEXT context ) {
+CONTEXT draw_text(CONTEXT)( string text, const Point location, CONTEXT context ) {
     context.moveTo( location.x, location.y ); 
     context.save();
     context.identityMatrix();
@@ -210,7 +205,7 @@ unittest {
     mocker.expect(mock.moveTo( 250.0, 150.0 )).repeat(1);
     mocker.expect(mock.showText( "text" )).repeat(1);
     mocker.replay;
-    draw_text( "text", Point( 0, 0 ), Bounds( -1, 1, -1, 1 ), mock );
+    draw_text( "text", Point( 0, 0 ), mock );
     mocker.verify;
 }
 
