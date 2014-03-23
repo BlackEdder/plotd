@@ -26,8 +26,7 @@ void main() {
     auto plot_bounds = Bounds( -1, 1, -1, 1 );
     auto surface_bounds = Bounds( 100, 400, 300, 0 );
 
-    auto axes_surface = new cairo.ImageSurface(
-            cairo.Format.CAIRO_FORMAT_ARGB32, 400, 400);
+    auto axes_surface = create_plot_surface();
     auto axes_context = axes_context_from_surface( axes_surface );
 
     axes_context = draw_axes( plot_bounds, axes_context );
@@ -40,7 +39,7 @@ void main() {
     axes_context = draw_point( pnt, plot_bounds, axes_context );
     axes_context = draw_line( Point( -1,0 ), Point( 0,1 ), 
             plot_bounds, axes_context );
-    axes_surface.writeToPNG("example.png");
+    save( axes_surface );
     axes_surface.dispose();
 
 

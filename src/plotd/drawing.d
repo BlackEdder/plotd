@@ -46,8 +46,13 @@ unittest
 
 /// Create the plot surface
 cairo.Surface create_plot_surface() {
-    return new cairo.ImageSurface(
+    auto surface = new cairo.ImageSurface(
             cairo.Format.CAIRO_FORMAT_ARGB32, 400, 400);
+    auto context = cairo.Context( surface );
+    context.setSourceRGBA( 1, 1, 1, 1 );
+    context.rectangle( 0, 0, 400, 400 );
+    context.fill();
+    return surface;
 }
 
 /// Save surface to a file
