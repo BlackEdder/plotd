@@ -12,6 +12,7 @@ import cairo = cairo;
 
 import plotd.primitives;
 import plotd.drawing;
+import plotd.binning;
 
 void main() {
     Socket server = new TcpSocket();
@@ -40,6 +41,18 @@ void main() {
     pnt = Point( 1, 1 );
     plot_context = draw_point( pnt, plot_context );
     plot_context = draw_line( Point( -1,0 ), Point( 0,1 ), plot_context );
+
+    auto bins = new Bins!size_t;
+    bins.min = -1.0;
+    bins.width = 0.5;
+    bins.resize([4]);
+
+    bins = add_data( bins, [-0.75] );
+    bins = add_data( bins, [-0.73] );
+    bins = add_data( bins, [-0.23] );
+
+    plot_context = draw_bins( plot_context, bins );
+
     save( surface );
     surface.dispose();
 

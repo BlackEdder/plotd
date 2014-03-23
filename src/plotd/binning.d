@@ -40,8 +40,6 @@ class Bins(T) {
         return bins;
     }
 
-    bool iambin() {return true;}
-
     private:
         T[] mybins;
 }

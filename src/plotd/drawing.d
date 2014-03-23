@@ -4,6 +4,7 @@ import std.conv;
 import cairo = cairo;
 
 import plotd.primitives;
+import plotd.binning;
 
 // Design: One surface per plot (this makes it easier for PDFSurface support
 // Get axes context
@@ -224,4 +225,18 @@ unittest {
     mocker.verify;
 }
 
-
+CONTEXT draw_bins( T : size_t, CONTEXT )( CONTEXT context, Bins!T bins ) {
+    foreach( x, count; bins ) {
+        context = draw_line( Point( x, 0 ), 
+                Point( x, cast(double)(count)/bins.max_size ),
+                context );
+        context = draw_line( Point( x, cast(double)(count)/bins.max_size ), 
+                Point( x + bins.width, cast(double)(count)/bins.max_size ),
+                context );
+        context = draw_line( 
+                Point( x + bins.width, cast(double)(count)/bins.max_size ), 
+                Point( x + bins.width, 0 ),
+                context );
+      }
+    return context;
+}
