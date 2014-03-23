@@ -61,8 +61,27 @@ void save( cairo.Surface surface ) {
 }
 
 /// Get axes_context from a surface
-cairo.Context axes_context_from_surface( cairo.Surface axes_surface ) {
-    auto context = cairo.Context( axes_surface );
+cairo.Context axes_context_from_surface( cairo.Surface surface, Bounds bounds ) {
+    auto context = cairo.Context( surface );
+
+    context.translate( 100, 300 );
+    context.scale( 300.0/(bounds.max_x-bounds.min_x), 
+            -300.0/(bounds.max_y - bounds.min_y) );
+    context.translate( -bounds.min_x, -bounds.min_y );
+    context.setFontSize( 14.0 );
+    return context;
+}
+
+/// Get plot_context from a surface
+cairo.Context plot_context_from_surface( cairo.Surface surface, Bounds bounds ) {
+    // Create a sub surface. Makes sure everything is plotted within plot surface
+    auto plot_surface = cairo.Surface.createForRectangle( surface, 
+            cairo.Rectangle!double( 100, 0, 300, 300 ) );
+    auto context = cairo.Context( plot_surface );
+    context.translate( 0, 300 );
+    context.scale( 300.0/(bounds.max_x-bounds.min_x), 
+            -300.0/(bounds.max_y - bounds.min_y) );
+    context.translate( -bounds.min_x, -bounds.min_y );
     context.setFontSize( 14.0 );
     return context;
 }
@@ -74,11 +93,11 @@ cairo.Context axes_context_from_surface( cairo.Surface axes_surface ) {
   */
 CONTEXT draw_point(CONTEXT)( const Point point, const Bounds bounds, 
         CONTEXT context ) {
-    auto surface_bounds = Bounds( 100, 400, 300, 0 );
-    auto pixel_point = convert_coordinates( point, bounds, surface_bounds );
+    auto width_height = context.deviceToUserDistance( 
+            cairo.Point!double( 10.0, 10.0 ) );
     context.rectangle(
-            pixel_point.x-5, pixel_point.y-5, 
-                10, 10 );
+            point.x-width_height.x/2.0, point.y-width_height.y/2.0, 
+                width_height.x, width_height.y );
     context.fill();
     return context;
 }
@@ -92,8 +111,8 @@ unittest {
             surface ); 
 
     mocker.expect(mock.fill()).repeat( 2 );
-    mocker.expect(mock.rectangle( 245.0, 145.0, 10.0, 10.0 )).repeat(1);
-    mocker.expect(mock.rectangle( 95.0, 295.0, 10.0, 10.0 )).repeat(1);
+    mocker.expect(mock.rectangle( 145.0, 145.0, 10.0, 10.0 )).repeat(1);
+    mocker.expect(mock.rectangle( -5.0, 295.0, 10.0, 10.0 )).repeat(1);
     mocker.replay;
     draw_point( Point( 0, 0 ), Bounds( -1, 1, -1, 1 ), mock );
     draw_point( Point( -1, -1 ), Bounds( -1, 1, -1, 1 ), mock );
@@ -102,12 +121,12 @@ unittest {
 
 CONTEXT draw_line(CONTEXT)( const Point from, const Point to, const Bounds bounds,
         CONTEXT context ) {
-    auto surface_bounds = Bounds( 100, 400, 300, 0 );
-    auto pixel_from = convert_coordinates( from, bounds, surface_bounds );
-    context.moveTo( pixel_from.x, pixel_from.y );
-    auto pixel_to = convert_coordinates( to, bounds, surface_bounds );
-    context.lineTo( pixel_to.x, pixel_to.y );
+    context.moveTo( from.x, from.y );
+    context.lineTo( to.x, to.y );
+    context.save();
+    context.identityMatrix();
     context.stroke();
+    context.restore();
     return context;
 }
 
@@ -119,7 +138,7 @@ unittest {
     auto mock = mocker.mockStruct!(cairo.Context, cairo.Surface )(
             surface ); 
 
-    mocker.expect(mock.moveTo( 250.0, 150.0 )).repeat(1);
+    mocker.expect(mock.moveTo( 150.0, 150.0 )).repeat(1);
     mocker.expect(mock.lineTo( 100.0, 300.0 )).repeat(1);
     mocker.expect(mock.stroke()).repeat(1);
     mocker.replay;
@@ -172,10 +191,11 @@ CONTEXT draw_axes(CONTEXT)( const Bounds bounds, CONTEXT context ) {
 
 CONTEXT draw_text(CONTEXT)( string text, const Point location, const Bounds bounds,
         CONTEXT context ) {
-    auto surface_bounds = Bounds( 100, 400, 300, 0 );
-    auto pixel_point = convert_coordinates( location, bounds, surface_bounds );
-    context.moveTo( pixel_point.x, pixel_point.y ); 
+    context.moveTo( location.x, location.y ); 
+    context.save();
+    context.identityMatrix();
     context.showText( text );
+    context.restore();
     return context;
 }
 
