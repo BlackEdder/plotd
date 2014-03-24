@@ -1,11 +1,8 @@
 import std.stdio;
-import std.socket;
 import std.string;
 import std.conv;
-
+import std.algorithm;
 import std.datetime;
-
-import std.stdio;
 import std.socket;
 
 import cairo = cairo;
@@ -13,6 +10,7 @@ import cairo = cairo;
 import plotd.primitives;
 import plotd.drawing;
 import plotd.binning;
+import plotd.message;
 
 void main() {
     Socket server = new TcpSocket();
@@ -34,7 +32,7 @@ void main() {
 
     auto plot_context = plot_context_from_surface( surface, plot_bounds );
 
-    auto pnt = Point( -1, -1 );
+    /*auto pnt = Point( -1, -1 );
     plot_context = draw_point( pnt, plot_context );
     pnt = Point( 0, 0 );
     plot_context = draw_point( pnt, plot_context );
@@ -51,19 +49,30 @@ void main() {
     bins = add_data( bins, [-0.73] );
     bins = add_data( bins, [-0.23] );
 
-    plot_context = draw_bins( plot_context, bins );
+    plot_context = draw_bins( plot_context, bins );*/
 
-    save( surface );
-    surface.dispose();
+    scope(exit) {surface.dispose();}
 
 
     while(wait) {
+        save( surface );
         Socket client = server.accept();
 
         char[1024] buffer;
         auto received = client.receive(buffer);
 
-        writeln( buffer[0.. received] );
+        auto msg = parseJSON( buffer[0..received] );
+        writeln( msg );
+
+        switch (msg["action"].str) {
+            case "point":
+                foreach ( pnt; pointsFromParameters( msg["parameters"].array ))
+                    plot_context = draw_point( pnt, plot_context );
+                break;
+            default:
+                writeln( "Unrecognized action: ", msg["action"].to!string );
+                break;
+        }
 
         client.shutdown(SocketShutdown.BOTH);
         client.close();

@@ -1,5 +1,7 @@
 module plotd.message;
-import std.json;
+
+import std.algorithm;
+public import std.json;
 
 import plotd.primitives;
 
@@ -21,8 +23,16 @@ Message toMessage( const Point point ) {
 
 Point toPoint( const Message msg ) {
 	Point pnt;
-	pnt.x = msg["x"].floating;
-	pnt.y = msg["y"].floating;
+    if ( msg["x"].type == JSON_TYPE.INTEGER )
+        pnt.x = cast(double)( msg["x"].integer );
+	else
+        pnt.x = msg["x"].floating;
+
+    if ( msg["y"].type == JSON_TYPE.INTEGER )
+        pnt.y = cast(double)( msg["y"].integer );
+	else
+        pnt.y = msg["y"].floating;
+
 	return pnt;
 }
 
@@ -57,4 +67,18 @@ unittest {
 		"{\"a\":1,\"b\":1,\"g\":1,\"r\":1,\"type\":\"color\"}" );
 	assert( toColor( toMessage( Color.black ) ) ==
 			Color.black );
+}
+
+Point[] pointsFromParameters( const Message[] messages ) {
+    Point[] result;
+    auto pointsJSON = messages.filter!( a => a["type"].str == "point" );
+    foreach ( pointJSON; pointsJSON ) {
+        result ~= toPoint( pointJSON );
+    }
+    return result;
+}
+
+unittest {
+    auto msg = parseJSON( "{\"parameters\":[{\"type\":\"point\",\"x\":1.0,\"y\":2.0}],\"action\":\"point\"}" );
+    assert( pointsFromParameters( msg["parameters"].array ) == [Point( 1, 2 )] );
 }
