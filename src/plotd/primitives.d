@@ -64,6 +64,19 @@ struct Bounds {
         min_y = my_min_y;
         max_y = my_max_y;
     }
+
+    this( string value ) {
+        auto bnds = value.split( "," );
+        assert( bnds.length == 4 );
+        min_x = to!double(bnds[0]); max_x = to!double(bnds[1]); 
+        min_y = to!double(bnds[2]); max_y = to!double(bnds[3]);
+    }
+
+    unittest {
+        assert( Bounds( "0.1,0.2,0.3,0.4" ) == Bounds( 0.1, 0.2, 0.3, 0.4 ) );
+    }
+
+
 }
 
 struct Point {
