@@ -88,6 +88,14 @@ Bounds toBounds( const Message msg ) {
 	return bounds;
 }
 
+unittest {
+    import std.stdio;
+	assert( toMessage( Bounds( 0, 2, -1, 1 ) ).toString() == 
+		"{\"max_x\":2,\"max_y\":1,\"type\":\"bounds\",\"min_x\":0,\"min_y\":-1}" );
+	assert( toBounds( toMessage( Bounds( 0, 2, -1, 1 ) ) ) ==
+			Bounds( 0, 2, -1, 1 ) );
+}
+
 Point[] pointsFromParameters( const Message[] messages ) {
     Point[] result;
     auto pointsJSON = messages.filter!( a => a["type"].str == "point" );
