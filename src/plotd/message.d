@@ -64,7 +64,7 @@ Color toColor( const Message msg ) {
 
 unittest {
 	assert( toMessage( Color.black() ).toString() == 
-		"{\"a\":1,\"b\":1,\"g\":1,\"r\":1,\"type\":\"color\"}" );
+		"{\"a\":1,\"b\":0,\"g\":0,\"r\":0,\"type\":\"color\"}" );
 	assert( toColor( toMessage( Color.black ) ) ==
 			Color.black );
 }

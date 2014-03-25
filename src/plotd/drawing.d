@@ -50,9 +50,7 @@ cairo.Surface create_plot_surface() {
     auto surface = new cairo.ImageSurface(
             cairo.Format.CAIRO_FORMAT_ARGB32, 400, 400);
     auto context = cairo.Context( surface );
-    context.setSourceRGBA( 1, 1, 1, 1 );
-    context.rectangle( 0, 0, 400, 400 );
-    context.fill();
+    clear( context );
     return surface;
 }
 
@@ -238,5 +236,34 @@ CONTEXT draw_bins( T : size_t, CONTEXT )( CONTEXT context, Bins!T bins ) {
                 Point( x + bins.width, 0 ),
                 context );
       }
+    return context;
+}
+
+CONTEXT clear( CONTEXT )( CONTEXT context ) {
+    context.save();
+    context = color( context, Color.white );
+    context.paint();
+    context.restore();
+    return context;
+}
+
+unittest {
+    import dmocks.mocks;
+    auto mocker = new Mocker();
+
+    auto surface = create_plot_surface();
+    auto mock = mocker.mockStruct!(cairo.Context, cairo.Surface )(
+            surface );
+    mocker.expect( mock.save() ).repeat(1);
+    mocker.expect( mock.setSourceRGBA( 1, 1, 1, 1 ) ).repeat(1);
+    mocker.expect( mock.paint() ).repeat(1);
+    mocker.expect( mock.restore() ).repeat(1);
+    mocker.replay;
+    clear( mock );
+    mocker.verify;
+}
+
+CONTEXT color( CONTEXT )( CONTEXT context, const Color color ) {
+    context.setSourceRGBA( color.r, color.g, color.b, color.a );
     return context;
 }

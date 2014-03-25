@@ -30,9 +30,15 @@ class Color {
     }
 
     static Color black() {
+        auto color = new Color( 0, 0, 0, 1 );
+        return color;
+    }
+
+    static Color white() {
         auto color = new Color( 1, 1, 1, 1 );
         return color;
     }
+
 
     unittest {
         auto col1 = Color.black;
