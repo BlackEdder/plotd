@@ -167,8 +167,8 @@ class Axis {
     */
 Axis adjust_tick_width( Axis axis, size_t approx_no_ticks ) {
     auto axis_width = axis.max-axis.min;
-    auto scale = cast(int) ceil(log10( axis_width )) - 1;
-    auto acceptables = [ 0.1, 0.5, 1.0 ]; // Only accept ticks of these sizes
+    auto scale = cast(int) floor(log10( axis_width ));
+    auto acceptables = [ 0.1, 0.2, 0.5, 1.0 ]; // Only accept ticks of these sizes
     auto approx_width = pow(10.0, -scale)*(axis_width)/approx_no_ticks;
     // Find closest acceptable value
     double best = acceptables[0];
@@ -196,9 +196,14 @@ unittest {
     assert( adjust_tick_width( new Axis( 0, 0.4 ), 5 ).tick_width == 0.1 );
     assert( adjust_tick_width( new Axis( 0, 40 ), 8 ).tick_width == 5 );
     assert( adjust_tick_width( new Axis( -0.1, 4 ), 8 ).tick_width == 0.5 );
+    
+   
     assert( adjust_tick_width( new Axis( -0.1, 4 ), 8 ).min_tick == 0.0 );
     assert( adjust_tick_width( new Axis( 0.1, 4 ), 8 ).min_tick == 0.5 );
     assert( adjust_tick_width( new Axis( 1, 40 ), 8 ).min_tick == 5 );
+
+    assert( adjust_tick_width( new Axis( 3, 4 ), 5 ).min_tick == 3 );
+    assert( adjust_tick_width( new Axis( 3, 4 ), 5 ).tick_width == 0.2 );    
 }
 
 /// Calculate tick length

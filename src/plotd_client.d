@@ -28,12 +28,17 @@ void main(string[] args) {
     void add_color_to_pars( string option, string value ) {
         parameters = rgbaHandler( value, parameters );
     }
+
+    void add_bounds_to_pars( string option, string value ) {
+        parameters ~= toMessage(Bounds( value ));
+    }
      
     getopt(
             args,
             "action", &action,
             "point", &add_point_to_pars,
             "color|colour", &add_color_to_pars,
+            "bounds", &add_bounds_to_pars,
             "id", &id
           );
 

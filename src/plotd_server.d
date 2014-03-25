@@ -69,6 +69,13 @@ void main() {
                 foreach ( pnt; pointsFromParameters( msg["parameters"].array ))
                     plot_context = draw_point( pnt, plot_context );
                 break;
+            case "resize":
+                plot_bounds = boundsFromParameters( msg["parameters"].array );
+                axes_context = clear_context( axes_context );
+                axes_context = axes_context_from_surface( surface, plot_bounds );
+                axes_context = draw_axes( plot_bounds, axes_context );
+                plot_context = plot_context_from_surface( surface, plot_bounds );
+                break;
             default:
                 writeln( "Unrecognized action: ", msg["action"].to!string );
                 break;

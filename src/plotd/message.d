@@ -22,18 +22,20 @@ Message toMessage( const Point point ) {
 	return msg;
 }
 
+/// Transparently convert JSON_TYPE.INTEGER and FLOAT to double
+double messageNumericToFloat( const Message msg ) {
+    double result;
+    if ( msg.type == JSON_TYPE.INTEGER )
+        result = cast(double)( msg.integer );
+	else
+        result = msg.floating;
+    return result;
+}
+
 Point toPoint( const Message msg ) {
 	Point pnt;
-    if ( msg["x"].type == JSON_TYPE.INTEGER )
-        pnt.x = cast(double)( msg["x"].integer );
-	else
-        pnt.x = msg["x"].floating;
-
-    if ( msg["y"].type == JSON_TYPE.INTEGER )
-        pnt.y = cast(double)( msg["y"].integer );
-	else
-        pnt.y = msg["y"].floating;
-
+    pnt.x = messageNumericToFloat( msg["x"] );
+    pnt.y = messageNumericToFloat( msg["y"] );
 	return pnt;
 }
 
@@ -56,10 +58,10 @@ Message toMessage( const Color color ) {
 
 Color toColor( const Message msg ) {
     Color color = new Color(
-            msg["r"].floating,
-            msg["g"].floating,
-            msg["b"].floating,
-            msg["a"].floating);
+            messageNumericToFloat( msg["r"] ),
+            messageNumericToFloat( msg["g"] ),
+            messageNumericToFloat( msg["b"] ),
+            messageNumericToFloat( msg["a"] ) );
     return color;
 }
 
@@ -82,10 +84,10 @@ Message toMessage( const Bounds bounds ) {
 
 Bounds toBounds( const Message msg ) {
     Bounds bounds = Bounds(
-            msg["min_x"].floating,
-            msg["max_x"].floating,
-            msg["min_y"].floating,
-            msg["max_y"].floating );
+            messageNumericToFloat( msg["min_x"] ),
+            messageNumericToFloat( msg["max_x"] ),
+            messageNumericToFloat( msg["min_y"] ),
+            messageNumericToFloat( msg["max_y"] ) );
 	return bounds;
 }
 

@@ -50,7 +50,7 @@ cairo.Surface create_plot_surface() {
     auto surface = new cairo.ImageSurface(
             cairo.Format.CAIRO_FORMAT_ARGB32, 400, 400);
     auto context = cairo.Context( surface );
-    clear( context );
+    clear_context( context );
     return surface;
 }
 
@@ -239,7 +239,7 @@ CONTEXT draw_bins( T : size_t, CONTEXT )( CONTEXT context, Bins!T bins ) {
     return context;
 }
 
-CONTEXT clear( CONTEXT )( CONTEXT context ) {
+CONTEXT clear_context( CONTEXT )( CONTEXT context ) {
     context.save();
     context = color( context, Color.white );
     context.paint();
@@ -259,7 +259,7 @@ unittest {
     mocker.expect( mock.paint() ).repeat(1);
     mocker.expect( mock.restore() ).repeat(1);
     mocker.replay;
-    clear( mock );
+    clear_context( mock );
     mocker.verify;
 }
 
