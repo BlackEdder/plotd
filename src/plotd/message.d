@@ -54,12 +54,12 @@ Message toMessage( const Color color ) {
 }
 
 Color toColor( const Message msg ) {
-	Color color = new Color( 0, 0, 0, 0 );
-	color.r = msg["r"].floating;
-	color.g = msg["g"].floating;
-	color.b = msg["b"].floating;
-	color.a = msg["a"].floating;
-	return color;
+    Color color = new Color(
+            msg["r"].floating,
+            msg["g"].floating,
+            msg["b"].floating,
+            msg["a"].floating);
+    return color;
 }
 
 unittest {
@@ -67,6 +67,25 @@ unittest {
 		"{\"a\":1,\"b\":0,\"g\":0,\"r\":0,\"type\":\"color\"}" );
 	assert( toColor( toMessage( Color.black ) ) ==
 			Color.black );
+}
+
+Message toMessage( const Bounds bounds ) {
+    Message msg;
+   	msg = [ "type": JSONValue("bounds"), 
+			"min_x" : JSONValue( bounds.min_x ), 
+			"max_x" : JSONValue( bounds.max_x ), 
+			"min_y" : JSONValue( bounds.min_y ), 
+			"max_y" : JSONValue( bounds.max_y ) ];
+    return msg;
+}
+
+Bounds toBounds( const Message msg ) {
+    Bounds bounds = Bounds(
+            msg["min_x"].floating,
+            msg["max_x"].floating,
+            msg["min_y"].floating,
+            msg["max_y"].floating );
+	return bounds;
 }
 
 Point[] pointsFromParameters( const Message[] messages ) {
