@@ -75,8 +75,6 @@ struct Bounds {
     unittest {
         assert( Bounds( "0.1,0.2,0.3,0.4" ) == Bounds( 0.1, 0.2, 0.3, 0.4 ) );
     }
-
-
 }
 
 struct Point {

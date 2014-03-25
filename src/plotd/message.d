@@ -1,6 +1,7 @@
 module plotd.message;
 
 import std.algorithm;
+import std.range;
 public import std.json;
 
 import plotd.primitives;
@@ -109,3 +110,17 @@ unittest {
     auto msg = parseJSON( "{\"parameters\":[{\"type\":\"point\",\"x\":1.0,\"y\":2.0}],\"action\":\"point\"}" );
     assert( pointsFromParameters( msg["parameters"].array ) == [Point( 1, 2 )] );
 }
+
+Bounds boundsFromParameters( const Message[] messages ) {
+    auto boundsJSON = messages.filter!( a => a["type"].str == "bounds" ).takeOne[0];
+    return toBounds( boundsJSON );
+}
+
+unittest {
+    Message msg;
+    Message[] pars = [ toMessage(Bounds( 0,2,-1,1 )) ];
+    msg = ["parameters" : Message( pars )];
+    assert( boundsFromParameters( msg["parameters"].array ) == Bounds( 0,2,-1,1 ) );
+}
+
+
