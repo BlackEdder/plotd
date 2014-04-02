@@ -122,18 +122,24 @@ class LineState {
 }
 
 class Lines {
+
     /// Returns an unused (new) line_id
     LineId new_line_id() {
         last_id++;
         return last_id;
     }
 
+    /// Add a new line with begin point, or add to an existing line
     void add_line( LineId id, Point point ) {
-        auto state = new LineState;
-        state.color = Color.black;
-        state.end_point = point;
-        state.id = id;
-        lines[id] = state;
+        LineState state;
+        lines.get( id, state );
+        if ( state is null ) {
+            state = new LineState;
+            state.color = Color.black;
+            state.id = id;
+            lines[id] = state;
+        }
+        lines[id].end_point = point;
     }
 
     unittest {
@@ -142,6 +148,38 @@ class Lines {
         assert( lines.lines.length == 1 );
         assert( lines.lines[1].color == Color.black ); // Should implement equals for color
         assert( lines.lines[1].end_point == Point( 1, 2 ) );
+        lines.add_line( 1, Point( 2, 2 ) );
+        assert( lines.lines[1].end_point == Point( 2, 2 ) );
+    }
+
+    void color( LineId id, Color color ) {
+        lines[id].color = color;
+    }
+
+    unittest {
+        auto lines = new Lines;
+        lines.add_line( 1, Point( 1, 2 ) );
+        assert( lines.lines.length == 1 );
+        assert( lines.lines[1].color == Color.black ); 
+        lines.color( 1, new Color( 0.5, 0.5, 0.5, 0.5 ) );
+        assert( lines.lines[1].color == new Color( 0.5, 0.5, 0.5, 0.5 ) ); 
+    }
+
+    /// Return last used id
+    LineId last_used_id() {
+        return last_id;
+    }
+
+    unittest {
+        auto lines = new Lines;
+        lines.add_line( 1, Point( 1, 2 ) );
+        assert( lines.last_used_id == 1 );
+        lines.add_line( 2, Point( 1, 2 ) );
+        assert( lines.last_used_id == 2 );
+        lines.add_line( 1, Point( 1, 1 ) );
+        assert( lines.last_used_id == 1 );
+        lines.color( 2, new Color( 0.5, 0.5, 0.5, 0.5 ) );
+        assert( lines.last_used_id == 2 );
     }
 
     private:
