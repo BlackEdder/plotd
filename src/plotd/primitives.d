@@ -140,6 +140,7 @@ class Lines {
             lines[id] = state;
         }
         lines[id].end_point = point;
+        mylast_used_id = id; // Keeping track of the last used line id
     }
 
     unittest {
@@ -154,6 +155,7 @@ class Lines {
 
     void color( LineId id, Color color ) {
         lines[id].color = color;
+        mylast_used_id = id; // Keeping track of the last used line id
     }
 
     unittest {
@@ -166,8 +168,8 @@ class Lines {
     }
 
     /// Return last used id
-    LineId last_used_id() {
-        return last_id;
+    @property LineId last_used_id() {
+        return mylast_used_id;
     }
 
     unittest {
@@ -185,6 +187,7 @@ class Lines {
     private:
         LineState[LineId] lines;
         LineId last_id = 0;
+        LineId mylast_used_id = 0;
 }
 
 class Axis {
@@ -193,11 +196,11 @@ class Axis {
         max = newmax;
         min_tick = min;
     }
-  string label;
-  double min = -1;
-  double max = 1;
-  double min_tick = -1;
-  double tick_width = 0.2;
+    string label;
+    double min = -1;
+    double max = 1;
+    double min_tick = -1;
+    double tick_width = 0.2;
 }
 
 /**
