@@ -174,7 +174,7 @@ CONTEXT drawAxes(CONTEXT)( const Bounds bounds, CONTEXT context ) {
     while( tick_x < xaxis.max ) {
         context = drawLine( Point( tick_x, yaxis.min ),
             Point( tick_x, yaxis.min + tick_size ), context );
-        context = draw_text( tick_x.to!string, 
+        context = drawText( tick_x.to!string, 
                 Point( tick_x, yaxis.min - 1.5*tick_size ), context );
         tick_x += xaxis.tick_width;
     }
@@ -188,7 +188,7 @@ CONTEXT drawAxes(CONTEXT)( const Bounds bounds, CONTEXT context ) {
     while( tick_y < yaxis.max ) {
         context = drawLine( Point( xaxis.min, tick_y ),
             Point( xaxis.min + tick_size, tick_y ), context );
-        context = draw_text( tick_y.to!string, 
+        context = drawText( tick_y.to!string, 
                 Point( xaxis.min - 1.5*tick_size, tick_y ), context );
         tick_y += yaxis.tick_width;
     }
@@ -196,7 +196,7 @@ CONTEXT drawAxes(CONTEXT)( const Bounds bounds, CONTEXT context ) {
     return context;
 }
 
-CONTEXT draw_text(CONTEXT)( string text, const Point location, CONTEXT context ) {
+CONTEXT drawText(CONTEXT)( string text, const Point location, CONTEXT context ) {
     context.moveTo( location.x, location.y ); 
     context.save();
     context.identityMatrix();
@@ -219,11 +219,11 @@ unittest {
     mocker.expect(mock.showText( "text" )).repeat(1);
     mocker.expect(mock.restore()).repeat(1);
     mocker.replay;
-    draw_text( "text", Point( 0, 0 ), mock );
+    drawText( "text", Point( 0, 0 ), mock );
     mocker.verify;
 }
 
-CONTEXT draw_bins( T : size_t, CONTEXT )( CONTEXT context, Bins!T bins ) {
+CONTEXT drawBins( T : size_t, CONTEXT )( CONTEXT context, Bins!T bins ) {
     foreach( x, count; bins ) {
         context = drawLine( Point( x, 0 ), 
                 Point( x, cast(double)(count)/bins.max_size ),
