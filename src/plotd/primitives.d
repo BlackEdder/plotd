@@ -101,7 +101,7 @@ struct Point {
     }
 }
 
-Point convert_coordinates( const Point point, const Bounds orig_bounds, 
+Point convertCoordinates( const Point point, const Bounds orig_bounds, 
         const Bounds new_bounds ) {
     double new_x = new_bounds.min_x + (new_bounds.max_x-new_bounds.min_x)*(point.x-orig_bounds.min_x)/(orig_bounds.max_x-orig_bounds.min_x);
     double new_y = new_bounds.min_y + (new_bounds.max_y-new_bounds.min_y)*(point.y-orig_bounds.min_y)/(orig_bounds.max_y-orig_bounds.min_y);
@@ -109,7 +109,7 @@ Point convert_coordinates( const Point point, const Bounds orig_bounds,
 }
 
 unittest {
-    assert( convert_coordinates( Point( 0.5, 0.1 ), Bounds( -1, 1, -1, 1 ),
+    assert( convertCoordinates( Point( 0.5, 0.1 ), Bounds( -1, 1, -1, 1 ),
                 Bounds( 50, 100, -100, -50 ) ) == Point( 87.5, -72.5 ) );
 }
 
@@ -124,13 +124,13 @@ class LineState {
 class Lines {
 
     /// Returns an unused (new) line_id
-    LineId new_line_id() {
+    LineId newLineId() {
         last_id++;
         return last_id;
     }
 
     /// Add a new line with begin point, or add to an existing line
-    void add_line( LineId id, Point point ) {
+    void addLine( LineId id, Point point ) {
         LineState state;
         lines.get( id, state );
         if ( state is null ) {
@@ -140,27 +140,27 @@ class Lines {
             lines[id] = state;
         }
         lines[id].end_point = point;
-        mylast_used_id = id; // Keeping track of the last used line id
+        mylastUsedId = id; // Keeping track of the last used line id
     }
 
     unittest {
         auto lines = new Lines;
-        lines.add_line( 1, Point( 1, 2 ) );
+        lines.addLine( 1, Point( 1, 2 ) );
         assert( lines.lines.length == 1 );
         assert( lines.lines[1].color == Color.black ); // Should implement equals for color
         assert( lines.lines[1].end_point == Point( 1, 2 ) );
-        lines.add_line( 1, Point( 2, 2 ) );
+        lines.addLine( 1, Point( 2, 2 ) );
         assert( lines.lines[1].end_point == Point( 2, 2 ) );
     }
 
     void color( LineId id, Color color ) {
         lines[id].color = color;
-        mylast_used_id = id; // Keeping track of the last used line id
+        mylastUsedId = id; // Keeping track of the last used line id
     }
 
     unittest {
         auto lines = new Lines;
-        lines.add_line( 1, Point( 1, 2 ) );
+        lines.addLine( 1, Point( 1, 2 ) );
         assert( lines.lines.length == 1 );
         assert( lines.lines[1].color == Color.black ); 
         lines.color( 1, new Color( 0.5, 0.5, 0.5, 0.5 ) );
@@ -168,26 +168,26 @@ class Lines {
     }
 
     /// Return last used id
-    @property LineId last_used_id() {
-        return mylast_used_id;
+    @property LineId lastUsedId() {
+        return mylastUsedId;
     }
 
     unittest {
         auto lines = new Lines;
-        lines.add_line( 1, Point( 1, 2 ) );
-        assert( lines.last_used_id == 1 );
-        lines.add_line( 2, Point( 1, 2 ) );
-        assert( lines.last_used_id == 2 );
-        lines.add_line( 1, Point( 1, 1 ) );
-        assert( lines.last_used_id == 1 );
+        lines.addLine( 1, Point( 1, 2 ) );
+        assert( lines.lastUsedId == 1 );
+        lines.addLine( 2, Point( 1, 2 ) );
+        assert( lines.lastUsedId == 2 );
+        lines.addLine( 1, Point( 1, 1 ) );
+        assert( lines.lastUsedId == 1 );
         lines.color( 2, new Color( 0.5, 0.5, 0.5, 0.5 ) );
-        assert( lines.last_used_id == 2 );
+        assert( lines.lastUsedId == 2 );
     }
 
     private:
         LineState[LineId] lines;
         LineId last_id = 0;
-        LineId mylast_used_id = 0;
+        LineId mylastUsedId = 0;
 }
 
 class Axis {
@@ -206,7 +206,7 @@ class Axis {
 /**
     Calculate optimal tick width given an axis and an approximate number of ticks
     */
-Axis adjust_tick_width( Axis axis, size_t approx_no_ticks ) {
+Axis adjustTickWidth( Axis axis, size_t approx_no_ticks ) {
     auto axis_width = axis.max-axis.min;
     auto scale = cast(int) floor(log10( axis_width ));
     auto acceptables = [ 0.1, 0.2, 0.5, 1.0 ]; // Only accept ticks of these sizes
@@ -230,29 +230,29 @@ Axis adjust_tick_width( Axis axis, size_t approx_no_ticks ) {
 }
 
 unittest {
-    adjust_tick_width( new Axis( 0, .4 ), 5 );
-    adjust_tick_width( new Axis( 0, 4 ), 8 );
-    assert( adjust_tick_width( new Axis( 0, 4 ), 5 ).tick_width == 1.0 );
-    assert( adjust_tick_width( new Axis( 0, 4 ), 8 ).tick_width == 0.5 );
-    assert( adjust_tick_width( new Axis( 0, 0.4 ), 5 ).tick_width == 0.1 );
-    assert( adjust_tick_width( new Axis( 0, 40 ), 8 ).tick_width == 5 );
-    assert( adjust_tick_width( new Axis( -0.1, 4 ), 8 ).tick_width == 0.5 );
+    adjustTickWidth( new Axis( 0, .4 ), 5 );
+    adjustTickWidth( new Axis( 0, 4 ), 8 );
+    assert( adjustTickWidth( new Axis( 0, 4 ), 5 ).tick_width == 1.0 );
+    assert( adjustTickWidth( new Axis( 0, 4 ), 8 ).tick_width == 0.5 );
+    assert( adjustTickWidth( new Axis( 0, 0.4 ), 5 ).tick_width == 0.1 );
+    assert( adjustTickWidth( new Axis( 0, 40 ), 8 ).tick_width == 5 );
+    assert( adjustTickWidth( new Axis( -0.1, 4 ), 8 ).tick_width == 0.5 );
     
    
-    assert( adjust_tick_width( new Axis( -0.1, 4 ), 8 ).min_tick == 0.0 );
-    assert( adjust_tick_width( new Axis( 0.1, 4 ), 8 ).min_tick == 0.5 );
-    assert( adjust_tick_width( new Axis( 1, 40 ), 8 ).min_tick == 5 );
+    assert( adjustTickWidth( new Axis( -0.1, 4 ), 8 ).min_tick == 0.0 );
+    assert( adjustTickWidth( new Axis( 0.1, 4 ), 8 ).min_tick == 0.5 );
+    assert( adjustTickWidth( new Axis( 1, 40 ), 8 ).min_tick == 5 );
 
-    assert( adjust_tick_width( new Axis( 3, 4 ), 5 ).min_tick == 3 );
-    assert( adjust_tick_width( new Axis( 3, 4 ), 5 ).tick_width == 0.2 );    
+    assert( adjustTickWidth( new Axis( 3, 4 ), 5 ).min_tick == 3 );
+    assert( adjustTickWidth( new Axis( 3, 4 ), 5 ).tick_width == 0.2 );    
 }
 
 /// Calculate tick length
-double tick_length( const Axis axis ) {
+double tickLength( const Axis axis ) {
     return (axis.max-axis.min)/25.0;
 }
 
 unittest {
     auto axis = new Axis( -1, 1 );
-    assert( tick_length( axis ) == 0.08);
+    assert( tickLength( axis ) == 0.08);
 }

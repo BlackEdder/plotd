@@ -31,12 +31,12 @@ unittest
     import dmocks.mocks;
     auto mocker = new Mocker();
 
-    auto axes_surface = new cairo.ImageSurface(
+    auto axesSurface = new cairo.ImageSurface(
             cairo.Format.CAIRO_FORMAT_ARGB32, 400, 400);
     
-    //auto axes_context = cairo.Context( axes_surface );
+    //auto axesContext = cairo.Context( axesSurface );
     auto mock = mocker.mockStruct!(cairo.Context, cairo.ImageSurface )(
-            axes_surface ); 
+            axesSurface ); 
 
     mocker.expect(mock.fill()).repeat( 1 );
     mocker.replay;
@@ -46,11 +46,11 @@ unittest
 */
 
 /// Create the plot surface
-cairo.Surface create_plot_surface() {
+cairo.Surface createPlotSurface() {
     auto surface = new cairo.ImageSurface(
             cairo.Format.CAIRO_FORMAT_ARGB32, 400, 400);
     auto context = cairo.Context( surface );
-    clear_context( context );
+    clearContext( context );
     return surface;
 }
 
@@ -59,8 +59,8 @@ void save( cairo.Surface surface ) {
     (cast(cairo.ImageSurface)( surface )).writeToPNG( "example.png" );
 }
 
-/// Get axes_context from a surface
-cairo.Context axes_context_from_surface( cairo.Surface surface, Bounds bounds ) {
+/// Get axesContext from a surface
+cairo.Context axesContextFromSurface( cairo.Surface surface, Bounds bounds ) {
     auto context = cairo.Context( surface );
 
     context.translate( 100, 300 );
@@ -71,12 +71,12 @@ cairo.Context axes_context_from_surface( cairo.Surface surface, Bounds bounds ) 
     return context;
 }
 
-/// Get plot_context from a surface
-cairo.Context plot_context_from_surface( cairo.Surface surface, Bounds bounds ) {
+/// Get plotContext from a surface
+cairo.Context plotContextFromSurface( cairo.Surface surface, Bounds bounds ) {
     // Create a sub surface. Makes sure everything is plotted within plot surface
-    auto plot_surface = cairo.Surface.createForRectangle( surface, 
+    auto plotSurface = cairo.Surface.createForRectangle( surface, 
             cairo.Rectangle!double( 100, 0, 300, 300 ) );
-    auto context = cairo.Context( plot_surface );
+    auto context = cairo.Context( plotSurface );
     context.translate( 0, 300 );
     context.scale( 300.0/(bounds.max_x-bounds.min_x), 
             -300.0/(bounds.max_y - bounds.min_y) );
@@ -90,7 +90,7 @@ cairo.Context plot_context_from_surface( cairo.Surface surface, Bounds bounds ) 
   Template function to make it Mockable
 
   */
-CONTEXT draw_point(CONTEXT)( const Point point, CONTEXT context ) {
+CONTEXT drawPoint(CONTEXT)( const Point point, CONTEXT context ) {
     auto width_height = context.deviceToUserDistance( 
             cairo.Point!double( 10.0, 10.0 ) );
     context.rectangle(
@@ -107,7 +107,7 @@ For some reason the expect for deviceToUserDistance is not working correctly
     import dmocks.mocks;
     auto mocker = new Mocker();
 
-    auto surface = create_plot_surface();
+    auto surface = createPlotSurface();
     auto mock = mocker.mockStruct!(cairo.Context, cairo.Surface )(
             surface ); 
 
@@ -121,12 +121,12 @@ For some reason the expect for deviceToUserDistance is not working correctly
     mocker.expect(mock.rectangle( 0-scale, 0-scale, scale*2, scale*2 )).repeat(1);
     mocker.expect(mock.rectangle( -1-scale, -1-scale, scale*2, scale*2 )).repeat(1);
     mocker.replay;
-    draw_point( Point( 0, 0 ), mock );
-    draw_point( Point( -1, -1 ), mock );
+    drawPoint( Point( 0, 0 ), mock );
+    drawPoint( Point( -1, -1 ), mock );
     mocker.verify;
 }*/
 
-CONTEXT draw_line(CONTEXT)( const Point from, const Point to, CONTEXT context ) {
+CONTEXT drawLine(CONTEXT)( const Point from, const Point to, CONTEXT context ) {
     context.moveTo( from.x, from.y );
     context.lineTo( to.x, to.y );
     context.save();
@@ -140,7 +140,7 @@ unittest {
     import dmocks.mocks;
     auto mocker = new Mocker();
 
-    auto surface = create_plot_surface();
+    auto surface = createPlotSurface();
     auto mock = mocker.mockStruct!(cairo.Context, cairo.Surface )(
             surface ); 
 
@@ -151,28 +151,28 @@ unittest {
     mocker.expect(mock.identityMatrix()).repeat(1);
     mocker.expect(mock.restore()).repeat(1);
     mocker.replay;
-    draw_line( Point( 0, 0 ), Point( -1, -1 ), mock );
+    drawLine( Point( 0, 0 ), Point( -1, -1 ), mock );
     mocker.verify;
 }
 
 /**
   Draw axes onto the given context
   */
-CONTEXT draw_axes(CONTEXT)( const Bounds bounds, CONTEXT context ) {
+CONTEXT drawAxes(CONTEXT)( const Bounds bounds, CONTEXT context ) {
     auto xaxis = new Axis( bounds.min_x, bounds.max_x );
-    xaxis = adjust_tick_width( xaxis, 5 );
+    xaxis = adjustTickWidth( xaxis, 5 );
 
     auto yaxis = new Axis( bounds.min_y, bounds.max_y );
-    yaxis = adjust_tick_width( yaxis, 5 );
+    yaxis = adjustTickWidth( yaxis, 5 );
 
     // Draw xaxis
-    context = draw_line( Point( xaxis.min, yaxis.min ), 
+    context = drawLine( Point( xaxis.min, yaxis.min ), 
             Point( xaxis.max, yaxis.min ), context );
     // Draw ticks
     auto tick_x = xaxis.min_tick;
-    auto tick_size = tick_length(yaxis);
+    auto tick_size = tickLength(yaxis);
     while( tick_x < xaxis.max ) {
-        context = draw_line( Point( tick_x, yaxis.min ),
+        context = drawLine( Point( tick_x, yaxis.min ),
             Point( tick_x, yaxis.min + tick_size ), context );
         context = draw_text( tick_x.to!string, 
                 Point( tick_x, yaxis.min - 1.5*tick_size ), context );
@@ -180,13 +180,13 @@ CONTEXT draw_axes(CONTEXT)( const Bounds bounds, CONTEXT context ) {
     }
 
     // Draw yaxis
-    context = draw_line( Point( xaxis.min, yaxis.min ), 
+    context = drawLine( Point( xaxis.min, yaxis.min ), 
             Point( xaxis.min, yaxis.max ), context );
     // Draw ticks
     auto tick_y = yaxis.min_tick;
-    tick_size = tick_length(yaxis);
+    tick_size = tickLength(yaxis);
     while( tick_y < yaxis.max ) {
-        context = draw_line( Point( xaxis.min, tick_y ),
+        context = drawLine( Point( xaxis.min, tick_y ),
             Point( xaxis.min + tick_size, tick_y ), context );
         context = draw_text( tick_y.to!string, 
                 Point( xaxis.min - 1.5*tick_size, tick_y ), context );
@@ -209,7 +209,7 @@ unittest {
     import dmocks.mocks;
     auto mocker = new Mocker();
 
-    auto surface = create_plot_surface();
+    auto surface = createPlotSurface();
     auto mock = mocker.mockStruct!(cairo.Context, cairo.Surface )(
             surface ); 
 
@@ -225,13 +225,13 @@ unittest {
 
 CONTEXT draw_bins( T : size_t, CONTEXT )( CONTEXT context, Bins!T bins ) {
     foreach( x, count; bins ) {
-        context = draw_line( Point( x, 0 ), 
+        context = drawLine( Point( x, 0 ), 
                 Point( x, cast(double)(count)/bins.max_size ),
                 context );
-        context = draw_line( Point( x, cast(double)(count)/bins.max_size ), 
+        context = drawLine( Point( x, cast(double)(count)/bins.max_size ), 
                 Point( x + bins.width, cast(double)(count)/bins.max_size ),
                 context );
-        context = draw_line( 
+        context = drawLine( 
                 Point( x + bins.width, cast(double)(count)/bins.max_size ), 
                 Point( x + bins.width, 0 ),
                 context );
@@ -239,7 +239,7 @@ CONTEXT draw_bins( T : size_t, CONTEXT )( CONTEXT context, Bins!T bins ) {
     return context;
 }
 
-CONTEXT clear_context( CONTEXT )( CONTEXT context ) {
+CONTEXT clearContext( CONTEXT )( CONTEXT context ) {
     context.save();
     context = color( context, Color.white );
     context.paint();
@@ -251,7 +251,7 @@ unittest {
     import dmocks.mocks;
     auto mocker = new Mocker();
 
-    auto surface = create_plot_surface();
+    auto surface = createPlotSurface();
     auto mock = mocker.mockStruct!(cairo.Context, cairo.Surface )(
             surface );
     mocker.expect( mock.save() ).repeat(1);
@@ -259,7 +259,7 @@ unittest {
     mocker.expect( mock.paint() ).repeat(1);
     mocker.expect( mock.restore() ).repeat(1);
     mocker.replay;
-    clear_context( mock );
+    clearContext( mock );
     mocker.verify;
 }
 

@@ -22,23 +22,23 @@ void main() {
     bool wait = true;
 
     // Setup axes
-    auto plot_bounds = Bounds( -1, 1, -1, 1 );
-    auto surface_bounds = Bounds( 100, 400, 300, 0 );
+    auto plotBounds = Bounds( -1, 1, -1, 1 );
+    auto surfaceBounds = Bounds( 100, 400, 300, 0 );
 
-    auto surface = create_plot_surface();
-    auto axes_context = axes_context_from_surface( surface, plot_bounds );
+    auto surface = createPlotSurface();
+    auto axesContext = axesContextFromSurface( surface, plotBounds );
 
-    axes_context = draw_axes( plot_bounds, axes_context );
+    axesContext = drawAxes( plotBounds, axesContext );
 
-    auto plot_context = plot_context_from_surface( surface, plot_bounds );
+    auto plotContext = plotContextFromSurface( surface, plotBounds );
 
     /*auto pnt = Point( -1, -1 );
-    plot_context = draw_point( pnt, plot_context );
+    plotContext = draw_point( pnt, plotContext );
     pnt = Point( 0, 0 );
-    plot_context = draw_point( pnt, plot_context );
+    plotContext = draw_point( pnt, plotContext );
     pnt = Point( 1, 1 );
-    plot_context = draw_point( pnt, plot_context );
-    plot_context = draw_line( Point( -1,0 ), Point( 0,1 ), plot_context );
+    plotContext = draw_point( pnt, plotContext );
+    plotContext = draw_line( Point( -1,0 ), Point( 0,1 ), plotContext );
 
     auto bins = new Bins!size_t;
     bins.min = -1.0;
@@ -49,7 +49,7 @@ void main() {
     bins = add_data( bins, [-0.73] );
     bins = add_data( bins, [-0.23] );
 
-    plot_context = draw_bins( plot_context, bins );*/
+    plotContext = draw_bins( plotContext, bins );*/
 
     scope(exit) {surface.dispose();}
 
@@ -67,14 +67,14 @@ void main() {
         switch (msg["action"].str) {
             case "point":
                 foreach ( pnt; pointsFromParameters( msg["parameters"].array ))
-                    plot_context = draw_point( pnt, plot_context );
+                    plotContext = drawPoint( pnt, plotContext );
                 break;
             case "resize":
-                plot_bounds = boundsFromParameters( msg["parameters"].array );
-                axes_context = clear_context( axes_context );
-                axes_context = axes_context_from_surface( surface, plot_bounds );
-                axes_context = draw_axes( plot_bounds, axes_context );
-                plot_context = plot_context_from_surface( surface, plot_bounds );
+                plotBounds = boundsFromParameters( msg["parameters"].array );
+                axesContext = clearContext( axesContext );
+                axesContext = axesContextFromSurface( surface, plotBounds );
+                axesContext = drawAxes( plotBounds, axesContext );
+                plotContext = plotContextFromSurface( surface, plotBounds );
                 break;
             default:
                 writeln( "Unrecognized action: ", msg["action"].to!string );
