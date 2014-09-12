@@ -184,12 +184,12 @@ CONTEXT drawAxes(CONTEXT)( const Bounds bounds, CONTEXT context ) {
             Point( xaxis.min, yaxis.max ), context );
     // Draw ticks
     auto tick_y = yaxis.min_tick;
-    tick_size = tickLength(yaxis);
+    tick_size = tickLength(xaxis);
     while( tick_y < yaxis.max ) {
         context = drawLine( Point( xaxis.min, tick_y ),
             Point( xaxis.min + tick_size, tick_y ), context );
         context = drawText( tick_y.to!string, 
-                Point( xaxis.min - 1.5*tick_size, tick_y ), context );
+                Point( xaxis.min - 2.5*tick_size, tick_y ), context );
         tick_y += yaxis.tick_width;
     }
 
