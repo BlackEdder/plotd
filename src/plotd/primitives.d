@@ -5,6 +5,7 @@ import std.stdio;
 import std.string;
 import std.conv;
 
+/// Color class using rgba representation internally
 class Color {
     double r = 1, g = 1, b = 1, a = 1;
     this( double red, double green, double blue, double alpha ) { 
@@ -52,6 +53,7 @@ class Color {
     }
 }
 
+/// Bounds struct holding the bounds (min_x, max_x, min_y, max_y)
 struct Bounds {
     double min_x;
     double max_x;

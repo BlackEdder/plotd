@@ -45,42 +45,42 @@ unittest
 }
 */
 
-/// Create the plot surface
-cairo.Surface createPlotSurface() {
+/// Create the plot surface with given width and height in pixels
+cairo.Surface createPlotSurface( int width = 400, int height = 400 ) {
     auto surface = new cairo.ImageSurface(
-            cairo.Format.CAIRO_FORMAT_ARGB32, 400, 400);
+            cairo.Format.CAIRO_FORMAT_ARGB32, width, height );
     auto context = cairo.Context( surface );
     clearContext( context );
     return surface;
 }
 
 /// Save surface to a file
-void save( cairo.Surface surface ) {
-    (cast(cairo.ImageSurface)( surface )).writeToPNG( "example.png" );
+void save( cairo.Surface surface, string name = "example.png" ) {
+    (cast(cairo.ImageSurface)( surface )).writeToPNG( name );
 }
 
 /// Get axesContext from a surface
-cairo.Context axesContextFromSurface( cairo.Surface surface, Bounds bounds ) {
+cairo.Context axesContextFromSurface( cairo.Surface surface, Bounds plotBounds ) {
     auto context = cairo.Context( surface );
 
     context.translate( 100, 300 );
-    context.scale( 300.0/(bounds.max_x-bounds.min_x), 
-            -300.0/(bounds.max_y - bounds.min_y) );
-    context.translate( -bounds.min_x, -bounds.min_y );
+    context.scale( 300.0/(plotBounds.max_x-plotBounds.min_x), 
+            -300.0/(plotBounds.max_y - plotBounds.min_y) );
+    context.translate( -plotBounds.min_x, -plotBounds.min_y );
     context.setFontSize( 14.0 );
     return context;
 }
 
 /// Get plotContext from a surface
-cairo.Context plotContextFromSurface( cairo.Surface surface, Bounds bounds ) {
+cairo.Context plotContextFromSurface( cairo.Surface surface, Bounds plotBounds ) {
     // Create a sub surface. Makes sure everything is plotted within plot surface
     auto plotSurface = cairo.Surface.createForRectangle( surface, 
             cairo.Rectangle!double( 100, 0, 300, 300 ) );
     auto context = cairo.Context( plotSurface );
     context.translate( 0, 300 );
-    context.scale( 300.0/(bounds.max_x-bounds.min_x), 
-            -300.0/(bounds.max_y - bounds.min_y) );
-    context.translate( -bounds.min_x, -bounds.min_y );
+    context.scale( 300.0/(plotBounds.max_x-plotBounds.min_x), 
+            -300.0/(plotBounds.max_y - plotBounds.min_y) );
+    context.translate( -plotBounds.min_x, -plotBounds.min_y );
     context.setFontSize( 14.0 );
     return context;
 }
@@ -188,14 +188,15 @@ CONTEXT drawAxes(CONTEXT)( const Bounds bounds, CONTEXT context ) {
     while( tick_y < yaxis.max ) {
         context = drawLine( Point( xaxis.min, tick_y ),
             Point( xaxis.min + tick_size, tick_y ), context );
-        context = drawText( tick_y.to!string, 
-                Point( xaxis.min - 2.5*tick_size, tick_y ), context );
+        context = drawRotatedText( tick_y.to!string, 
+							Point( xaxis.min - tick_size, tick_y ), 1.5*3.14, context );
         tick_y += yaxis.tick_width;
     }
 
     return context;
 }
 
+/// Draw text at given location
 CONTEXT drawText(CONTEXT)( string text, const Point location, CONTEXT context ) {
     context.moveTo( location.x, location.y ); 
     context.save();
@@ -205,6 +206,17 @@ CONTEXT drawText(CONTEXT)( string text, const Point location, CONTEXT context ) 
     return context;
 }
 
+/// Draw rotated text on plot
+CONTEXT drawRotatedText(CONTEXT)( string text, const Point location, 
+		double radians, CONTEXT context ) {
+    context.moveTo( location.x, location.y ); 
+    context.save();
+    context.identityMatrix();
+		context.rotate( radians );
+    context.showText( text );
+    context.restore();
+    return context;
+}
 unittest {
     import dmocks.mocks;
     auto mocker = new Mocker();
