@@ -94,13 +94,13 @@ cairo.Context plotContextFromSurface( cairo.Surface surface, Bounds plotBounds,
 
   */
 CONTEXT drawPoint(CONTEXT)( const Point point, CONTEXT context ) {
-    auto width_height = context.deviceToUserDistance( 
-            cairo.Point!double( 6.0, 6.0 ) );
-    context.rectangle(
-            point.x-width_height.x/2.0, point.y-width_height.y/2.0, 
-                width_height.x, width_height.y );
-    context.fill();
-    return context;
+	auto width_height = context.deviceToUserDistance( 
+			cairo.Point!double( 6.0, 6.0 ) );
+	context.rectangle(
+			point.x-width_height.x/2.0, point.y-width_height.y/2.0, 
+			width_height.x, width_height.y );
+	context.fill();
+	return context;
 }
 
 /*
@@ -198,6 +198,29 @@ CONTEXT drawAxes(CONTEXT)( const Bounds bounds, CONTEXT context ) {
 
     return context;
 }
+
+/// Draw xlabel
+CONTEXT drawXLabel(CONTEXT)( string label, Bounds bounds, CONTEXT context ) {
+  auto yaxis = new Axis( bounds.min_y, bounds.max_y );
+  auto tick_size = tickLength(yaxis);
+	context = drawText( label, 
+			//Point( tick_x, bounds.min_y - 1.5*tick_size ), context );
+			Point( bounds.min_x + bounds.width/3.0, bounds.min_y - 4.0*tick_size ),
+			context );
+	return context;
+}
+
+/// Draw ylabel
+CONTEXT drawYLabel(CONTEXT)( string label, Bounds bounds, CONTEXT context ) {
+  auto xaxis = new Axis( bounds.min_x, bounds.max_x );
+  auto tick_size = tickLength(xaxis);
+	context = drawRotatedText( label, 
+			//Point( tick_x, bounds.min_y - 1.5*tick_size ), context );
+			Point( bounds.min_x - 3.0*tick_size, bounds.min_y + bounds.height/3.0 ),
+			1.5*3.14, context );
+	return context;
+}
+
 
 /// Draw text at given location
 CONTEXT drawText(CONTEXT)( string text, const Point location, CONTEXT context ) {
