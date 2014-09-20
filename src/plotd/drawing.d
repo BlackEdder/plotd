@@ -95,7 +95,7 @@ cairo.Context plotContextFromSurface( cairo.Surface surface, Bounds plotBounds,
   */
 CONTEXT drawPoint(CONTEXT)( const Point point, CONTEXT context ) {
     auto width_height = context.deviceToUserDistance( 
-            cairo.Point!double( 10.0, 10.0 ) );
+            cairo.Point!double( 6.0, 6.0 ) );
     context.rectangle(
             point.x-width_height.x/2.0, point.y-width_height.y/2.0, 
                 width_height.x, width_height.y );
