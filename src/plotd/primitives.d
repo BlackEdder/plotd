@@ -79,6 +79,24 @@ struct Bounds {
     }
 }
 
+/// Return the height of the given bounds 
+double height( Bounds bounds ) {
+	return bounds.max_y-bounds.min_y;
+}
+
+unittest {
+	assert( Bounds(0,1.5,1,5).height == 4 );
+}
+
+/// Return the width of the given bounds 
+double width( Bounds bounds ) {
+	return bounds.max_x-bounds.min_x;
+}
+
+unittest {
+	assert( Bounds(0,1.5,1,5).width == 1.5 );
+}
+
 struct Point {
     double x;
     double y;
