@@ -4,43 +4,24 @@
 	"copyright": "Copyright © 2014, Edwin van Leeuwen",
 	"authors": ["Edwin van Leeuwen"],
 	"license": "GPL-3.0",
-    "libs": ["cairo"],
+	"libs": ["cairo"],
 	"dependencies": {
 		"tested": "~master",
-        "cairod": "~master",
-        "dmocks-revived": "~master"
+		"cairod": "~master",
+		"dmocks-revived": "~master"
 	},
-    "configurations": [
-        {
-            "name": "plotd",
-            "targetType": "library",
-            "excludedSourceFiles": [ "src/plotd_client.d","src/plotd_server.d",
-                "src/processing.d"],
-        },
-        {
-            "name": "plotd_server",
-            "targetType": "executable",
-            "excludedSourceFiles": ["src/plotd_client.d", "src/processing.d"],
-            "mainSourceFile": "src/plotd_server.d",
-            "targetName": "plotd_server",
-            "targetPath": "bin/"
-        },
-        {
-            "name": "plotd_client",
-            "targetType": "executable",
-            "excludedSourceFiles": ["src/plotd_server.d", "src/processing.d"],
-            "mainSourceFile": "src/plotd_client.d",
-            "targetName": "plotd_client",
-            "targetPath": "bin/"
-        },
-        {
-            "name": "processing",
-            "targetType": "executable",
-            "excludedSourceFiles": ["src/plotd_server.d", "src/plotd_client.d"],
-            "mainSourceFile": "src/processing.d",
-            "targetName": "processing",
-            "targetPath": "bin/"
-        }
-  
-    ]
+	"configurations": [
+		{
+			"name": "plotd",
+			"targetType": "library",
+		},
+		{
+			"name": "plot1",
+			"targetType": "executable",
+			"mainSourceFile": "examples/plot1.d",
+			"targetName": "plot1",
+			"targetPath": "bin",
+			"sourcePaths":["examples"]
+		}
+	]
 }
