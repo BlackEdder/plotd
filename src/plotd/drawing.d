@@ -6,6 +6,10 @@ import cairo = cairo;
 import plotd.primitives;
 import plotd.binning;
 
+version( unittest ) {
+	import std.stdio;
+}
+
 // Design: One surface per plot (this makes it easier for PDFSurface support
 // Get axes context
 // Get plot context ( probably by first getting a subsurface from the main surface )
@@ -177,8 +181,13 @@ CONTEXT drawAxes(CONTEXT)( const Bounds bounds, CONTEXT context ) {
     while( tick_x < xaxis.max ) {
         context = drawLine( Point( tick_x, yaxis.min ),
             Point( tick_x, yaxis.min + tick_size ), context );
+
+				auto extents = context.textExtents( tick_x.to!string );
+				auto textSize = cairo.Point!double( 0.5*extents.width, 
+						-extents.height );
+				textSize = context.deviceToUserDistance( textSize );
         context = drawText( tick_x.to!string, 
-                Point( tick_x, yaxis.min - 1.5*tick_size ), context );
+                Point( tick_x - textSize.x, yaxis.min - 1.5*textSize.y ), context );
         tick_x += xaxis.tick_width;
     }
 
@@ -191,8 +200,13 @@ CONTEXT drawAxes(CONTEXT)( const Bounds bounds, CONTEXT context ) {
     while( tick_y < yaxis.max ) {
         context = drawLine( Point( xaxis.min, tick_y ),
             Point( xaxis.min + tick_size, tick_y ), context );
+				auto extents = context.textExtents( tick_y.to!string );
+				auto textSize = cairo.Point!double( extents.height, 
+						-0.5*extents.width );
+				textSize = context.deviceToUserDistance( textSize );
         context = drawRotatedText( tick_y.to!string, 
-							Point( xaxis.min - tick_size, tick_y ), 1.5*3.14, context );
+							Point( xaxis.min - 0.5*textSize.x, tick_y-textSize.y ), 
+							1.5*3.14, context );
         tick_y += yaxis.tick_width;
     }
 
@@ -201,22 +215,26 @@ CONTEXT drawAxes(CONTEXT)( const Bounds bounds, CONTEXT context ) {
 
 /// Draw xlabel
 CONTEXT drawXLabel(CONTEXT)( string label, Bounds bounds, CONTEXT context ) {
-  auto yaxis = new Axis( bounds.min_y, bounds.max_y );
-  auto tick_size = tickLength(yaxis);
+	auto extents = context.textExtents( label );
+	auto textSize = cairo.Point!double( 0.5*extents.width, 
+			-extents.height );
+	textSize = context.deviceToUserDistance( textSize );
 	context = drawText( label, 
-			//Point( tick_x, bounds.min_y - 1.5*tick_size ), context );
-			Point( bounds.min_x + bounds.width/3.0, bounds.min_y - 4.0*tick_size ),
+			Point( bounds.min_x + bounds.width/2.0 - textSize.x, 
+					bounds.min_y - 3.0*textSize.y ),
 			context );
 	return context;
 }
 
 /// Draw ylabel
 CONTEXT drawYLabel(CONTEXT)( string label, Bounds bounds, CONTEXT context ) {
-  auto xaxis = new Axis( bounds.min_x, bounds.max_x );
-  auto tick_size = tickLength(xaxis);
+	auto extents = context.textExtents( label );
+	auto textSize = cairo.Point!double( -extents.height, 
+			0.5*extents.width );
+	textSize = context.deviceToUserDistance( textSize );
 	context = drawRotatedText( label, 
-			//Point( tick_x, bounds.min_y - 1.5*tick_size ), context );
-			Point( bounds.min_x - 3.0*tick_size, bounds.min_y + bounds.height/3.0 ),
+			Point( bounds.min_x + 2.0*textSize.x,
+				bounds.min_y + bounds.height/2.0 + textSize.y ),
 			1.5*3.14, context );
 	return context;
 }
