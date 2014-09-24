@@ -37,41 +37,6 @@ version( unittest ) {
 // Get axes context
 // Get plot context ( probably by first getting a subsurface from the main surface )
 
-/*
-
-class Dependency
-{
-    //string call(TYPE)();  wouldn't be mocked as it's a template
-    string call()
-    {
-        return "Call on me, baby!";
-    }
-}
-
-void funcToTest(CONTEXT)(CONTEXT cnt)
-{
-    cnt.fill();
-}
-
-unittest
-{
-    import dmocks.mocks;
-    auto mocker = new Mocker();
-
-    auto axesSurface = new cairo.ImageSurface(
-            cairo.Format.CAIRO_FORMAT_ARGB32, 400, 400);
-    
-    //auto axesContext = cairo.Context( axesSurface );
-    auto mock = mocker.mockStruct!(cairo.Context, cairo.ImageSurface )(
-            axesSurface ); 
-
-    mocker.expect(mock.fill()).repeat( 1 );
-    mocker.replay;
-    funcToTest(mock);
-    mocker.verify;
-}
-*/
-
 /// Create the plot surface with given width and height in pixels
 cairo.Surface createPlotSurface( int width = 400, int height = 400 ) {
     auto surface = new cairo.ImageSurface(
@@ -129,32 +94,6 @@ CONTEXT drawPoint(CONTEXT)( const Point point, CONTEXT context ) {
 	context.fill();
 	return context;
 }
-
-/*
-For some reason the expect for deviceToUserDistance is not working correctly
-
-   unittest {
-    import dmocks.mocks;
-    auto mocker = new Mocker();
-
-    auto surface = createPlotSurface();
-    auto mock = mocker.mockStruct!(cairo.Context, cairo.Surface )(
-            surface ); 
-
-    mocker.expect(mock.fill()).repeat( 2 );
-    auto distance = cairo.Point!double( 10, 10 );
-    mocker.expect(mock.deviceToUserDistance( 
-            distance ) ).returns( cairo.Point!double( 20.0/300.0,
-                20.0/300.0 ));
-
-    double scale = 10.0/300.0;
-    mocker.expect(mock.rectangle( 0-scale, 0-scale, scale*2, scale*2 )).repeat(1);
-    mocker.expect(mock.rectangle( -1-scale, -1-scale, scale*2, scale*2 )).repeat(1);
-    mocker.replay;
-    drawPoint( Point( 0, 0 ), mock );
-    drawPoint( Point( -1, -1 ), mock );
-    mocker.verify;
-}*/
 
 CONTEXT drawLine(CONTEXT)( const Point from, const Point to, CONTEXT context ) {
     context.moveTo( from.x, from.y );
