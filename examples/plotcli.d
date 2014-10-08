@@ -22,6 +22,11 @@
 	 */
 
 import std.stdio : writeln, readln;
+
+import plotd.drawing;
+import plotd.plot;
+import plotd.primitives;
+
 /**
 	Read from standard input and plot
 
@@ -29,11 +34,11 @@ import std.stdio : writeln, readln;
 
 	myprogram > plotcli
 	*/
-
-unittest {
-	assert( false );
-}
 void main() {
+	auto marginBounds = Bounds( 70, 400, 70, 400 );
+	auto plot = createPlotState( Bounds( 0, 1, 0, 1 ),
+			marginBounds );
+
 	while( true ) {
 		auto msg = readln();
 		writeln( msg );
