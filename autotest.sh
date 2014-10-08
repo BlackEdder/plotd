@@ -8,7 +8,7 @@ function watch_tests() {
 while : 
 do
 	#file=`inotifywait -q -e CREATE bin/ --format %f`
-	file=`inotifywait -q -e ATTRIB src/plotd/ --format %f`
+	file=`inotifywait -r -q -e ATTRIB src/ --format %f`
 	sleep 1
 	dub test
 done
