@@ -4,3 +4,4 @@ docs*
 __*
 .*.swp
 bin/
+dub.selections.json
