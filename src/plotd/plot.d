@@ -24,7 +24,7 @@
 /**
 	High level interface to the plotting library
 	*/
-module plot;
+module plotd.plot;
 
 import std.conv;
 import std.range;
