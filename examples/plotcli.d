@@ -42,5 +42,7 @@ void main() {
 	while( true ) {
 		auto msg = readln();
 		writeln( msg );
+
+		plot.save( "plotcli.png" );
 	}
 }
