@@ -23,6 +23,7 @@
 
 import std.stdio : writeln, readln;
 
+import cli.parsing;
 import plotd.drawing;
 import plotd.plot;
 import plotd.primitives;
@@ -40,8 +41,14 @@ void main() {
 			marginBounds );
 
 	while( true ) {
-		auto msg = readln();
-		writeln( msg );
+		auto msg = readln()[0..$-1];
+		writeln( "Received: ", msg );
+
+		auto coords = toRange( msg );
+
+		if (coords.length == 2) {
+			Point( coords[0], coords[1] ).draw( plot );
+		}
 
 		plot.save( "plotcli.png" );
 	}

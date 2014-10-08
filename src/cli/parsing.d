@@ -23,4 +23,20 @@
 
 module cli.parsing;
 
+import std.algorithm;
+import std.conv;
+import std.range;
+import std.string;
 
+version( unittest ) {
+	import std.stdio;
+}
+
+double[] toRange( string line ) {
+  auto result = line.split( "," ).map!( (d) => d.to!double );
+	return result.array;
+}
+
+unittest {
+	assert( "1,2".toRange == [1,2] );
+}
