@@ -100,3 +100,8 @@ void drawFunction(CONTEXT)( double delegate(double) func,
 				plot.plotBounds.width/100.0 )
 			.map!( a => Point( a, func( a ) ) ).drawRange( plot );
 }
+
+/// Save plot to a file
+void save( PlotState plot, string name = "example.png" ) {
+    (cast(cairo.ImageSurface)( plot.surface )).writeToPNG( name );
+}
