@@ -18,10 +18,16 @@
 		{
 			"name": "plot1",
 			"targetType": "executable",
-			"mainSourceFile": "examples/plot1.d",
+			"sourceFiles": ["examples/plot1.d"],
 			"targetName": "plot1",
 			"targetPath": "bin",
-			"sourcePaths":["examples"]
+		},
+		{
+			"name": "plotcli",
+			"targetType": "executable",
+			"sourceFiles": ["examples/plotcli.d"],
+			"targetName": "plotcli",
+			"targetPath": "bin",
 		}
 	]
 }
