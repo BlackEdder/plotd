@@ -96,9 +96,16 @@ void drawRange(RANGE)( RANGE range, PlotState plot ) {
 /// Draw function on our plot
 void drawFunction(CONTEXT)( double delegate(double) func,
 		PlotState plot ) {
-	auto points = iota( plot.plotBounds.min_x, plot.plotBounds.max_x, 
+	iota( plot.plotBounds.min_x, plot.plotBounds.max_x, 
 				plot.plotBounds.width/100.0 )
 			.map!( a => Point( a, func( a ) ) ).drawRange( plot );
+}
+
+/// Draw point on the plot
+void draw( Point point, PlotState plot ) {
+	import std.stdio;
+	writeln( point );
+	plot.plotContext = drawPoint( point, plot.plotContext );
 }
 
 /// Save plot to a file
