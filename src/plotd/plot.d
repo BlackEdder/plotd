@@ -24,7 +24,7 @@
 /**
 	High level interface to the plotting library
 	*/
-module plot;
+module plotd.plot;
 
 import std.conv;
 import std.range;
@@ -99,4 +99,9 @@ void drawFunction(CONTEXT)( double delegate(double) func,
 	auto points = iota( plot.plotBounds.min_x, plot.plotBounds.max_x, 
 				plot.plotBounds.width/100.0 )
 			.map!( a => Point( a, func( a ) ) ).drawRange( plot );
+}
+
+/// Save plot to a file
+void save( PlotState plot, string name = "example.png" ) {
+    (cast(cairo.ImageSurface)( plot.surface )).writeToPNG( name );
 }
