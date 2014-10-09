@@ -162,6 +162,72 @@ unittest {
 			Bounds( 0, 1.2, -0.1, 1 ) );
 }
 
+/// Can we construct valid bounds given these points
+bool validBounds( Point[] points ) {
+	if (points.length < 2)
+		return false;
+
+	bool validx = false;
+	bool validy = false;
+	double x = points[0].x;
+	double y = points[0].y;
+
+	foreach( point; points[1..$] ) {
+		if ( point.x != x )
+			validx = true;
+		if ( point.y != y )
+			validy = true;
+		if (validx && validy)
+			return true;
+	}
+	return false;
+}
+
+unittest {
+	assert( validBounds( [ Point( 0, 1 ), Point( 1, 0 ) ] ) );
+	assert( !validBounds( [ Point( 0, 1 ) ] ) );
+	assert( !validBounds( [ Point( 0, 1 ), Point( 0, 0 ) ] ) );
+	assert( !validBounds( [ Point( 0, 1 ), Point( 1, 1 ) ] ) );
+}
+
+Bounds minimalBounds( Point[] points ) {
+	if (points.length == 0)
+		return Bounds( -1,1,-1,1 );
+
+	double min_x = points[0].x;
+	double max_x = points[0].x;
+	double min_y = points[0].y;
+	double max_y = points[0].y;
+	if (points.length > 1) {
+		foreach( point; points[1..$] ) {
+			if ( point.x < min_x )
+				min_x = point.x;
+			else if ( point.x > max_x )
+				max_x = point.x;
+			if ( point.y < min_y )
+				min_y = point.y;
+			else if ( point.y > max_y )
+				max_y = point.y;
+		}
+	}
+	if (min_x == max_x) {
+		min_x = min_x - 0.5;
+		max_x = max_x + 0.5;
+	}
+	if (min_y == max_y) {
+		min_y = min_y - 0.5;
+		max_y = max_y + 0.5;
+	}
+	return Bounds( min_x, max_x, min_y, max_y );
+}
+
+unittest {
+	assert( minimalBounds( [] ) == Bounds( -1, 1, -1, 1 ) );
+	assert( minimalBounds( [Point(0,0)] ) == Bounds( -0.5, 0.5, -0.5, 0.5 ) );
+	assert( minimalBounds( [Point(0,0),Point(0,0)] ) == Bounds( -0.5, 0.5, -0.5, 0.5 ) );
+	assert( minimalBounds( [Point(0.1,0),Point(0,0.2)] ) == Bounds( 0, 0.1, 0, 0.2 ) );
+}
+
 struct Point {
     double x;
     double y;
