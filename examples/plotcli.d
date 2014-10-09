@@ -45,19 +45,55 @@ void main() {
 	scope(exit) plot.save( "plotcli.png" );
 	auto msg = readln();
 
+	Event[] eventCache;
+
+	bool validBound = false;
+	Point[] pointCache;
+
 	while( true  ) {
 		writeln( "Received: ", msg );
 
-		auto coords = toRange( msg.strip );
+		auto points = msg.strip
+			.toRange
+			.toPoints;
 
-		if (coords.length == 2) {
-			Point( coords[0], coords[1] ).draw( plot );
+		bool needAdjusting = false;
+		if ( !validBound ) {
+			needAdjusting = true;
+			pointCache ~= points;
+			validBound = validBounds( pointCache );
+			plot.plotBounds = minimalBounds( pointCache );
+			if (validBound)
+				pointCache = [];
+		} else {
+			foreach( point; points ) {
+				if (!plot.plotBounds.withinBounds( point )) {
+					plot.plotBounds = adjustedBounds( plot.plotBounds, point );
+					needAdjusting = true;
+				}
+			}
 		}
 
-		plot.save( "plotcli.png" );
-		msg = readln();
-		if ( msg.length == 0 ) // Got to end of file
-			Thread.sleep( dur!("msecs")( 100 ) );
+		if (needAdjusting) {
+			plot = createPlotState( plot.plotBounds, plot.marginBounds );
+			foreach( event; eventCache )
+				event( plot );
+		}
 
+		auto events = points.toEvents;
+
+		foreach( event; events )
+			event( plot );
+
+		eventCache ~= events;
+
+		plot.save( "plotcli.png" );
+
+		msg = readln();
+		while ( msg.length == 0 ) // Got to end of file
+		{
+			Thread.sleep( dur!("msecs")( 100 ) );
+			msg = readln();
+		}
 	}
 }
