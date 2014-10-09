@@ -33,10 +33,17 @@ version( unittest ) {
 }
 
 double[] toRange( string line ) {
-  auto result = line.split( "," ).map!( (d) => d.to!double );
-	return result.array;
+	try {
+		return line.split( "," )
+			.map!( (d) => d.strip( ' ' ).to!double )
+			.array;
+	} catch (ConvException exp) { 
+		return [];
+	}
 }
 
 unittest {
 	assert( "1,2".toRange == [1,2] );
+	assert( "0.5, 2".toRange == [0.5,2] );
+	assert( "bla, 2".toRange == [] );
 }

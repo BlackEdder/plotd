@@ -20,8 +20,10 @@
 
 	 -------------------------------------------------------------------
 	 */
-
+import core.thread : Thread;
+import core.time : dur;
 import std.stdio : writeln, readln;
+import std.string : strip;
 
 import cli.parsing;
 import plotd.drawing;
@@ -40,16 +42,22 @@ void main() {
 	auto plot = createPlotState( Bounds( 0, 1, 0, 1 ),
 			marginBounds );
 
-	while( true ) {
-		auto msg = readln()[0..$-1];
+	scope(exit) plot.save( "plotcli.png" );
+	auto msg = readln();
+
+	while( true  ) {
 		writeln( "Received: ", msg );
 
-		auto coords = toRange( msg );
+		auto coords = toRange( msg.strip );
 
 		if (coords.length == 2) {
 			Point( coords[0], coords[1] ).draw( plot );
 		}
 
 		plot.save( "plotcli.png" );
+		msg = readln();
+		if ( msg.length == 0 ) // Got to end of file
+			Thread.sleep( dur!("msecs")( 100 ) );
+
 	}
 }
