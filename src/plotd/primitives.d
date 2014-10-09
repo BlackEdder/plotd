@@ -23,10 +23,11 @@
 
 module plotd.primitives;
 
+import std.algorithm : min, max;
+import std.conv;
 import std.math;
 import std.stdio;
 import std.string;
-import std.conv;
 
 /// Color class using rgba representation internally
 class Color {
@@ -118,6 +119,47 @@ double width( Bounds bounds ) {
 
 unittest {
 	assert( Bounds(0,1.5,1,5).width == 1.5 );
+}
+
+/// Is the point within the Bounds
+bool withinBounds( Bounds bounds, Point point ) {
+	return ( point.x <= bounds.max_x && point.x >= bounds.min_x
+			&& point.y <= bounds.max_y && point.y >= bounds.min_y );
+}
+
+unittest {
+	assert( Bounds( 0, 1, 0, 1 ).withinBounds( Point( 1, 0 ) ) );
+	assert( Bounds( 0, 1, 0, 1 ).withinBounds( Point( 0, 1 ) ) );
+	assert( !Bounds( 0, 1, 0, 1 ).withinBounds( Point( 0, 1.1 ) ) );
+	assert( !Bounds( 0, 1, 0, 1 ).withinBounds( Point( -0.1, 1 ) ) );
+	assert( !Bounds( 0, 1, 0, 1 ).withinBounds( Point( 1.1, 0.5 ) ) );
+	assert( !Bounds( 0, 1, 0, 1 ).withinBounds( Point( 0.1, -0.1 ) ) );
+}
+
+/// Returns adjust bounds based on given bounds to include point
+Bounds adjustedBounds( Bounds bounds, Point point ) {
+	if ( bounds.min_x > point.x ) {
+		bounds.min_x = min( bounds.min_x - 0.1*bounds.width, point.x );
+	} else if ( bounds.max_x < point.x ) {
+		bounds.max_x = max( bounds.max_x + 0.1*bounds.width, point.x );
+	}
+	if ( bounds.min_y > point.y ) {
+		bounds.min_y = min( bounds.min_y - 0.1*bounds.height, point.y );
+	} else if ( bounds.max_y < point.y ) {
+		bounds.max_y = max( bounds.max_y + 0.1*bounds.height, point.y );
+	}
+	return bounds;
+}
+
+unittest {
+	assert( adjustedBounds( Bounds( 0, 1, 0, 1 ), Point( 0, 1.01 ) ) ==
+			Bounds( 0, 1, 0, 1.1 ) );
+	assert( adjustedBounds( Bounds( 0, 1, 0, 1 ), Point( 0, 1.5 ) ) ==
+			Bounds( 0, 1, 0, 1.5 ) );
+	assert( adjustedBounds( Bounds( 0, 1, 0, 1 ), Point( -1, 1.01 ) ) ==
+			Bounds( -1, 1, 0, 1.1 ) );
+	assert( adjustedBounds( Bounds( 0, 1, 0, 1 ), Point( 1.2, -0.01 ) ) ==
+			Bounds( 0, 1.2, -0.1, 1 ) );
 }
 
 struct Point {
