@@ -166,3 +166,25 @@ unittest {
 	assert( parsed.histData.length == 1 );
 	assert( equal( parsed.histData, [5.0] ) );
 }
+
+/// Check whether current RowMode makes sense for new data.
+string[] updateRowMode( double[] floats, string[] rowMode ) {
+	if (floats.length == rowMode.length)
+		return rowMode;
+	if (floats.length == 1)
+		return ["hist"];
+	else {
+		rowMode ~= "x";
+		foreach( i; 1..floats.length )
+			rowMode ~= "y";
+	}
+	return rowMode;
+}
+
+unittest {
+	assert( equal( updateRowMode( [1.0], [] ), ["hist"] ) );
+	assert( equal( updateRowMode( [1.0,2.0], [] ), ["x","y"] ) );
+	assert( equal( updateRowMode( [1.0,2.0,3.0], [] ), ["x","y","y"] ) );
+	assert( equal( updateRowMode( [1.0,2.0], ["y","y"] ), ["y","y"] ) );
+	assert( equal( updateRowMode( [1.0], ["y","y"] ), ["hist"] ) );
+}
