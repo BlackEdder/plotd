@@ -74,3 +74,95 @@ Event[] toEvents( Point[] points ) {
 	}
 	return events;
 }
+
+struct ParsedRow {
+	Point[] points;
+	double[] histData;
+}
+
+ParsedRow applyFormat( double[] floats, string[] format ) {
+	static double defaultX = 0;
+	static double defaultY = 0;
+	ParsedRow result;
+	size_t[] xIDs;
+	size_t[] yIDs;
+	foreach( i; 0..format.length ) {
+		switch( format[i] ) {
+			case "x":
+				xIDs ~= i;
+				break;
+			case "y":
+				yIDs ~= i;
+				break;
+			case "hist":
+				result.histData ~= floats[i];
+				break;
+			default:
+		}
+	}
+
+	foreach( i; 0..max(xIDs.length,yIDs.length) ) {
+		double x, y;
+		if (xIDs.length == 0) {
+			x = defaultX;
+		} else if ( i >= xIDs.length )
+			x = floats[ xIDs[$-1] ];
+		else
+			x = floats[ xIDs[i] ];
+
+		if (yIDs.length == 0) {
+			y = defaultY;
+		} else if ( i >= yIDs.length )
+			y = floats[ yIDs[$-1] ];
+		else
+			y = floats[ yIDs[i] ];
+
+		result.points ~= Point( x, y);
+	}
+
+	if (xIDs.length == 0)
+		++defaultX;
+	if (yIDs.length == 0)
+		++defaultY;
+	return result;
+
+}
+
+unittest {
+	auto parsed = applyFormat( [1.0,2.0], ["x","y"] );
+	assert( equal( parsed.points, [ Point( 1.0, 2.0 ) ] ) );
+	assert( parsed.histData.length == 0 );
+
+	parsed = applyFormat( [1.0,2.0,3.0], ["x","y","y"] );
+	assert( equal( parsed.points, [ Point( 1.0, 2.0 ), Point( 1.0, 3.0 ) ] ) );
+	assert( parsed.histData.length == 0 );
+
+	parsed = applyFormat( [1.0,2.0,3.0], ["x","y","x"] );
+	assert( equal( parsed.points, [ Point( 1.0, 2.0 ), Point( 3.0, 2.0 ) ] ) );
+	assert( parsed.histData.length == 0 );
+
+	parsed = applyFormat( [1.0,2.0,3.0,4.0], ["x","y","x","y"] );
+	assert( equal( parsed.points, [ Point( 1.0, 2.0 ), Point( 3.0, 4.0 ) ] ) );
+	assert( parsed.histData.length == 0 );
+	
+	// default x value
+	parsed = applyFormat( [1.0,2.0], ["y","y"] );
+	assert( equal( parsed.points, [ Point( 0.0, 1.0 ), Point( 0.0, 2.0 ) ] ) );
+	assert( parsed.histData.length == 0 );
+	parsed = applyFormat( [1.0,2.0], ["y","y"] );
+	assert( equal( parsed.points, [ Point( 1.0, 1.0 ), Point( 1.0, 2.0 ) ] ) );
+	assert( parsed.histData.length == 0 );
+
+	// default y value
+	parsed = applyFormat( [1.0,2.0], ["x","x"] );
+	assert( equal( parsed.points, [ Point( 1.0, 0.0 ), Point( 2.0, 0.0 ) ] ) );
+	assert( parsed.histData.length == 0 );
+	parsed = applyFormat( [1.0,2.0], ["x","x"] );
+	assert( equal( parsed.points, [ Point( 1.0, 1.0 ), Point( 2.0, 1.0 ) ] ) );
+	assert( parsed.histData.length == 0 );
+
+	parsed = applyFormat( [5.0,2.0,3.0], ["hist","y","y"] );
+	assert( parsed.points.length == 2 );
+	assert( parsed.histData.length == 1 );
+	assert( equal( parsed.histData, [5.0] ) );
+}
