@@ -244,13 +244,13 @@ unittest {
 CONTEXT drawBins( T : size_t, CONTEXT )( CONTEXT context, Bins!T bins ) {
     foreach( x, count; bins ) {
         context = drawLine( Point( x, 0 ), 
-                Point( x, cast(double)(count)/bins.max_size ),
+                Point( x, count.to!double ),
                 context );
-        context = drawLine( Point( x, cast(double)(count)/bins.max_size ), 
-                Point( x + bins.width, cast(double)(count)/bins.max_size ),
+        context = drawLine( Point( x, count.to!double ), 
+                Point( x + bins.width, count.to!double ),
                 context );
         context = drawLine( 
-                Point( x + bins.width, cast(double)(count)/bins.max_size ), 
+                Point( x + bins.width, count.to!double ), 
                 Point( x + bins.width, 0 ),
                 context );
       }
