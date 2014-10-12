@@ -26,6 +26,10 @@ module plotd.binning;
 import std.array;
 import std.range;
 
+version( unittest ) {
+	import std.algorithm;
+}
+
 /**
   The struct Bins is a container holding binned data
  */
@@ -38,8 +42,13 @@ struct Bins(T) {
 		}
 
     /// How many bins does the container have
-    size_t length() {
+    @property size_t length() {
         return mybins.length;
+    }
+	
+		/// Set length/number of bins
+    @property size_t length( size_t noBins ) {
+        return mybins.length = noBins;
     }
 
     /// save the container position
@@ -110,6 +119,16 @@ unittest {
     }
 }
 
+/// Number of Bins
+unittest {
+    Bins!size_t bins;
+    bins.min = -1;
+    bins.width = 0.5;
+		bins.length = 3;
+		assert( bins.length == 3 );
+		assert( equal( bins.mybins, [0,0,0] ) );
+}
+ 
 /**
   Calculate bin id based on data value and Bins
 
