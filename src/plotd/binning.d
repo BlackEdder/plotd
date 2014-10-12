@@ -38,7 +38,7 @@ struct Bins(T) {
     double width;
 
 		 @property double max() {
-			return min + width*(length);
+			return min + width*(mybins.length);
 		}
 
     /// How many bins does the container have
@@ -47,8 +47,8 @@ struct Bins(T) {
     }
 	
 		/// Set length/number of bins
-    @property size_t length( size_t noBins ) {
-        return mybins.length = noBins;
+    @property void length( size_t noBins ) {
+ 			mybins.length = noBins;
     }
 
     /// save the container position
@@ -92,7 +92,7 @@ struct Bins(T) {
         return result;
     }
 
-    //private:
+    private:
         T[] mybins;
 }
 
