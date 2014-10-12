@@ -107,7 +107,6 @@ void main() {
 			if ( data > histRange[1] || isNaN(histRange[1]) ) {
 				histRange[1] = data;
 			}
-			writeln( histRange );
 			histData ~= data;
 		}
 
@@ -123,7 +122,6 @@ void main() {
 			foreach( data; histData )
 				bins = bins.addDataToBin( [bins.binId( data )] );
 			// Adjust plotBounds 
-			writeln( bins.min, " ", bins.max );
 			plot = createPlotState( Bounds( bins.min, bins.max, 0, histData.length ),
 					marginBounds );
 			// Plot Bins
