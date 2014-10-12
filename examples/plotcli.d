@@ -24,6 +24,7 @@ import core.thread : Thread;
 import core.time : dur;
 import std.stdio : writeln, readln;
 import std.string : strip;
+import std.regex : match;
 
 import cli.parsing;
 import plotd.drawing;
@@ -49,24 +50,31 @@ void main() {
 
 	bool validBound = false;
 	Point[] pointCache;
+	string[] rowMode;
 
 	while( true  ) {
 		writeln( "Received: ", msg );
 
-		auto points = msg.strip
-			.toRange
-			.toPoints;
+		auto m = msg.match( r"^#plotcli (.*)" );
+		if (m)
+			writeln( "Found command ", m.captures[1] );
+
+		auto floats = msg.strip
+			.toRange;
+
+		rowMode = updateRowMode( floats, rowMode );
+		auto parsedRow = applyRowMode( floats, rowMode );
 
 		bool needAdjusting = false;
 		if ( !validBound ) {
 			needAdjusting = true;
-			pointCache ~= points;
+			pointCache ~= parsedRow.points;
 			validBound = validBounds( pointCache );
 			plot.plotBounds = minimalBounds( pointCache );
 			if (validBound)
 				pointCache = [];
 		} else {
-			foreach( point; points ) {
+			foreach( point; parsedRow.points ) {
 				if (!plot.plotBounds.withinBounds( point )) {
 					plot.plotBounds = adjustedBounds( plot.plotBounds, point );
 					needAdjusting = true;
@@ -80,7 +88,7 @@ void main() {
 				event( plot );
 		}
 
-		auto events = points.toEvents;
+		auto events = parsedRow.points.toEvents;
 
 		foreach( event; events )
 			event( plot );

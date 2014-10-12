@@ -67,27 +67,33 @@ unittest {
 
 Event[] toEvents( Point[] points ) {
 	Event[] events;
+
+	// Workaround point not properly copied in foreach loop
+  void delegate( PlotState ) createEvent( Point point ) {
+		return delegate( PlotState plot ) {	point.draw( plot ); };
+  }
+
 	foreach( point; points ) {
-		events ~= delegate( PlotState plot ) {
-			point.draw( plot );
-		};
+		events ~= createEvent( point ); 
 	}
 	return events;
 }
 
+/// Struct to hold the different points etc
 struct ParsedRow {
 	Point[] points;
 	double[] histData;
 }
 
-ParsedRow applyFormat( double[] floats, string[] format ) {
+/// Parse the row and return a struct containing the results
+ParsedRow applyRowMode( double[] floats, string[] rowMode ) {
 	static double defaultX = 0;
 	static double defaultY = 0;
 	ParsedRow result;
 	size_t[] xIDs;
 	size_t[] yIDs;
-	foreach( i; 0..format.length ) {
-		switch( format[i] ) {
+	foreach( i; 0..rowMode.length ) {
+		switch( rowMode[i] ) {
 			case "x":
 				xIDs ~= i;
 				break;
@@ -125,43 +131,42 @@ ParsedRow applyFormat( double[] floats, string[] format ) {
 	if (yIDs.length == 0)
 		++defaultY;
 	return result;
-
 }
 
 unittest {
-	auto parsed = applyFormat( [1.0,2.0], ["x","y"] );
+	auto parsed = applyRowMode( [1.0,2.0], ["x","y"] );
 	assert( equal( parsed.points, [ Point( 1.0, 2.0 ) ] ) );
 	assert( parsed.histData.length == 0 );
 
-	parsed = applyFormat( [1.0,2.0,3.0], ["x","y","y"] );
+	parsed = applyRowMode( [1.0,2.0,3.0], ["x","y","y"] );
 	assert( equal( parsed.points, [ Point( 1.0, 2.0 ), Point( 1.0, 3.0 ) ] ) );
 	assert( parsed.histData.length == 0 );
 
-	parsed = applyFormat( [1.0,2.0,3.0], ["x","y","x"] );
+	parsed = applyRowMode( [1.0,2.0,3.0], ["x","y","x"] );
 	assert( equal( parsed.points, [ Point( 1.0, 2.0 ), Point( 3.0, 2.0 ) ] ) );
 	assert( parsed.histData.length == 0 );
 
-	parsed = applyFormat( [1.0,2.0,3.0,4.0], ["x","y","x","y"] );
+	parsed = applyRowMode( [1.0,2.0,3.0,4.0], ["x","y","x","y"] );
 	assert( equal( parsed.points, [ Point( 1.0, 2.0 ), Point( 3.0, 4.0 ) ] ) );
 	assert( parsed.histData.length == 0 );
 	
 	// default x value
-	parsed = applyFormat( [1.0,2.0], ["y","y"] );
+	parsed = applyRowMode( [1.0,2.0], ["y","y"] );
 	assert( equal( parsed.points, [ Point( 0.0, 1.0 ), Point( 0.0, 2.0 ) ] ) );
 	assert( parsed.histData.length == 0 );
-	parsed = applyFormat( [1.0,2.0], ["y","y"] );
+	parsed = applyRowMode( [1.0,2.0], ["y","y"] );
 	assert( equal( parsed.points, [ Point( 1.0, 1.0 ), Point( 1.0, 2.0 ) ] ) );
 	assert( parsed.histData.length == 0 );
 
 	// default y value
-	parsed = applyFormat( [1.0,2.0], ["x","x"] );
+	parsed = applyRowMode( [1.0,2.0], ["x","x"] );
 	assert( equal( parsed.points, [ Point( 1.0, 0.0 ), Point( 2.0, 0.0 ) ] ) );
 	assert( parsed.histData.length == 0 );
-	parsed = applyFormat( [1.0,2.0], ["x","x"] );
+	parsed = applyRowMode( [1.0,2.0], ["x","x"] );
 	assert( equal( parsed.points, [ Point( 1.0, 1.0 ), Point( 2.0, 1.0 ) ] ) );
 	assert( parsed.histData.length == 0 );
 
-	parsed = applyFormat( [5.0,2.0,3.0], ["hist","y","y"] );
+	parsed = applyRowMode( [5.0,2.0,3.0], ["hist","y","y"] );
 	assert( parsed.points.length == 2 );
 	assert( parsed.histData.length == 1 );
 	assert( equal( parsed.histData, [5.0] ) );
