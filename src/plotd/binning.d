@@ -83,7 +83,7 @@ struct Bins(T) {
         return result;
     }
 
-    private:
+    //private:
         T[] mybins;
 }
 
