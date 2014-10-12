@@ -33,24 +33,9 @@ struct Bins(T) {
     double min;
     double width;
 
-    /// First value in the bins
-    T front() {
-        return mybins[0];
-    }
-
-    /// Return first value and drop it
-    void popFront() {
-        min += width;
-        mybins = mybins[1..$];
-    }
-    
-    /// Whether the container contains any bins
-    bool empty() {
-        if (mybins.length>0)
-            return false;
-        else 
-            return true;
-    }
+		 @property double max() {
+			return min + width*(length);
+		}
 
     /// How many bins does the container have
     size_t length() {
@@ -65,8 +50,24 @@ struct Bins(T) {
     {
         return mybins[index];
     }
+
+    int opApply(int delegate( ref T ) dg)
+    {
+        int result;
+
+        double x = min;
+        foreach ( el; mybins )
+        {
+            result = dg( el );
+            if (result)
+                break;
+
+            x += width;
+        }
+        return result;
+    }
     
-    /*int opApply(int delegate( ref double, ref T ) dg)
+    int opApply(int delegate( double, ref T ) dg)
     {
         int result;
 
@@ -80,7 +81,7 @@ struct Bins(T) {
             x += width;
         }
         return result;
-    }*/
+    }
 
     private:
         T[] mybins;
@@ -99,14 +100,14 @@ unittest {
         correct_el++;
     }
 
-    /*double correct_x = bins.min;
-    double correct_el = 1;
+    double correct_x = bins.min;
+    correct_el = 1;
     foreach ( x, el; bins ) {
         assert( correct_x == x );
         assert( correct_el == el );
         correct_x += bins.width;
         correct_el++;
-    }*/
+    }
 }
 
 /**
@@ -127,24 +128,6 @@ unittest {
     assert( binId( bins, -0.5 ) == 1 );
     assert( bins.binId( -0.25 ) == 1 );
 }
-
-/*
-/// For loop over Bins
-unittest {
-    auto bins = new Bins!size_t;
-    bins.min = -1;
-    bins.width = 0.5;
-    bins.mybins = [1,2,3,4];
-
-    double correct_x = bins.min;
-    double correct_el = 1;
-    foreach ( x, el; bins ) {
-        assert( correct_x == x );
-        assert( correct_el == el );
-        correct_x += bins.width;
-        correct_el++;
-    }
-}*/
 
 /**
   Add data to the given bin id
