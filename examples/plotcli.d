@@ -115,7 +115,7 @@ void main() {
 			Bins!size_t bins;
 			bins.min = histRange[0];
 			bins.width = 0.5;
-			bins.mybins = [0,0,0,0,0,0,0,0,0,0]; // Really need to fix this in binning.d
+			bins.length = 11; // Really need to fix this in binning.d
 			if( histRange[0] != histRange[1] )
 				bins.width = (histRange[1]-histRange[0])/10.0;
 			// add all data to bin
