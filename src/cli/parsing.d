@@ -90,6 +90,9 @@ ParsedRow applyRowMode( double[] floats, string[] rowMode ) {
 	static double defaultX = 0;
 	static double defaultY = 0;
 	ParsedRow result;
+	if (floats.length == 0)
+		return result;
+
 	size_t[] xIDs;
 	size_t[] yIDs;
 	foreach( i; 0..rowMode.length ) {
@@ -134,6 +137,8 @@ ParsedRow applyRowMode( double[] floats, string[] rowMode ) {
 }
 
 unittest {
+	assert( applyRowMode( [], ["x","y"] ).points.length == 0 );
+
 	auto parsed = applyRowMode( [1.0,2.0], ["x","y"] );
 	assert( equal( parsed.points, [ Point( 1.0, 2.0 ) ] ) );
 	assert( parsed.histData.length == 0 );
@@ -174,6 +179,8 @@ unittest {
 
 /// Check whether current RowMode makes sense for new data.
 string[] updateRowMode( double[] floats, string[] rowMode ) {
+	if (floats.length == 0)
+		return rowMode;
 	if (floats.length == rowMode.length)
 		return rowMode;
 	if (floats.length == 1)
@@ -187,6 +194,7 @@ string[] updateRowMode( double[] floats, string[] rowMode ) {
 }
 
 unittest {
+	assert( equal( updateRowMode( [], ["hist"] ), ["hist"] ) );
 	assert( equal( updateRowMode( [1.0], [] ), ["hist"] ) );
 	assert( equal( updateRowMode( [1.0,2.0], [] ), ["x","y"] ) );
 	assert( equal( updateRowMode( [1.0,2.0,3.0], [] ), ["x","y","y"] ) );
