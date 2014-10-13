@@ -22,12 +22,16 @@
 	 */
 import core.thread : Thread;
 import core.time : dur;
+import std.conv : to;
 import std.math : isNaN;
 import std.regex : match;
 import std.stdio : writeln, readln;
-import std.string : strip;
+import std.string : strip, split;
+
+import docopt;
 
 import cli.parsing;
+import cli.options;
 import plotd.binning;
 import plotd.drawing;
 import plotd.plot;
@@ -40,7 +44,22 @@ import plotd.primitives;
 
 	myprogram > plotcli
 	*/
-void main() {
+void main( string[] args ) {
+	// Options
+	auto doc = "Usage: plotcli [-d FORMAT] [-f]
+
+-d FORMAT		String describing the content of each row. Different row formats supported: x, y and h, with h indication histogram data. For example: x,y,y or h,x,y. When there are more ys provided than xs (or vice versa) the last x will be matched to all remaining ys.
+-f 					Follow: keep listening for new lines.
+
+";
+
+	auto arguments = docopt.docopt(doc, args[1..$], true, "plotcli");
+	Settings settings;
+	settings = settings.updateSettings( arguments );
+	writeln(arguments, " ", settings);
+
+
+	// Drawing
 	auto marginBounds = Bounds( 70, 400, 70, 400 );
 	auto plot = createPlotState( Bounds( 0, 1, 0, 1 ),
 			marginBounds );
@@ -52,7 +71,6 @@ void main() {
 
 	bool validBound = false;
 	Point[] pointCache;
-	string[] rowMode;
 	double[] histData;
 	double[2] histRange;
 
@@ -60,14 +78,17 @@ void main() {
 		writeln( "Received: ", msg );
 
 		auto m = msg.match( r"^#plotcli (.*)" );
-		if (m)
-			writeln( "Found command ", m.captures[1] );
+		if (m) {
+		  settings = settings.updateSettings( 
+					docopt.docopt(doc, m.captures[1].split( " " ), true, "plotcli") );
+			writeln( settings );
+		}
 
 		auto floats = msg.strip
 			.toRange;
-
-		rowMode = updateRowMode( floats, rowMode );
-		auto parsedRow = applyRowMode( floats, rowMode );
+		
+		settings.rowMode = updateRowMode( floats, settings.rowMode );
+		auto parsedRow = applyRowMode( floats, settings.rowMode );
 
 		bool needAdjusting = false;
 		if ( !validBound ) {
