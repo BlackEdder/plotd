@@ -64,7 +64,6 @@ class Color {
         return color;
     }
 
-
     unittest {
         auto col1 = Color.black;
         auto col2 = Color.black;
@@ -75,6 +74,48 @@ class Color {
         assert ( col1.opEquals( col2 ) );
         assert ( col1 == col2 );
     }
+}
+
+/// Infinite range of colors
+struct ColorRange {
+	@property bool empty() const
+	{
+		return false;
+	}
+
+	@property Color front() {
+		return Color( r, g, b, a );
+	}
+
+	void popFront() {
+		if ( r == 0 && g == 0 && b == 0 )
+			r = 1;
+		else if ( r == 1 && g == 0 && b == 0 )
+			g == 1;
+		else if ( r == 1 && g == 1 && b == 0 )
+			r == 0;
+		else if ( r == 0 && g == 1 && b == 0 )
+			b == 1;
+		else if ( r == 0 && g == 1 && b == 1 )
+			g == 0;
+		else if ( r == 0 && g == 0 && b == 1 ) {
+			b == 0;
+		}
+	}
+
+	private:
+		double r = 0;
+		double g = 0;
+		double b = 0;
+		double a = 1;
+}
+
+unittest {
+	Color prevColor = Color.white;
+	foreach( col ; ColorRange ) {
+		assert( prevColor != col );
+		prevColor = col;
+	}
 }
 
 /// Bounds struct holding the bounds (min_x, max_x, min_y, max_y)
