@@ -28,6 +28,7 @@ import std.conv;
 import std.range;
 import std.string;
 
+import plotd.drawing;
 import plotd.plot;
 import plotd.primitives;
 
@@ -68,9 +69,15 @@ unittest {
 Event[] toEvents( Point[] points ) {
 	Event[] events;
 
+	ColorRange colorRange;
+
 	// Workaround point not properly copied in foreach loop
   void delegate( PlotState ) createEvent( Point point ) {
-		return delegate( PlotState plot ) {	point.draw( plot ); };
+		return delegate( PlotState plot ) {	
+			plot.plotContext = color( plot.plotContext, colorRange.front );
+			colorRange.popFront;
+			point.draw( plot ); 
+		};
   }
 
 	foreach( point; points ) {
@@ -186,7 +193,7 @@ string[] updateRowMode( double[] floats, string[] rowMode ) {
 	if (floats.length == 1)
 		return ["h"];
 	else {
-		rowMode ~= "x";
+		rowMode = ["x"];
 		foreach( i; 1..floats.length )
 			rowMode ~= "y";
 	}
