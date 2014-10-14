@@ -127,7 +127,7 @@ unittest {
 	settings = settings.updateSettings( 
 			docopt(helpText, ["-o", "name.png"], true, "plotcli") );
 	args = docopt(helpText, ["-o", "name.png"], true, "plotcli");
-	//assert( equal( settings.rowMode, ["x","y"] ) );
+	assert( equal( settings.rowMode, ["x","y"] ) );
 	writeln( args );
 	writeln( settings );
 	assert( settings.outputFile == "name.png" );
