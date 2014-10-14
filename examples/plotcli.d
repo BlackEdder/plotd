@@ -46,12 +46,7 @@ import plotd.primitives;
 	*/
 void main( string[] args ) {
 	// Options
-	auto doc = "Usage: plotcli [-d FORMAT] [-f]
-
--d FORMAT		String describing the content of each row. Different row formats supported: x, y and h, with h indication histogram data. For example: x,y,y or h,x,y. When there are more ys provided than xs (or vice versa) the last x will be matched to all remaining ys.
--f 					Follow: keep listening for new lines.
-
-";
+	auto doc = helpText;
 
 	auto arguments = docopt.docopt(doc, args[1..$], true, "plotcli");
 	Settings settings;
@@ -149,7 +144,7 @@ void main( string[] args ) {
 			plot.plotContext = drawBins( plot.plotContext, bins );
 		}
 
-		plot.save( "plotcli.png" );
+		plot.save( settings.outputFile );
 
 		msg = readln();
 		while ( msg.length == 0 ) // Got to end of file

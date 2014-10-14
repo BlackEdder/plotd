@@ -103,7 +103,7 @@ ParsedRow applyRowMode( double[] floats, string[] rowMode ) {
 			case "y":
 				yIDs ~= i;
 				break;
-			case "hist":
+			case "h":
 				result.histData ~= floats[i];
 				break;
 			default:
@@ -171,7 +171,7 @@ unittest {
 	assert( equal( parsed.points, [ Point( 1.0, 1.0 ), Point( 2.0, 1.0 ) ] ) );
 	assert( parsed.histData.length == 0 );
 
-	parsed = applyRowMode( [5.0,2.0,3.0], ["hist","y","y"] );
+	parsed = applyRowMode( [5.0,2.0,3.0], ["h","y","y"] );
 	assert( parsed.points.length == 2 );
 	assert( parsed.histData.length == 1 );
 	assert( equal( parsed.histData, [5.0] ) );
@@ -184,7 +184,7 @@ string[] updateRowMode( double[] floats, string[] rowMode ) {
 	if (floats.length == rowMode.length)
 		return rowMode;
 	if (floats.length == 1)
-		return ["hist"];
+		return ["h"];
 	else {
 		rowMode ~= "x";
 		foreach( i; 1..floats.length )
@@ -194,10 +194,10 @@ string[] updateRowMode( double[] floats, string[] rowMode ) {
 }
 
 unittest {
-	assert( equal( updateRowMode( [], ["hist"] ), ["hist"] ) );
-	assert( equal( updateRowMode( [1.0], [] ), ["hist"] ) );
+	assert( equal( updateRowMode( [], ["h"] ), ["h"] ) );
+	assert( equal( updateRowMode( [1.0], [] ), ["h"] ) );
 	assert( equal( updateRowMode( [1.0,2.0], [] ), ["x","y"] ) );
 	assert( equal( updateRowMode( [1.0,2.0,3.0], [] ), ["x","y","y"] ) );
 	assert( equal( updateRowMode( [1.0,2.0], ["y","y"] ), ["y","y"] ) );
-	assert( equal( updateRowMode( [1.0], ["y","y"] ), ["hist"] ) );
+	assert( equal( updateRowMode( [1.0], ["y","y"] ), ["h"] ) );
 }
