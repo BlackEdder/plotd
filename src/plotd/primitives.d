@@ -95,9 +95,10 @@ struct ColorRange {
 		if ( r == 0 && g == 0 && b == 0 )
 			r = 1;
 		else if ( r == 1 && g == 0 && b == 0 )
+		{
+			r = 0; // Skip yellow, because difficult to see on white
 			g = 1;
-		else if ( r == 1 && g == 1 && b == 0 )
-			r = 0;
+		}
 		else if ( r == 0 && g == 1 && b == 0 )
 			b = 1;
 		else if ( r == 0 && g == 1 && b == 1 )
