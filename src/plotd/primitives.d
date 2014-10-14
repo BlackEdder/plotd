@@ -29,6 +29,10 @@ import std.math;
 import std.stdio;
 import std.string;
 
+version( unittest ) {
+	import std.algorithm : take;
+}
+
 /// Color class using rgba representation internally
 class Color {
     double r = 1, g = 1, b = 1, a = 1;
@@ -84,22 +88,22 @@ struct ColorRange {
 	}
 
 	@property Color front() {
-		return Color( r, g, b, a );
+		return new Color( r, g, b, a );
 	}
 
 	void popFront() {
 		if ( r == 0 && g == 0 && b == 0 )
 			r = 1;
 		else if ( r == 1 && g == 0 && b == 0 )
-			g == 1;
+			g = 1;
 		else if ( r == 1 && g == 1 && b == 0 )
-			r == 0;
+			r = 0;
 		else if ( r == 0 && g == 1 && b == 0 )
-			b == 1;
+			b = 1;
 		else if ( r == 0 && g == 1 && b == 1 )
-			g == 0;
+			g = 0;
 		else if ( r == 0 && g == 0 && b == 1 ) {
-			b == 0;
+			b = 0;
 		}
 	}
 
@@ -112,7 +116,8 @@ struct ColorRange {
 
 unittest {
 	Color prevColor = Color.white;
-	foreach( col ; ColorRange ) {
+	ColorRange colorRange;
+	foreach( col ; take( colorRange, 15 ) ) {
 		assert( prevColor != col );
 		prevColor = col;
 	}
