@@ -28,6 +28,8 @@ import std.conv;
 import std.range;
 import std.string;
 
+import std.regex : ctRegex, split;
+
 import plotd.drawing;
 import plotd.plot;
 import plotd.primitives;
@@ -38,9 +40,11 @@ version( unittest ) {
 
 alias void delegate( PlotState plot ) Event;
 
+private auto csvRegex = ctRegex!(`,|\t`);
+
 double[] toRange( string line ) {
 	try {
-		return line.split( "," )
+		return line.split( csvRegex )
 			.map!( (d) => d.strip( ' ' ).to!double )
 			.array;
 	} catch (ConvException exp) { 
@@ -52,6 +56,7 @@ unittest {
 	assert( "1,2".toRange == [1,2] );
 	assert( "0.5, 2".toRange == [0.5,2] );
 	assert( "bla, 2".toRange == [] );
+	assert( "1\t2".toRange == [1,2] );
 }
 
 Point[] toPoints( double[] coords ) {
@@ -72,19 +77,41 @@ Event[] toEvents( Point[] points ) {
 	ColorRange colorRange;
 
 	// Workaround point not properly copied in foreach loop
-  void delegate( PlotState ) createEvent( Point point ) {
+  void delegate( PlotState ) createEvent( Point point, Color col ) {
 		return delegate( PlotState plot ) {	
-			plot.plotContext = color( plot.plotContext, colorRange.front );
+			plot.plotContext = color( plot.plotContext, col );
 			colorRange.popFront;
 			point.draw( plot ); 
 		};
   }
 
 	foreach( point; points ) {
-		events ~= createEvent( point ); 
+		events ~= createEvent( point, colorRange.front ); 
+		colorRange.popFront;
 	}
 	return events;
 }
+
+Event[] toLineEvents( Point[] points, Point[] previousPoints ) {
+	Event[] events;
+
+	ColorRange colorRange;
+
+	// Workaround point not properly copied in foreach loop
+  void delegate( PlotState ) createEvent( size_t i, Color col ) {
+		return delegate( PlotState plot ) {	
+			plot.plotContext = color( plot.plotContext, col );
+			plot.plotContext = drawLine( previousPoints[i], points[i], plot.plotContext ); 
+		};
+  }
+
+	foreach( i; 0..points.length ) {
+		events ~= createEvent( i, colorRange.front ); 
+		colorRange.popFront;
+	}
+	return events;
+}
+
 
 /// Struct to hold the different points etc
 struct ParsedRow {
@@ -154,9 +181,11 @@ ParsedRow applyRowMode( double[] floats, string[] rowMode ) {
 	result.points ~= idsToPoint( floats, xIDs, yIDs, defaultX, defaultY );
 	result.linePoints ~= idsToPoint( floats, lxIDs, lyIDs, defaultX, defaultY );
 
-	if (xIDs.length == 0)
+	if ((xIDs.length == 0 && yIDs.length > 0) || 
+			(lxIDs.length == 0 && lyIDs.length > 0) )
 		++defaultX;
-	if (yIDs.length == 0)
+	if ((yIDs.length == 0 && xIDs.length > 0) || 
+			(lyIDs.length == 0 && lxIDs.length > 0) )
 		++defaultY;
 	return result;
 }
