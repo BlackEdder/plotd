@@ -75,6 +75,7 @@ Data format:
 	--image	IMAGETYPE (pdf,png)
 	--xlabel XLABEL
 	--ylabel YLABEL
+	--debug 		Output lines that are not successfully parsed
 
 Future Data formats:
   hx,hy	2D Histogram data (Not supported yet)
