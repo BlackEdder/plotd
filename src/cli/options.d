@@ -95,8 +95,13 @@ unittest {
 }
 
 Settings updateSettings( Settings settings, ArgValue[string] options ) {
-	if ( options["-d"].isTrue )
-		settings.rowMode = options["FORMAT"].to!string.split(',');
+	if ( options["-d"].isTrue ) 
+	{
+		if ( options["-o"].isFalse ) // Workaround docopt github issue #1
+			settings.rowMode = options["OUTPUT"].to!string.split(',');
+		else
+			settings.rowMode = options["FORMAT"].to!string.split(',');
+	}
 	if ( options["-o"].isTrue )
 		settings.outputFile = options["OUTPUT"].to!string;
 	return settings;
@@ -104,14 +109,6 @@ Settings updateSettings( Settings settings, ArgValue[string] options ) {
 
 unittest {
 	Settings settings;
-	auto args1 = docopt(helpText, ["-o", "name.png"], true, "plotcli");
-	writeln( args1 );
-	args1 = docopt(helpText, ["-d", "x,y"], true, "plotcli");
-	writeln( args1 );
-	args1 = docopt(helpText, ["-o", "name.png", "-d", "x,y"], true, "plotcli");
-	writeln( args1 );
-	
-
 	auto args = docopt(helpText, [], true, "plotcli");
 	assert( args["-d"].isFalse );
 	settings = settings.updateSettings( 
@@ -128,7 +125,5 @@ unittest {
 			docopt(helpText, ["-o", "name.png"], true, "plotcli") );
 	args = docopt(helpText, ["-o", "name.png"], true, "plotcli");
 	assert( equal( settings.rowMode, ["x","y"] ) );
-	writeln( args );
-	writeln( settings );
 	assert( settings.outputFile == "name.png" );
 }
