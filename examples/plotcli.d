@@ -51,7 +51,7 @@ void main( string[] args ) {
 	auto arguments = docopt.docopt(doc, args[1..$], true, "plotcli");
 	Settings settings;
 	settings = settings.updateSettings( arguments );
-	writeln(arguments, " ", settings);
+	//writeln(arguments, " ", settings);
 
 
 	// Drawing
@@ -66,17 +66,18 @@ void main( string[] args ) {
 
 	bool validBound = false;
 	Point[] pointCache;
+	Point[] previousLines;
 	double[] histData;
 	double[2] histRange;
 
 	while( true  ) {
-		writeln( "Received: ", msg );
+		//writeln( "Received: ", msg );
 
 		auto m = msg.match( r"^#plotcli (.*)" );
 		if (m) {
 		  settings = settings.updateSettings( 
 					docopt.docopt(doc, m.captures[1].split( " " ), true, "plotcli") );
-			writeln( settings );
+			//writeln( settings );
 		}
 
 		auto floats = msg.strip
@@ -88,13 +89,13 @@ void main( string[] args ) {
 		bool needAdjusting = false;
 		if ( !validBound ) {
 			needAdjusting = true;
-			pointCache ~= parsedRow.points;
+			pointCache ~= parsedRow.points ~ parsedRow.linePoints;
 			validBound = validBounds( pointCache );
 			plot.plotBounds = minimalBounds( pointCache );
 			if (validBound)
 				pointCache = [];
 		} else {
-			foreach( point; parsedRow.points ) {
+			foreach( point; parsedRow.points ~ parsedRow.linePoints ) {
 				if (!plot.plotBounds.withinBounds( point )) {
 					plot.plotBounds = adjustedBounds( plot.plotBounds, point );
 					needAdjusting = true;
@@ -109,6 +110,13 @@ void main( string[] args ) {
 		}
 
 		auto events = parsedRow.points.toEvents;
+
+		if ( previousLines.length == parsedRow.linePoints.length )
+			events ~= parsedRow.linePoints.toLineEvents( previousLines );
+
+		if (parsedRow.linePoints.length > 0)
+			previousLines = parsedRow.linePoints;
+
 
 		foreach( event; events )
 			event( plot );
