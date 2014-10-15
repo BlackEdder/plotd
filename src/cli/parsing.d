@@ -89,34 +89,13 @@ Event[] toEvents( Point[] points ) {
 /// Struct to hold the different points etc
 struct ParsedRow {
 	Point[] points;
+	Point[] linePoints;
 	double[] histData;
 }
 
-/// Parse the row and return a struct containing the results
-ParsedRow applyRowMode( double[] floats, string[] rowMode ) {
-	static double defaultX = 0;
-	static double defaultY = 0;
-	ParsedRow result;
-	if (floats.length == 0)
-		return result;
-
-	size_t[] xIDs;
-	size_t[] yIDs;
-	foreach( i; 0..rowMode.length ) {
-		switch( rowMode[i] ) {
-			case "x":
-				xIDs ~= i;
-				break;
-			case "y":
-				yIDs ~= i;
-				break;
-			case "h":
-				result.histData ~= floats[i];
-				break;
-			default:
-		}
-	}
-
+Point[] idsToPoint( double[] floats, size_t[] xIDs, size_t[] yIDs, 
+		double defaultX, double defaultY ) {
+	Point[] points;
 	foreach( i; 0..max(xIDs.length,yIDs.length) ) {
 		double x, y;
 		if (xIDs.length == 0) {
@@ -133,8 +112,47 @@ ParsedRow applyRowMode( double[] floats, string[] rowMode ) {
 		else
 			y = floats[ yIDs[i] ];
 
-		result.points ~= Point( x, y);
+		points ~= Point( x, y);
 	}
+
+	return points;
+}
+
+/// Parse the row and return a struct containing the results
+ParsedRow applyRowMode( double[] floats, string[] rowMode ) {
+	static double defaultX = 0;
+	static double defaultY = 0;
+	ParsedRow result;
+	if (floats.length == 0)
+		return result;
+
+	size_t[] xIDs;
+	size_t[] yIDs;
+	size_t[] lxIDs;
+	size_t[] lyIDs;
+	foreach( i; 0..rowMode.length ) {
+		switch( rowMode[i] ) {
+			case "lx":
+				lxIDs ~= i;
+				break;
+			case "ly":
+				lyIDs ~= i;
+				break;
+			case "x":
+				xIDs ~= i;
+				break;
+			case "y":
+				yIDs ~= i;
+				break;
+			case "h":
+				result.histData ~= floats[i];
+				break;
+			default:
+		}
+	}
+	
+	result.points ~= idsToPoint( floats, xIDs, yIDs, defaultX, defaultY );
+	result.linePoints ~= idsToPoint( floats, lxIDs, lyIDs, defaultX, defaultY );
 
 	if (xIDs.length == 0)
 		++defaultX;
@@ -182,6 +200,11 @@ unittest {
 	assert( parsed.points.length == 2 );
 	assert( parsed.histData.length == 1 );
 	assert( equal( parsed.histData, [5.0] ) );
+
+	// Line points
+	parsed = applyRowMode( [1.0,2.0,3.0], ["lx","ly","lx"] );
+	assert( equal( parsed.linePoints, [ Point( 1.0, 2.0 ), Point( 3.0, 2.0 ) ] ) );
+	assert( parsed.histData.length == 0 );
 }
 
 /// Check whether current RowMode makes sense for new data.
