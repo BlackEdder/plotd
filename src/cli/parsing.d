@@ -28,7 +28,7 @@ import std.conv;
 import std.range;
 import std.string;
 
-import std.regex : ctRegex, split;
+import std.regex : ctRegex, match, split;
 
 import plotd.drawing;
 import plotd.plot;
@@ -57,6 +57,49 @@ unittest {
 	assert( "0.5, 2".toRange == [0.5,2] );
 	assert( "bla, 2".toRange == [] );
 	assert( "1\t2".toRange == [1,2] );
+}
+
+/// Settings of a specific column
+struct ColumnMode {
+	string mode; /// x,y,lx,ly,h
+	string plotID; /// plotName/id 
+	int dataID = -1; /// -1 is the default value
+}
+
+ColumnMode parseColumn( string mode ) {
+	ColumnMode colMode;
+	auto columnRegex = ctRegex!( r"(lx|ly|x|y|hx|hy|hz|h)(\d*)(.*)" );
+	auto m = mode.match( columnRegex );
+	colMode.mode = m.captures[1];
+	if ( m.captures[2].length > 0 )
+		colMode.dataID = m.captures[2].to!int;
+	colMode.plotID = m.captures[3];
+	return colMode;
+}
+
+unittest {
+	auto col = parseColumn( "lx1a" );
+	assert( col.mode == "lx" );
+	assert( col.dataID == 1 );
+	assert( col.plotID == "a" );
+	col = parseColumn( "ly1a" );
+	assert( col.mode == "ly" );
+	col = parseColumn( "xb" );
+	assert( col.mode == "x" );
+	assert( col.dataID == -1 );
+	assert( col.plotID == "b" );
+
+	col = parseColumn( "y3" );
+	assert( col.mode == "y" );
+	assert( col.dataID == 3 );
+	assert( col.plotID == "" );
+
+	col = parseColumn( "hx" );
+	assert( col.mode == "hx" );
+	col = parseColumn( "hy" );
+	assert( col.mode == "hy" );
+	col = parseColumn( "h" );
+	assert( col.mode == "h" );
 }
 
 Point[] toPoints( double[] coords ) {
@@ -157,8 +200,9 @@ ParsedRow applyRowMode( double[] floats, string[] rowMode ) {
 	size_t[] yIDs;
 	size_t[] lxIDs;
 	size_t[] lyIDs;
-	foreach( i; 0..rowMode.length ) {
-		switch( rowMode[i] ) {
+	auto modes = rowMode.map!( (s) => s.parseColumn );
+	foreach( i; 0..modes.length ) {
+		switch( modes[i].mode ) {
 			case "lx":
 				lxIDs ~= i;
 				break;
