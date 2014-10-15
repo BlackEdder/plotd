@@ -62,6 +62,7 @@ Data format:
   Using -d it is possible to specify what each column in your data file represents. Supported formats are:
 
   x,y		The x and y coordinate for points
+  lx,ly	Line data
   h			Histogram data
 
 ";
@@ -72,9 +73,10 @@ Data format:
 	--adaptive-cache CACHESIZE (does it stop being adaptive after this or does it stop caching? Maybe combine with not adaptive or scrolling)
 	--bounds BOUNDS (minx,maxx,miny,maxy) sets default MODE to not
 	--image	IMAGETYPE (pdf,png)
+	--xlabel XLABEL
+	--ylabel YLABEL
 
 Future Data formats:
-  lx,ly	Line data
   hx,hy	2D Histogram data (Not supported yet)
 
 	Plotcli by default does a good job of figuring out which x and y data belong together, but you can optionally provide an numeric id to make this completely clear. I.e. x1,y1.
