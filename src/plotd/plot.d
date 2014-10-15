@@ -103,8 +103,6 @@ void drawFunction(CONTEXT)( double delegate(double) func,
 
 /// Draw point on the plot
 void draw( Point point, PlotState plot ) {
-	import std.stdio;
-	writeln( point );
 	plot.plotContext = drawPoint( point, plot.plotContext );
 }
 
