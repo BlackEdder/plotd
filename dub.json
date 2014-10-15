@@ -1,6 +1,6 @@
 {
 	"name": "plotd",
-	"description": "A plotting library for D.",
+	"description": "Plot streams of data from the command line.",
 	"copyright": "Copyright © 2014, Edwin van Leeuwen",
 	"authors": ["Edwin van Leeuwen"],
 	"license": "GPL-3.0",

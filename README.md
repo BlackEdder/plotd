@@ -1,6 +1,44 @@
-# Plotd: A plotting library for the D programming Language
+# Plotcli: Plot streams of data from the command line
 
-Currently in the initial stages. Library implements some low level functions to assist in drawing plots to a cairo surfaces, such as axes, points and lines. Design is still in flux. See examples and drawing.d for more details.
+Plotcli is a command line application that can create plots from text/csv files. It will ignore any lines it does not understand, so it is safe to use with files that contain non csv data as well. Typically I use it during simulations, where I simulate data, which I pipe to a file and then I plot it using plotcli
+
+```
+plotcli < path/to/file
+```
+
+While new data is coming in it will plot them and save the plot to a file (by default plotcli.png). I then normally use the eye of gnome (eog) to open the plot. The nice thing about eog is that it will keep reloading the updated plot, every time it is being written to.
+
+Plotcli is meant to be adaptive and will automatically adapt the plot boundaries to encompass all the data.
+
+## Installation
+
+```
+git clone http://github.com/BlackEdder/plotd.git
+cd plotd
+dub build -c plotcli -b release
+```
+
+This will create a binary in bin/plotcli which you can copy anywhere in your path.
+
+## Usage:
+
+```
+$ plotcli --help
+Usage: plotcli [-o OUTPUT] [-d FORMAT] [-f]
+
+Plotcli is a plotting program that will plot data from provided data streams (files). It will ignore any lines it doesn't understand, making it possible to feed it "dirty" streams/files. All options can also be provided within the stream by using the prefix #plotcli (e.g. #plotcli -d x,y).
+
+  -d FORMAT		String describing the content of each row. Different row formats supported: x, y and h, with h indication histogram data. For example: x,y,y or h,x,y. When there are more ys provided than xs (or vice versa) the last x will be matched to all remaining ys.
+  -o OUTPUT		Outputfile.
+  -f 					Follow: keep listening for new lines.
+
+Data format:
+  Using -d it is possible to specify what each column in your data file represents. Supported formats are:
+
+  x,y		The x and y coordinate for points
+  lx,ly	Line data
+  h			Histogram data
+```
 
 ## License
 
