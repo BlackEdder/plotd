@@ -50,13 +50,12 @@ unittest {
 	assert( aa1.merge( aa2 ) == ["x" : 1.0, "y": 3.0, "z":4.0] );
 }
 
-auto helpText = "Usage: plotcli [-o OUTPUT] [-d FORMAT] [-f]
+auto helpText = "Usage: plotcli [-o OUTPUT] [-d FORMAT]
 
 Plotcli is a plotting program that will plot data from provided data streams (files). It will ignore any lines it doesn't understand, making it possible to feed it \"dirty\" streams/files. All options can also be provided within the stream by using the prefix #plotcli (e.g. #plotcli -d x,y).
 
   -d FORMAT		String describing the content of each row. Different row formats supported: x, y and h, with h indication histogram data. For example: x,y,y or h,x,y. When there are more ys provided than xs (or vice versa) the last x will be matched to all remaining ys.
   -o OUTPUT		Outputfile.
-  -f 					Follow: keep listening for new lines.
 
 Data format:
   Using -d it is possible to specify what each column in your data file represents. Supported formats are:
@@ -76,6 +75,7 @@ Data format:
 	--xlabel XLABEL
 	--ylabel YLABEL
 	--debug 		Output lines that are not successfully parsed
+  -f 					Follow: keep listening for new lines.
 
 Future Data formats:
   hx,hy	2D Histogram data (Not supported yet)
