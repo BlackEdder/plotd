@@ -24,15 +24,22 @@
 module cli.parsing;
 
 import std.algorithm;
-import std.conv;
+import std.conv : ConvException, to;
+import std.math : isNaN;
 import std.range;
 import std.string;
 
 import std.regex : ctRegex, match, split;
 
+import docopt;
+
+import plotd.binning;
 import plotd.drawing;
 import plotd.plot;
 import plotd.primitives;
+
+import cli.figure : Figure;
+import cli.options : helpText, Settings, updateSettings;
 
 version( unittest ) {
 	import std.stdio;
@@ -303,4 +310,97 @@ unittest {
 	assert( equal( updateRowMode( [1.0,2.0,3.0], [] ), ["x","y","y"] ) );
 	assert( equal( updateRowMode( [1.0,2.0], ["y","y"] ), ["y","y"] ) );
 	assert( equal( updateRowMode( [1.0], ["y","y"] ), ["h"] ) );
+}
+
+// High level functionality for handlingMessages
+
+Figure[string] figures;
+
+void handleMessage( string msg, ref Settings settings ) {
+	if ( "" !in figures )
+		figures[""] = new Figure;
+
+	auto m = msg.match( r"^#plotcli (.*)" );
+	if (m) {
+		settings = settings.updateSettings( 
+				docopt.docopt(helpText, 
+					std.string.split( m.captures[1], " " ), true, "plotcli") );
+		//writeln( settings );
+	}
+
+	auto floats = msg.strip
+		.toRange;
+
+	settings.rowMode = updateRowMode( floats, settings.rowMode );
+	auto parsedRow = applyRowMode( floats, settings.rowMode );
+
+	bool needAdjusting = false;
+	if ( !figures[""].validBound ) {
+		needAdjusting = true;
+		figures[""].pointCache ~= parsedRow.points ~ parsedRow.linePoints;
+		figures[""].validBound = validBounds( figures[""].pointCache );
+		figures[""].plot.plotBounds = minimalBounds( figures[""].pointCache );
+		if (figures[""].validBound)
+			figures[""].pointCache = [];
+	} else {
+		foreach( point; parsedRow.points ~ parsedRow.linePoints ) {
+			if (!figures[""].plot.plotBounds.withinBounds( point )) {
+				figures[""].plot.plotBounds = adjustedBounds( figures[""].plot.plotBounds, point );
+				needAdjusting = true;
+			}
+		}
+	}
+
+	if (needAdjusting) {
+		figures[""].plot = createPlotState( figures[""].plot.plotBounds, 
+				figures[""].plot.marginBounds );
+		foreach( event; figures[""].eventCache )
+			event( figures[""].plot );
+	}
+
+	auto events = parsedRow.points.toEvents;
+
+	if ( figures[""].previousLines.length == parsedRow.linePoints.length )
+		events ~= parsedRow.linePoints.toLineEvents( figures[""].previousLines );
+
+	if (parsedRow.linePoints.length > 0)
+		figures[""].previousLines = parsedRow.linePoints;
+
+
+	foreach( event; events )
+		event( figures[""].plot );
+
+	figures[""].eventCache ~= events;
+
+	// Histograms
+	foreach( data; parsedRow.histData ) {
+		if ( data < figures[""].histRange[0] || isNaN(figures[""].histRange[0]) ) {
+			figures[""].histRange[0] = data;
+		} 
+		if ( data > figures[""].histRange[1] || isNaN(figures[""].histRange[1]) ) {
+			figures[""].histRange[1] = data;
+		}
+		figures[""].histData ~= data;
+	}
+
+	if (figures[""].histData.length > 0) {
+		// Create bin
+		Bins!size_t bins;
+		bins.min = figures[""].histRange[0];
+		bins.width = 0.5;
+		bins.length = 11; // Really need to fix this in binning.d
+		if( figures[""].histRange[0] != figures[""].histRange[1] )
+			bins.width = (figures[""].histRange[1]-figures[""].histRange[0])/10.0;
+		// add all data to bin
+		foreach( data; figures[""].histData )
+			bins = bins.addDataToBin( [bins.binId( data )] );
+		// Adjust plotBounds 
+		figures[""].plot = createPlotState( Bounds( bins.min, bins.max, 0, 
+					figures[""].histData.length ),
+				figures[""].plot.marginBounds );
+		// Plot Bins
+		figures[""].plot.plotContext = drawBins( figures[""].plot.plotContext, bins );
+	}
+
+	figures[""].plot.save( settings.outputFile );
 }
