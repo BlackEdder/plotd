@@ -424,6 +424,8 @@ Axis adjustTickWidth( Axis axis, size_t approx_no_ticks ) {
     axis.min_tick = ceil(axis.min/pow(10.0, -scale))*pow(10.0, scale);
     while (axis.min_tick - axis.tick_width > axis.min)
         axis.min_tick -= axis.tick_width;
+    while (axis.min_tick < axis.min)
+        axis.min_tick += axis.tick_width;
     return axis;
 }
 
