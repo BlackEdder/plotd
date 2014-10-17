@@ -44,6 +44,10 @@ Data format:
 
 ```
 
+## Examples
+
+See the [wiki for examples](https://github.com/BlackEdder/plotd/wiki).
+
 ## License
 
 The library is distributed under the GPL-v3 license. See the file COPYING for more details.
