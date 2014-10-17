@@ -64,6 +64,10 @@ Data format:
   lx,ly	Line data
   h			Histogram data
 
+  Plotcli by default does a good job of figuring out which x and y data belong together, but you can optionally provide an numeric id to make this completely clear. I.e. x1,y1.
+
+  Finally if you want to plot the data to different figures you can add a letter/name at the end: xa,ya or x1a,y1a. This plot id will be appended to the OUTPUT file name. 
+
 ";
 
 /* Future options
@@ -80,9 +84,7 @@ Data format:
 Future Data formats:
   hx,hy	2D Histogram data (Not supported yet)
 
-	Plotcli by default does a good job of figuring out which x and y data belong together, but you can optionally provide an numeric id to make this completely clear. I.e. x1,y1.
-
-  Finally if you want to plot the data to different figures you can add a letter/name at the end: xa,ya or x1a,y1a. This plot id will be appended to the OUTPUT file name. You can also start a new plot by passing a new output file name in the stream (e.g. #plotcli -o newplot).
+You can also start a new plot by passing a new output file name in the stream (e.g. #plotcli -o newplot).
 
 	*/
 
