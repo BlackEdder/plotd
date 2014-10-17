@@ -39,6 +39,8 @@ class Figure {
 	double[] histData;
 	double[2] histRange;
 
+	size_t columnCount = 0;
+
 
 	this() {
 		plot = createPlotState( Bounds( 0, 1, 0, 1 ),

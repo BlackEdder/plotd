@@ -55,7 +55,7 @@ auto helpText = "Usage: plotcli [-o OUTPUT] [-d FORMAT]
 Plotcli is a plotting program that will plot data from provided data streams (files). It will ignore any lines it doesn't understand, making it possible to feed it \"dirty\" streams/files. All options can also be provided within the stream by using the prefix #plotcli (e.g. #plotcli -d x,y).
 
   -d FORMAT		String describing the content of each row. Different row formats supported: x, y and h, with h indication histogram data. For example: x,y,y or h,x,y. When there are more ys provided than xs (or vice versa) the last x will be matched to all remaining ys.
-  -o OUTPUT		Outputfile.
+  -o OUTPUT		Outputfile (without extension).
 
 Data format:
   Using -d it is possible to specify what each column in your data file represents. Supported formats are:
@@ -82,19 +82,19 @@ Future Data formats:
 
 	Plotcli by default does a good job of figuring out which x and y data belong together, but you can optionally provide an numeric id to make this completely clear. I.e. x1,y1.
 
-  Finally if you want to plot the data to different figures you can add a letter/name at the end: xa,ya or x1a,y1a. This plot id will be appended to the OUTPUT file name. You can also start a new plot by passing a new output file name in the stream (e.g. #plotcli -o newplot.png).
+  Finally if you want to plot the data to different figures you can add a letter/name at the end: xa,ya or x1a,y1a. This plot id will be appended to the OUTPUT file name. You can also start a new plot by passing a new output file name in the stream (e.g. #plotcli -o newplot).
 
 	*/
 
 struct Settings {
 	string[] rowMode = [];
-	string outputFile = "plotcli.png";
+	string outputFile = "plotcli";
 }
 
 unittest {
 	Settings settings;
 	assert( settings.rowMode.length == 0 );
-	assert( settings.outputFile == "plotcli.png" );
+	assert( settings.outputFile == "plotcli" );
 }
 
 Settings updateSettings( Settings settings, ArgValue[string] options ) {
@@ -117,16 +117,16 @@ unittest {
 	settings = settings.updateSettings( 
 			docopt(helpText, [], true, "plotcli") );
 	assert( settings.rowMode.length == 0 );
-	assert( settings.outputFile == "plotcli.png" );
+	assert( settings.outputFile == "plotcli" );
 
 	settings = settings.updateSettings( 
 			docopt(helpText, ["-d", "x,y"], true, "plotcli") );
 	assert( equal( settings.rowMode, ["x","y"] ) );
-	assert( settings.outputFile == "plotcli.png" );
+	assert( settings.outputFile == "plotcli" );
 
 	settings = settings.updateSettings( 
-			docopt(helpText, ["-o", "name.png"], true, "plotcli") );
-	args = docopt(helpText, ["-o", "name.png"], true, "plotcli");
+			docopt(helpText, ["-o", "name"], true, "plotcli") );
+	args = docopt(helpText, ["-o", "name"], true, "plotcli");
 	assert( equal( settings.rowMode, ["x","y"] ) );
-	assert( settings.outputFile == "name.png" );
+	assert( settings.outputFile == "name" );
 }
