@@ -54,6 +54,7 @@ auto helpText = "Usage: plotcli [-o OUTPUT] [-d FORMAT]
 
 Plotcli is a plotting program that will plot data from provided data streams (files). It will ignore any lines it doesn't understand, making it possible to feed it \"dirty\" streams/files. All options can also be provided within the stream by using the prefix #plotcli (e.g. #plotcli -d x,y).
 
+Options:
   -d FORMAT		String describing the content of each row. Different row formats supported: x, y and h, with h indication histogram data. For example: x,y,y or h,x,y. When there are more ys provided than xs (or vice versa) the last x will be matched to all remaining ys.
   -o OUTPUT		Outputfile (without extension).
 
@@ -100,22 +101,19 @@ unittest {
 }
 
 Settings updateSettings( Settings settings, ArgValue[string] options ) {
-	if ( options["-d"].isTrue ) 
+	if ( !options["-d"].isNull ) 
 	{
-		if ( options["-o"].isFalse ) // Workaround docopt github issue #1
-			settings.rowMode = options["OUTPUT"].to!string.split(',');
-		else
-			settings.rowMode = options["FORMAT"].to!string.split(',');
+		settings.rowMode = options["-d"].to!string.split(',');
 	}
-	if ( options["-o"].isTrue )
-		settings.outputFile = options["OUTPUT"].to!string;
+	if ( !options["-o"].isNull )
+		settings.outputFile = options["-o"].to!string;
 	return settings;
 }
 
 unittest {
 	Settings settings;
 	auto args = docopt(helpText, [], true, "plotcli");
-	assert( args["-d"].isFalse );
+	assert( args["-d"].isNull );
 	settings = settings.updateSettings( 
 			docopt(helpText, [], true, "plotcli") );
 	assert( settings.rowMode.length == 0 );
