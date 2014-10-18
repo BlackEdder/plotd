@@ -20,7 +20,7 @@
 
 	 -------------------------------------------------------------------
 	 */
-import std.stdio : readln;
+import std.stdio : readln, writeln;
 
 import core.thread : Thread;
 import core.time : dur;
@@ -55,11 +55,11 @@ void main( string[] args ) {
 
 	auto msg = readln();
 
-	while( true  ) {
+	while( settings.follow || msg.length > 0 ) {
 		handleMessage( msg, settings );
 
 		msg = readln();
-		while ( msg.length == 0 ) // Got to end of file
+		while ( settings.follow && msg.length == 0 ) // Got to end of file
 		{
 			Thread.sleep( dur!("msecs")( 100 ) );
 			msg = readln();

@@ -50,11 +50,12 @@ unittest {
 	assert( aa1.merge( aa2 ) == ["x" : 1.0, "y": 3.0, "z":4.0] );
 }
 
-auto helpText = "Usage: plotcli [-o OUTPUT] [-d FORMAT]
+auto helpText = "Usage: plotcli [-f] [-o OUTPUT] [-d FORMAT]
 
 Plotcli is a plotting program that will plot data from provided data streams (files). It will ignore any lines it doesn't understand, making it possible to feed it \"dirty\" streams/files. All options can also be provided within the stream by using the prefix #plotcli (e.g. #plotcli -d x,y).
 
 Options:
+  -f          Follow the stream, i.e. keep listening for new lines.
   -d FORMAT		String describing the content of each row. Different row formats supported: x, y and h, with h indication histogram data. For example: x,y,y or h,x,y. When there are more ys provided than xs (or vice versa) the last x will be matched to all remaining ys.
   -o OUTPUT		Outputfile (without extension).
 
@@ -80,7 +81,6 @@ Data format:
 	--xlabel XLABEL
 	--ylabel YLABEL
 	--debug 		Output lines that are not successfully parsed
-  -f 					Follow: keep listening for new lines.
 
 Future Data formats:
   hx,hy	2D Histogram data (Not supported yet)
@@ -92,6 +92,7 @@ You can also start a new plot by passing a new output file name in the stream (e
 struct Settings {
 	string[] rowMode = [];
 	string outputFile = "plotcli";
+	bool follow = false;
 }
 
 unittest {
@@ -107,6 +108,8 @@ Settings updateSettings( Settings settings, ArgValue[string] options ) {
 	}
 	if ( !options["-o"].isNull )
 		settings.outputFile = options["-o"].to!string;
+	if ( options["-f"].isTrue )
+		settings.follow = true;
 	return settings;
 }
 
@@ -126,7 +129,14 @@ unittest {
 
 	settings = settings.updateSettings( 
 			docopt(helpText, ["-o", "name"], true, "plotcli") );
-	args = docopt(helpText, ["-o", "name"], true, "plotcli");
 	assert( equal( settings.rowMode, ["x","y"] ) );
 	assert( settings.outputFile == "name" );
+	assert( settings.follow == false );
+
+	settings = settings.updateSettings( 
+			docopt(helpText, ["-f"], true, "plotcli") );
+	assert( settings.follow == true );
+	settings = settings.updateSettings( 
+			docopt(helpText, ["-o", "name"], true, "plotcli") );
+	assert( settings.follow == true );
 }
