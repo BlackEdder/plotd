@@ -49,7 +49,7 @@ version( unittest ) {
 
 alias void delegate( PlotState plot ) Event;
 
-private auto csvRegex = ctRegex!(`,|\t`);
+private auto csvRegex = ctRegex!(`,\s*|\s`);
 
 double[] toRange( string line ) {
 	try {
@@ -66,6 +66,7 @@ unittest {
 	assert( "0.5, 2".toRange == [0.5,2] );
 	assert( "bla, 2".toRange == [] );
 	assert( "1\t2".toRange == [1,2] );
+	assert( "1 2".toRange == [1,2] );
 }
 
 /// Settings of a specific column
