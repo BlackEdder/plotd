@@ -418,14 +418,16 @@ Axis adjustTickWidth( Axis axis, size_t approx_no_ticks ) {
             diff = abs( approx_width - accept );
         }
     }
+
     axis.tick_width = best*pow(10.0, scale);
 
     // Find good min_tick
-    axis.min_tick = ceil(axis.min/pow(10.0, -scale))*pow(10.0, scale);
+    axis.min_tick = ceil(axis.min*pow(10.0, -scale))*pow(10.0, scale);
+
+		//debug writeln( "Here 120 ", axis.min_tick, " ", axis.min, " ", 
+		//		axis.max,	" ", axis.tick_width, " ", scale );
     while (axis.min_tick - axis.tick_width > axis.min)
         axis.min_tick -= axis.tick_width;
-    while (axis.min_tick < axis.min)
-        axis.min_tick += axis.tick_width;
     return axis;
 }
 
@@ -444,7 +446,12 @@ unittest {
     assert( adjustTickWidth( new Axis( 1, 40 ), 8 ).min_tick == 5 );
 
     assert( adjustTickWidth( new Axis( 3, 4 ), 5 ).min_tick == 3 );
-    assert( adjustTickWidth( new Axis( 3, 4 ), 5 ).tick_width == 0.2 );    
+    assert( adjustTickWidth( new Axis( 3, 4 ), 5 ).tick_width == 0.2 );
+
+		assert( adjustTickWidth( 
+					new Axis( 1.79877e+07, 1.86788e+07 ), 5).min_tick == 1.8e+07 );
+		assert( adjustTickWidth( 
+					new Axis( 1.79877e+07, 1.86788e+07 ), 5).tick_width == 100000 );
 }
 
 /// Calculate tick length

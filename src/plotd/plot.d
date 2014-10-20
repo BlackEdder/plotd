@@ -32,6 +32,10 @@ import std.range;
 import plotd.drawing;
 import plotd.primitives;
 
+version (assert) {
+	import std.stdio : writeln;
+}
+
 /// Draw function on our plot
 CONTEXT drawFunction(CONTEXT)( double delegate(double) func,
 		Bounds bounds, CONTEXT context ) {

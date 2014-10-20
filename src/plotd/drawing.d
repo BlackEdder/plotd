@@ -32,7 +32,9 @@ import plotd.binning;
 version( unittest ) {
 	import std.stdio;
 }
-
+version( assert ) {
+	import std.stdio;
+}
 // Design: One surface per plot (this makes it easier for PDFSurface support
 // Get axes context
 // Get plot context ( probably by first getting a subsurface from the main surface )
@@ -128,6 +130,7 @@ unittest {
   Draw axes onto the given context
   */
 CONTEXT drawAxes(CONTEXT)( const Bounds bounds, CONTEXT context ) {
+
     auto xaxis = new Axis( bounds.min_x, bounds.max_x );
     xaxis = adjustTickWidth( xaxis, 5 );
 
