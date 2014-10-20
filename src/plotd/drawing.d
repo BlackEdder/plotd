@@ -147,9 +147,12 @@ CONTEXT drawAxes(CONTEXT)( const Bounds bounds, CONTEXT context ) {
         context = drawLine( Point( tick_x, yaxis.min ),
             Point( tick_x, yaxis.min + tick_size ), context );
 
+				context.save;
+				context.identityMatrix;
 				auto extents = context.textExtents( tick_x.to!string );
 				auto textSize = cairo.Point!double( 0.5*extents.width, 
 						-extents.height );
+				context.restore;
 				textSize = context.deviceToUserDistance( textSize );
         context = drawText( tick_x.to!string, 
                 Point( tick_x - textSize.x, yaxis.min - 1.5*textSize.y ), context );
@@ -165,9 +168,12 @@ CONTEXT drawAxes(CONTEXT)( const Bounds bounds, CONTEXT context ) {
     while( tick_y < yaxis.max ) {
         context = drawLine( Point( xaxis.min, tick_y ),
             Point( xaxis.min + tick_size, tick_y ), context );
+				context.save;
+				context.identityMatrix;
 				auto extents = context.textExtents( tick_y.to!string );
 				auto textSize = cairo.Point!double( extents.height, 
 						-0.5*extents.width );
+				context.restore;
 				textSize = context.deviceToUserDistance( textSize );
         context = drawRotatedText( tick_y.to!string, 
 							Point( xaxis.min - 0.5*textSize.x, tick_y-textSize.y ), 
