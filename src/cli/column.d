@@ -200,11 +200,17 @@ unittest {
 
 ///
 bool validFormat( Formats formats, size_t noColumns ) {
+	if ( formats.empty )
+		return false;
 	if ( formats._formats.length == noColumns ||
 			formats._formats.back.mode == ".." 	) {
 		return true;
 	}
 	return false;
+}
+
+unittest {
+	assert( !validFormat( Formats, 2 ) );
 }
 
 /// Format and data of a specific column
