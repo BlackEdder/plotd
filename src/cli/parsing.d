@@ -403,6 +403,11 @@ void handleMessage( string msg, ref Settings settings ) {
 
 		}
 		figures[plotID].columnCount += 1;
-		figures[plotID].plot.save( settings.outputFile ~ plotID ~ ".png" );
+	}
+}
+
+void saveFigures( string baseName ) {
+	foreach ( plotID, figure; figures ) {
+		figure.plot.save( baseName ~ plotID ~ ".png" );
 	}
 }

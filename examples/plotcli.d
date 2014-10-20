@@ -21,30 +21,22 @@
 	 -------------------------------------------------------------------
 	 */
 import std.stdio : readln, writeln;
+import std.datetime : Clock, SysTime;
 
 import core.thread : Thread;
 import core.time : dur;
 import docopt;
 
 
-import cli.parsing : handleMessage;
+import cli.parsing : handleMessage, saveFigures;
 import cli.options : helpText, Settings, updateSettings;
 
 /**
 	Read from standard input and plot
 
 	Mainly used to pipe data into
-
-	myprogram > plotcli
 	*/
 
-/**
-	Notes on next steps:
-	Make an associative array with plots by plotID. (plots hold all events by dataID and all hist data by dataID and the plotstate of course)
-	For each row do groupBy plotID, then dataID and finally create
-	ParsedRow from those.
-	Apply ParsedRow to the given plotID (passing an array of colors)
-	*/
 void main( string[] args ) {
 	// Options
 	auto doc = helpText;
@@ -55,6 +47,8 @@ void main( string[] args ) {
 
 	auto msg = readln();
 
+	SysTime lastTime;
+
 	while( settings.follow || msg.length > 0 ) {
 		handleMessage( msg, settings );
 
@@ -64,5 +58,12 @@ void main( string[] args ) {
 			Thread.sleep( dur!("msecs")( 100 ) );
 			msg = readln();
 		}
+
+		auto curr = Clock.currTime;
+		if ( curr - lastTime > dur!("msecs")( 250 ) ) {
+			saveFigures( settings.outputFile );
+			lastTime = curr;
+		}
 	}
+	saveFigures( settings.outputFile );
 }
