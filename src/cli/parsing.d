@@ -168,6 +168,8 @@ ParsedRow applyColumnData( ColumnData[] cMs, size_t columnID ) {
 	ParsedRow parsed;
 	foreach ( type, groupedCMs;
 			cMs.groupBy!( (cm) {
+				if ( cm.mode.to!string == "" )
+					return "none";
 				if ( cm.mode.front.to!string == "l" )
 					return "line";
 				if ( cm.mode.front.to!string == "h" )
@@ -176,6 +178,8 @@ ParsedRow applyColumnData( ColumnData[] cMs, size_t columnID ) {
 			}
 		) ) 
 	{
+		if ( type == "none" )
+			break;
 		ColumnData[] xyGroup;
 		size_t xs = 0;
 		size_t ys = 0;
