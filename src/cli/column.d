@@ -210,7 +210,8 @@ bool validFormat( Formats formats, size_t noColumns ) {
 }
 
 unittest {
-	assert( !validFormat( Formats, 2 ) );
+	Formats fmts;
+	assert( !validFormat( fmts, 2 ) );
 }
 
 /// Format and data of a specific column
