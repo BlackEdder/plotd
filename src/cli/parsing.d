@@ -386,15 +386,14 @@ void handleMessage( string msg, ref Settings settings ) {
 				Bins!size_t bins;
 				bins.min = figures[plotID].histRange[0];
 				bins.width = 0.5;
-				bins.length = max( 11, figures[plotID].histData.length/100 ); 
+				bins.length = max( 11, min( 31, figures[plotID].histData.length/100 ) ); 
 				if( figures[plotID].histRange[0] != figures[plotID].histRange[1] )
-					bins.width = (figures[plotID].histRange[1]-figures[plotID].histRange[0])/10.0;
+					bins.width = (figures[plotID].histRange[1]-figures[plotID].histRange[0])/bins.length;
 				// add all data to bin
 				foreach( data; figures[plotID].histData )
 					bins = bins.addDataToBin( [bins.binId( data )] );
 
-				auto histBounds = Bounds( bins.min, bins.max, 0,
-							figures[plotID].histData.length );
+				auto histBounds = bins.optimalBounds( 0.99 );
 
 				debug writeln( "Adjusting histogram to bounds: ", histBounds );
 				// Adjust plotBounds 
