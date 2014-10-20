@@ -27,7 +27,7 @@ import std.algorithm;
 import std.conv : ConvException, to;
 import std.math : isNaN;
 import std.range;
-import std.stdio : writeln;
+import std.stdio : write, writeln;
 import std.string;
 
 import std.regex : ctRegex, match, split;
@@ -300,6 +300,8 @@ void handleMessage( string msg, ref Settings settings ) {
 	if ( "" !in figures )
 		figures[""] = new Figure;
 
+	debug write( "Received message: ", msg );
+
 	auto m = msg.match( r"^#plotcli (.*)" );
 	if (m) {
 		settings = settings.updateSettings( 
@@ -311,6 +313,8 @@ void handleMessage( string msg, ref Settings settings ) {
 	auto floats = msg.strip
 		.toRange;
 
+	debug writeln( "Converted to doubles: ", floats );
+
 	settings.formats = updateFormat( floats, settings.formats );
 
 	auto columnData = settings.formats.zip(floats).map!( 
@@ -321,6 +325,7 @@ void handleMessage( string msg, ref Settings settings ) {
 		if ( plotID !in figures )
 			figures[plotID] = new Figure;
 		foreach( dataID, cMs; cMs1.groupBy!( (cm) => cm.dataID ) ) {
+			debug writeln( "Plotting data: ", cMs );
 			auto parsedRow = applyColumnData( cMs, figures[plotID].columnCount );
 			bool needAdjusting = false;
 			if ( !figures[plotID].validBound ) {
@@ -340,6 +345,7 @@ void handleMessage( string msg, ref Settings settings ) {
 			}
 
 			if (needAdjusting) {
+
 				figures[plotID].plot = createPlotState( figures[plotID].plot.plotBounds, 
 						figures[plotID].plot.marginBounds );
 				foreach( event; figures[plotID].eventCache )
@@ -376,18 +382,23 @@ void handleMessage( string msg, ref Settings settings ) {
 				Bins!size_t bins;
 				bins.min = figures[plotID].histRange[0];
 				bins.width = 0.5;
-				bins.length = 11; // Really need to fix this in binning.d
+				bins.length = max( 11, figures[plotID].histData.length/100 ); 
 				if( figures[plotID].histRange[0] != figures[plotID].histRange[1] )
 					bins.width = (figures[plotID].histRange[1]-figures[plotID].histRange[0])/10.0;
 				// add all data to bin
 				foreach( data; figures[plotID].histData )
 					bins = bins.addDataToBin( [bins.binId( data )] );
+
+				auto histBounds = Bounds( bins.min, bins.max, 0,
+							figures[plotID].histData.length );
+
+				debug writeln( "Adjusting histogram to bounds: ", histBounds );
 				// Adjust plotBounds 
-				figures[plotID].plot = createPlotState( Bounds( bins.min, bins.max, 0, 
-							figures[plotID].histData.length ),
+				figures[plotID].plot = createPlotState( histBounds,
 						figures[plotID].plot.marginBounds );
 				// Plot Bins
 				figures[plotID].plot.plotContext = drawBins( figures[plotID].plot.plotContext, bins );
+				debug writeln( "Drawn bins to histogram: ", bins );
 			}
 
 		}
