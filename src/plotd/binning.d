@@ -24,10 +24,14 @@
 module plotd.binning;
 
 import std.array;
+import std.conv : to;
 import std.range;
+
+import plotd.primitives : Bounds;
 
 version( unittest ) {
 	import std.algorithm;
+	import std.stdio;
 }
 
 /**
@@ -191,6 +195,69 @@ unittest {
     mbins.addDataToBin( [1,3] );
     assert( mbins.mybins[1].mybins[3] == 6 );
 }
+
+/**
+	Calculate bounds that will at least cover the given percentage of data
+	*/
+Bounds optimalBounds( T )( Bins!T bins, double coverage = 0.95 ) {
+	Bounds bounds;
+	bounds.min_y = 0;
+	size_t maxCount = 0;
+	size_t maxID = 0;
+	double[2] sides = [0,0];
+	double sum = 0;
+	foreach( i; 0..bins.length ) {
+		auto count = bins.mybins[i];
+		sum += count;
+		if (count > maxCount) {
+			maxCount = count;
+			maxID = i;
+			sides[0] += sides[1];
+			sides[1] = maxCount;
+		} else if (sides[1] > 0)
+			sides [1] += count;
+		else
+			sides[0] += count;
+	}
+
+	size_t[2] sideIDs = [maxID,maxID+1];
+	sides[1] -= maxCount;
+	double covered = (maxCount.to!double)/sum;
+	while (covered < coverage) {
+		if (sides[0] > sides[1]) {
+			--sideIDs[0];
+			sides[0] -= bins.mybins[sideIDs[0]];
+			covered += bins.mybins[sideIDs[0]].to!double/sum;
+		} else {
+			sides[1] -= bins.mybins[sideIDs[1]];
+			covered += bins.mybins[sideIDs[1]].to!double/sum;
+			++sideIDs[1];
+		}
+	}
+	bounds.min_x = bins.min + sideIDs[0]*bins.width;
+	bounds.max_x = bins.min + sideIDs[1]*bins.width;
+	bounds.max_y = 1.5*maxCount;
+	return bounds;
+}
+
+unittest {
+	Bins!size_t bins;
+	bins.min = -1;
+	bins.width = 0.5;
+	
+	bins.mybins = [1,3,4,1];
+	auto bounds = bins.optimalBounds;
+	assert( bounds == Bounds( -1, 1, 0, 6 ) );
+
+	bins.mybins = [0,0,4,0];
+	bounds = bins.optimalBounds;
+	assert( bounds == Bounds( 0, 0.5, 0, 6 ) );
+
+	bins.mybins = [2,0,4,0];
+	bounds = bins.optimalBounds;
+	assert( bounds == Bounds( -1, 0.5, 0, 6 ) );
+}
+
 /**
   Resize the bins
 
