@@ -34,6 +34,8 @@ version( unittest ) {
 	import docopt : docopt;
 }
 
+import cli.column;
+
 /// Merge given associative arrays
 V[K] merge( K, V )( V[K] aaBase, in V[K] aa ) {
 	foreach ( k, v; aa )
@@ -90,21 +92,21 @@ You can also start a new plot by passing a new output file name in the stream (e
 	*/
 
 struct Settings {
-	string[] rowMode = [];
+	Formats formats;
 	string outputFile = "plotcli";
 	bool follow = false;
 }
 
 unittest {
 	Settings settings;
-	assert( settings.rowMode.length == 0 );
+	assert( settings.formats.empty );
 	assert( settings.outputFile == "plotcli" );
 }
 
 Settings updateSettings( Settings settings, ArgValue[string] options ) {
 	if ( !options["-d"].isNull ) 
 	{
-		settings.rowMode = options["-d"].to!string.split(',');
+		settings.formats = parseDataFormat( options["-d"].to!string );
 	}
 	if ( !options["-o"].isNull )
 		settings.outputFile = options["-o"].to!string;
@@ -119,17 +121,16 @@ unittest {
 	assert( args["-d"].isNull );
 	settings = settings.updateSettings( 
 			docopt(helpText, [], true, "plotcli") );
-	assert( settings.rowMode.length == 0 );
+	assert( settings.formats.empty );
 	assert( settings.outputFile == "plotcli" );
 
 	settings = settings.updateSettings( 
 			docopt(helpText, ["-d", "x,y"], true, "plotcli") );
-	assert( equal( settings.rowMode, ["x","y"] ) );
+	assert( settings.formats.front.mode == "x" );
 	assert( settings.outputFile == "plotcli" );
 
 	settings = settings.updateSettings( 
 			docopt(helpText, ["-o", "name"], true, "plotcli") );
-	assert( equal( settings.rowMode, ["x","y"] ) );
 	assert( settings.outputFile == "name" );
 	assert( settings.follow == false );
 

@@ -118,6 +118,13 @@ unittest {
 ///
 struct Formats {
 
+	this( size_t noColumns ) {
+		if (noColumns > 1)
+			_formats = parseDataFormat( "x,y,.." )._formats;
+		else
+			_formats = parseDataFormat( "h,.." )._formats;
+	}
+
 	@property Format front() {
 		auto fm = _formats.front;
 		if ( _formats.length == 1 && fm.mode == ".." ) {
@@ -181,10 +188,6 @@ unittest {
 	assert( fmts.front.mode == "x" );
 	fmts.popFront;
 	assert( fmts.front.mode == "y" );
-	writeln( "a".to!char - "b".to!char );
-	string text = "aaaaa";
-	writeln( text = text[0..$-1] ~ ((text.back.to!char + 1).to!char ).to!string );
-	writeln( text );
 	fmts = parseDataFormat( "haa,hab,.." );
 	fmts.popFront;
 	fmts.popFront;
@@ -195,6 +198,15 @@ unittest {
 	assert( fmts.front.plotID == "ae" );
 }
 
+///
+bool validFormat( Formats formats, size_t noColumns ) {
+	if ( formats._formats.length == noColumns ||
+			formats._formats.back.mode == ".." 	) {
+		return true;
+	}
+	return false;
+}
+
 /// Format and data of a specific column
 struct ColumnData {
 	double value;
@@ -203,10 +215,16 @@ struct ColumnData {
 		_format = fm;
 	}
 
+	this( string mode, int dataID, string plotID, double v ) {
+		_format.mode = mode;
+		_format.dataID = dataID;
+		_format.plotID = plotID;
+		value = v;
+	}
+
 	alias _format this;
 
-	private:
-		Format _format;
+	Format _format;
 }
 
 unittest {
@@ -216,4 +234,3 @@ unittest {
 	assert( cm.dataID == 1 );
 	assert( cm.plotID == "a" );
 }
-

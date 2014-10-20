@@ -40,6 +40,7 @@ import plotd.plot;
 import plotd.primitives;
 
 import cli.algorithm : groupBy;
+import cli.column;
 import cli.figure : Figure;
 import cli.options : helpText, Settings, updateSettings;
 
@@ -67,91 +68,6 @@ unittest {
 	assert( "bla, 2".toRange == [] );
 	assert( "1\t2".toRange == [1,2] );
 	assert( "1 2".toRange == [1,2] );
-}
-
-/// Settings of a specific column
-struct ColumnMode {
-	string mode; /// x,y,lx,ly,h
-	int dataID = -1; /// -1 is the default value
-	string plotID; /// plotName/id 
-	double value;
-}
-
-ColumnMode parseColumn( string mode ) {
-	ColumnMode colMode;
-	auto columnRegex = ctRegex!( r"(lx|ly|x|y|hx|hy|hz|h)(\d*)(.*)" );
-	auto m = mode.match( columnRegex );
-	colMode.mode = m.captures[1];
-	if ( m.captures[2].length > 0 )
-		colMode.dataID = m.captures[2].to!int;
-	colMode.plotID = m.captures[3];
-	return colMode;
-}
-
-unittest {
-	auto col = parseColumn( "lx1a" );
-	assert( col.mode == "lx" );
-	assert( col.dataID == 1 );
-	assert( col.plotID == "a" );
-	col = parseColumn( "ly1a" );
-	assert( col.mode == "ly" );
-	col = parseColumn( "xb" );
-	assert( col.mode == "x" );
-	assert( col.dataID == -1 );
-	assert( col.plotID == "b" );
-
-	col = parseColumn( "y3" );
-	assert( col.mode == "y" );
-	assert( col.dataID == 3 );
-	assert( col.plotID == "" );
-
-	col = parseColumn( "hx" );
-	assert( col.mode == "hx" );
-	col = parseColumn( "hy" );
-	assert( col.mode == "hy" );
-	col = parseColumn( "h" );
-	assert( col.mode == "h" );
-}
-/// Return true if ColumnMode represents an x value
-bool xCoord( ColumnMode cm ) {
-	return cm.mode.back.to!string == "x";
-}
-
-unittest {
-	auto cm = ColumnMode();
-	cm.mode = "x";
-	assert( cm.xCoord );
-	cm.mode = "lx";
-	assert( cm.xCoord );
-	cm.mode = "yx";
-	assert( cm.xCoord );
-	cm.mode = "y";
-	assert( !cm.xCoord );
-	cm.mode = "ly";
-	assert( !cm.xCoord );
-	cm.mode = "xy";
-	assert( !cm.xCoord );
-}
-
-/// Return true if ColumnMode represents an y value
-bool yCoord( ColumnMode cm ) {
-	return cm.mode.back.to!string == "y";
-}
-
-unittest {
-	auto cm = ColumnMode();
-	cm.mode = "y";
-	assert( cm.yCoord );
-	cm.mode = "ly";
-	assert( cm.yCoord );
-	cm.mode = "xy";
-	assert( cm.yCoord );
-	cm.mode = "x";
-	assert( !cm.yCoord );
-	cm.mode = "lx";
-	assert( !cm.yCoord );
-	cm.mode = "yx";
-	assert( !cm.yCoord );
 }
 
 Point[] toPoints( double[] coords ) {
@@ -215,7 +131,7 @@ struct ParsedRow {
 }
 
 // Warning assumes array with either one x or one y value.
-private Point[] columnModeToPoints( ColumnMode[] cMs, double defaultCoord )
+private Point[] columnDataToPoints( ColumnData[] cMs, double defaultCoord )
 {
 	Point[] pnts;
 	if (cMs.length == 0)
@@ -248,7 +164,7 @@ private Point[] columnModeToPoints( ColumnMode[] cMs, double defaultCoord )
 
 	This function tries to be relative human like in parsing and the logic is difficult to follow. See the unittests for its behaviour
 	*/
-ParsedRow applyColumnMode( ColumnMode[] cMs, size_t columnID ) {
+ParsedRow applyColumnData( ColumnData[] cMs, size_t columnID ) {
 	ParsedRow parsed;
 	foreach ( type, groupedCMs;
 			cMs.groupBy!( (cm) {
@@ -260,7 +176,7 @@ ParsedRow applyColumnMode( ColumnMode[] cMs, size_t columnID ) {
 			}
 		) ) 
 	{
-		ColumnMode[] xyGroup;
+		ColumnData[] xyGroup;
 		size_t xs = 0;
 		size_t ys = 0;
 		double lastX; // If x is used set lastX to isNaN?
@@ -272,13 +188,13 @@ ParsedRow applyColumnMode( ColumnMode[] cMs, size_t columnID ) {
 					// We never want a group with more than 1 x coord or y coord
 					xs = 0;
 					ys = 0;
-					addRange ~= columnModeToPoints( 
+					addRange ~= columnDataToPoints( 
 							xyGroup[0..$-1], columnID );
 					xyGroup = [xyGroup.back];
 				} else if ( xs >= 1 && ys >= 1 && xyGroup.back.mode != cM.mode ) {
 					xs = 0;
 					ys = 0;
-					addRange ~= columnModeToPoints( xyGroup, columnID );
+					addRange ~= columnDataToPoints( xyGroup, columnID );
 					xyGroup = [cM];
 				} else
 					xyGroup ~= cM;
@@ -297,11 +213,11 @@ ParsedRow applyColumnMode( ColumnMode[] cMs, size_t columnID ) {
 		if (xyGroup.length > 0) {
 			// If we found no x or y coord at all then use columnID
 			if (lastX.isNaN || lastY.isNaN)
-				addRange ~= columnModeToPoints( xyGroup, columnID ); 
+				addRange ~= columnDataToPoints( xyGroup, columnID ); 
 			else if ( xyGroup.front.xCoord )
-				addRange ~= columnModeToPoints( xyGroup, lastY ); 
+				addRange ~= columnDataToPoints( xyGroup, lastY ); 
 			else
-				addRange ~= columnModeToPoints( xyGroup, lastX ); 
+				addRange ~= columnDataToPoints( xyGroup, lastX ); 
 		}
 		if ( type == "line" ) {
 			parsed.linePoints ~= addRange;
@@ -312,89 +228,74 @@ ParsedRow applyColumnMode( ColumnMode[] cMs, size_t columnID ) {
 }
 
 unittest {
-	ColumnMode cm( string mode, double value ) {
-		return ColumnMode( mode, -1, "", value );
+	ColumnData cm( string mode, double value ) {
+		return ColumnData( mode, -1, "", value );
 	}
 	
-	auto pr = applyColumnMode( [cm("x",1), cm("y",2)], 0 );
+	auto pr = applyColumnData( [cm("x",1), cm("y",2)], 0 );
 	assert( pr.points == [Point( 1, 2 )] );
 
-	pr = applyColumnMode( [cm("x",3), cm("y",2), cm("y",4)], 0 );
+	pr = applyColumnData( [cm("x",3), cm("y",2), cm("y",4)], 0 );
 	assert( pr.points == [Point( 3, 2 ), Point( 3, 4 )] );
 
-	pr = applyColumnMode( [cm("x",1)], 5 );
+	pr = applyColumnData( [cm("x",1)], 5 );
 	assert( pr.points == [Point( 1, 5 )] );
 
-	pr = applyColumnMode( [cm("x",1), cm("x",3)], 5 );
+	pr = applyColumnData( [cm("x",1), cm("x",3)], 5 );
 	assert( pr.points == [Point( 1, 5 ),Point( 3, 5 )] );
 
-	pr = applyColumnMode( [cm("y",2)], 5 );
+	pr = applyColumnData( [cm("y",2)], 5 );
 	assert( pr.points == [Point( 5, 2 )] );
 
-	pr = applyColumnMode( [cm("y",2), cm("y",4)], 5 );
+	pr = applyColumnData( [cm("y",2), cm("y",4)], 5 );
 	assert( pr.points == [Point( 5, 2 ),Point( 5, 4 )] );
 
-	pr = applyColumnMode( [cm("y",2), cm("x",1), cm("y",4), cm("y",6)], 5 );
+	pr = applyColumnData( [cm("y",2), cm("x",1), cm("y",4), cm("y",6)], 5 );
 	assert( pr.points == [Point( 1, 2 ),Point( 1, 4 ),Point( 1, 6 )] );
-	pr = applyColumnMode( [cm("x",2), cm("y",1), cm("x",4), cm("x",6)], 5 );
+	pr = applyColumnData( [cm("x",2), cm("y",1), cm("x",4), cm("x",6)], 5 );
 	assert( pr.points == [Point( 2, 1 ),Point( 4, 1 ),Point( 6, 1 )] );
 
-	pr = applyColumnMode( [cm("y",2), cm("x",1), cm("y",4), cm("x",3)], 5 );
+	pr = applyColumnData( [cm("y",2), cm("x",1), cm("y",4), cm("x",3)], 5 );
 	assert( pr.points == [Point( 1, 2 ),Point( 3, 4 )] );
-	pr = applyColumnMode( [cm("y",2), cm("y",8), cm("x",1), cm("y",4), cm("y",6), cm("x",3)], 5 );
+	pr = applyColumnData( [cm("y",2), cm("y",8), cm("x",1), cm("y",4), cm("y",6), cm("x",3)], 5 );
 	assert( pr.points == [Point( 1, 2 ),Point( 1, 8 ),Point( 3, 4 ),Point( 3, 6 )] );
-	pr = applyColumnMode( [cm("x",2), cm("y",8), cm("y",1), cm("x",4), cm("y",6), cm("y",3)], 5 );
+	pr = applyColumnData( [cm("x",2), cm("y",8), cm("y",1), cm("x",4), cm("y",6), cm("y",3)], 5 );
 	assert( pr.points == [Point( 2, 8 ),Point( 2, 1 ),Point( 4, 6 ),Point( 4, 3 )] );
 
 	// Lines
 	// Should really be more indepth, but since same code is used, as for
 	// points should be ok
-	pr = applyColumnMode( [cm("lx",1), cm("ly",2)], 0 );
+	pr = applyColumnData( [cm("lx",1), cm("ly",2)], 0 );
 	assert( pr.linePoints == [Point( 1, 2 )] );
 
-	pr = applyColumnMode( [cm("x",2), cm("y",8), cm("lx",11), cm("y",1), cm("x",4), cm("y",6), cm("y",3)], 5 );
+	pr = applyColumnData( [cm("x",2), cm("y",8), cm("lx",11), cm("y",1), cm("x",4), cm("y",6), cm("y",3)], 5 );
 	assert( pr.points == [Point( 2, 8 ),Point( 2, 1 ),Point( 4, 6 ),Point( 4, 3 )] );
 	assert( pr.linePoints == [Point( 11, 5 )] );
 
 	// Hist
-	pr = applyColumnMode( [cm("h",1.1), cm("h",2.1)], 0 );
+	pr = applyColumnData( [cm("h",1.1), cm("h",2.1)], 0 );
 	assert( pr.histData == [1.1,2.1] );
 
-	pr = applyColumnMode( [cm("x",2), cm("h",1.1), cm("y",8), cm("lx",11), cm("y",1), cm("x",4), cm("h",2.1), cm("y",6), cm("y",3)], 5 );
+	pr = applyColumnData( [cm("x",2), cm("h",1.1), cm("y",8), cm("lx",11), cm("y",1), cm("x",4), cm("h",2.1), cm("y",6), cm("y",3)], 5 );
 	assert( pr.points == [Point( 2, 8 ),Point( 2, 1 ),Point( 4, 6 ),Point( 4, 3 )] );
 	assert( pr.linePoints == [Point( 11, 5 )] );
 	assert( pr.histData == [1.1,2.1] );
 }
 
 /// Check whether current RowMode makes sense for new data.
-string[] updateRowMode( double[] floats, string[] rowMode ) {
-	if (floats.length == 0)
-		return rowMode;
-	if (floats.length == rowMode.length)
-		return rowMode;
-	if (floats.length == 1)
-		return ["h"];
-	else {
-		rowMode = ["x"];
-		foreach( i; 1..floats.length )
-			rowMode ~= "y";
-	}
-	return rowMode;
+Formats updateFormat( double[] floats, Formats formats ) {
+	if ( floats.length == 0 )
+		return formats;
+	if ( formats.validFormat( floats.length ) )
+		return formats;
+	else 
+		return Formats( floats.length );
 }
 
-unittest {
-	assert( equal( updateRowMode( [], ["h"] ), ["h"] ) );
-	assert( equal( updateRowMode( [1.0], [] ), ["h"] ) );
-	assert( equal( updateRowMode( [1.0,2.0], [] ), ["x","y"] ) );
-	assert( equal( updateRowMode( [1.0,2.0,3.0], [] ), ["x","y","y"] ) );
-	assert( equal( updateRowMode( [1.0,2.0], ["y","y"] ), ["y","y"] ) );
-	assert( equal( updateRowMode( [1.0], ["y","y"] ), ["h"] ) );
-}
-
-// High level functionality for handlingMessages
 
 Figure[string] figures;
 
+// High level functionality for handlingMessages
 void handleMessage( string msg, ref Settings settings ) {
 	if ( "" !in figures )
 		figures[""] = new Figure;
@@ -410,17 +311,17 @@ void handleMessage( string msg, ref Settings settings ) {
 	auto floats = msg.strip
 		.toRange;
 
-	settings.rowMode = updateRowMode( floats, settings.rowMode );
+	settings.formats = updateFormat( floats, settings.formats );
 
-	auto columnModes = settings.rowMode.zip(floats).map!( 
-			(mv) { auto cM = mv[0].parseColumn; cM.value = mv[1]; return cM; } );
+	auto columnData = settings.formats.zip(floats).map!( 
+			(mv) { auto cD = ColumnData( mv[0] ); cD.value = mv[1]; return cD; } );
 
-	foreach( plotID, cMs1; columnModes.groupBy!( (cm) => cm.plotID ) )
+	foreach( plotID, cMs1; columnData.groupBy!( (cm) => cm.plotID ) )
 	{
 		if ( plotID !in figures )
 			figures[plotID] = new Figure;
 		foreach( dataID, cMs; cMs1.groupBy!( (cm) => cm.dataID ) ) {
-			auto parsedRow = applyColumnMode( cMs, figures[plotID].columnCount );
+			auto parsedRow = applyColumnData( cMs, figures[plotID].columnCount );
 			bool needAdjusting = false;
 			if ( !figures[plotID].validBound ) {
 				needAdjusting = true;
