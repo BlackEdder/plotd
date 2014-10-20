@@ -407,7 +407,7 @@ class Axis {
 Axis adjustTickWidth( Axis axis, size_t approx_no_ticks ) {
     auto axis_width = axis.max-axis.min;
     auto scale = cast(int) floor(log10( axis_width ));
-    auto acceptables = [ 0.1, 0.2, 0.5, 1.0 ]; // Only accept ticks of these sizes
+    auto acceptables = [ 0.1, 0.2, 0.5, 1.0, 2.0, 5.0 ]; // Only accept ticks of these sizes
     auto approx_width = pow(10.0, -scale)*(axis_width)/approx_no_ticks;
     // Find closest acceptable value
     double best = acceptables[0];
