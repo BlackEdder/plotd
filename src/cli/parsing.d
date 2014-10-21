@@ -178,55 +178,55 @@ ParsedRow applyColumnData( ColumnData[] cMs, size_t columnID ) {
 			}
 		) ) 
 	{
-		if ( type == "none" )
-			break;
-		ColumnData[] xyGroup;
-		size_t xs = 0;
-		size_t ys = 0;
-		double lastX; // If x is used set lastX to isNaN?
-		double lastY;
-		Point[] addRange;
-		foreach ( cM; groupedCMs ) {
-			if ( cM.xCoord || cM.yCoord ) {
-				if ( xs > 1 && ys > 1 ) { 
-					// We never want a group with more than 1 x coord or y coord
-					xs = 0;
-					ys = 0;
-					addRange ~= columnDataToPoints( 
-							xyGroup[0..$-1], columnID );
-					xyGroup = [xyGroup.back];
-				} else if ( xs >= 1 && ys >= 1 && xyGroup.back.mode != cM.mode ) {
-					xs = 0;
-					ys = 0;
-					addRange ~= columnDataToPoints( xyGroup, columnID );
-					xyGroup = [cM];
-				} else
-					xyGroup ~= cM;
-				if (cM.xCoord) {
-					lastX = cM.value;
-					xs++;
-				} else if (cM.yCoord) {
-					lastY = cM.value;
-					ys++;
+		if ( type != "none" ) {
+			ColumnData[] xyGroup;
+			size_t xs = 0;
+			size_t ys = 0;
+			double lastX; // If x is used set lastX to isNaN?
+			double lastY;
+			Point[] addRange;
+			foreach ( cM; groupedCMs ) {
+				if ( cM.xCoord || cM.yCoord ) {
+					if ( xs > 1 && ys > 1 ) { 
+						// We never want a group with more than 1 x coord or y coord
+						xs = 0;
+						ys = 0;
+						addRange ~= columnDataToPoints( 
+								xyGroup[0..$-1], columnID );
+						xyGroup = [xyGroup.back];
+					} else if ( xs >= 1 && ys >= 1 && xyGroup.back.mode != cM.mode ) {
+						xs = 0;
+						ys = 0;
+						addRange ~= columnDataToPoints( xyGroup, columnID );
+						xyGroup = [cM];
+					} else
+						xyGroup ~= cM;
+					if (cM.xCoord) {
+						lastX = cM.value;
+						xs++;
+					} else if (cM.yCoord) {
+						lastY = cM.value;
+						ys++;
+					}
+				} else {
+					if (type == "hist")
+						parsed.histData ~= cM.value;
 				}
-			} else {
-				if (type == "hist")
-					parsed.histData ~= cM.value;
 			}
+			if (xyGroup.length > 0) {
+				// If we found no x or y coord at all then use columnID
+				if (lastX.isNaN || lastY.isNaN)
+					addRange ~= columnDataToPoints( xyGroup, columnID ); 
+				else if ( xyGroup.front.xCoord )
+					addRange ~= columnDataToPoints( xyGroup, lastY ); 
+				else
+					addRange ~= columnDataToPoints( xyGroup, lastX ); 
+			}
+			if ( type == "line" ) {
+				parsed.linePoints ~= addRange;
+			} else if ( type == "point" )
+				parsed.points ~= addRange;
 		}
-		if (xyGroup.length > 0) {
-			// If we found no x or y coord at all then use columnID
-			if (lastX.isNaN || lastY.isNaN)
-				addRange ~= columnDataToPoints( xyGroup, columnID ); 
-			else if ( xyGroup.front.xCoord )
-				addRange ~= columnDataToPoints( xyGroup, lastY ); 
-			else
-				addRange ~= columnDataToPoints( xyGroup, lastX ); 
-		}
-		if ( type == "line" ) {
-			parsed.linePoints ~= addRange;
-		} else if ( type == "point" )
-			parsed.points ~= addRange;
 	}
 	return parsed;
 }
@@ -331,6 +331,7 @@ void handleMessage( string msg, ref Settings settings ) {
 		foreach( dataID, cMs; cMs1.groupBy!( (cm) => cm.dataID ) ) {
 			debug writeln( "Plotting data: ", cMs );
 			auto parsedRow = applyColumnData( cMs, figures[plotID].columnCount );
+
 			bool needAdjusting = false;
 			if ( !figures[plotID].validBound ) {
 				needAdjusting = true;
@@ -388,6 +389,7 @@ void handleMessage( string msg, ref Settings settings ) {
 				}
 				figures[plotID].histData ~= data;
 			}
+
 
 			if (figures[plotID].histData.length > 0) {
 				// Create bin
