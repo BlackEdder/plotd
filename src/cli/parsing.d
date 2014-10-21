@@ -306,8 +306,6 @@ Formats updateFormat( double[] floats, Formats formats ) {
 // High level functionality for handlingMessages
 Figure[string] handleMessage( string msg, ref Settings settings ) {
 	static Figure[string] figures;
-	if ( "" !in figures )
-		figures[""] = new Figure;
 
 	debug write( "Received message: ", msg );
 
