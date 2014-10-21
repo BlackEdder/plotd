@@ -1,7 +1,11 @@
 *.a
+*.o
 .dub/
 docs*
 __*
 .*.swp
 bin/
 dub.selections.json
+*.png
+/*.csv
+/*.d
