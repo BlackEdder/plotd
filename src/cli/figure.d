@@ -35,7 +35,7 @@ class Figure {
 
 	bool validBound = false;
 	Point[] pointCache;
-	Point[] previousLines;
+	Point[][int] previousLines;
 	double[] histData;
 	double[2] histRange;
 

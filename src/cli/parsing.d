@@ -358,11 +358,19 @@ void handleMessage( string msg, ref Settings settings ) {
 
 			auto events = parsedRow.points.toEvents;
 
-			if ( figures[plotID].previousLines.length == parsedRow.linePoints.length )
-				events ~= parsedRow.linePoints.toLineEvents( figures[plotID].previousLines );
+			if (dataID !in figures[plotID].previousLines) {
+				Point[] pnts;
+				figures[plotID].previousLines[dataID] = pnts;
+			}
+
+
+			if ( figures[plotID].previousLines[dataID].length 
+					== parsedRow.linePoints.length )
+				events ~= parsedRow.linePoints.toLineEvents( 
+						figures[plotID].previousLines[dataID] );
 
 			if (parsedRow.linePoints.length > 0)
-				figures[plotID].previousLines = parsedRow.linePoints;
+				figures[plotID].previousLines[dataID] = parsedRow.linePoints;
 
 
 			foreach( event; events )
