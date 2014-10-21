@@ -54,9 +54,13 @@ private auto csvRegex = ctRegex!(`,\s*|\s`);
 
 double[] toRange( string line ) {
 	try {
-		return line.split( csvRegex )
-			.map!( (d) => d.strip( ' ' ).to!double )
-			.array;
+		auto doubles = line.split( csvRegex )
+			.map!( (d) => d.strip( ' ' ).to!double );
+		
+		if ( doubles.any!isNaN )
+			return [];
+		else 
+			return doubles.array;
 	} catch (ConvException exp) { 
 		return [];
 	}
@@ -68,6 +72,7 @@ unittest {
 	assert( "bla, 2".toRange == [] );
 	assert( "1\t2".toRange == [1,2] );
 	assert( "1 2".toRange == [1,2] );
+	assert( "nan, 2".toRange == [] );
 }
 
 Point[] toPoints( double[] coords ) {
@@ -297,10 +302,10 @@ Formats updateFormat( double[] floats, Formats formats ) {
 }
 
 
-Figure[string] figures;
 
 // High level functionality for handlingMessages
-void handleMessage( string msg, ref Settings settings ) {
+Figure[string] handleMessage( string msg, ref Settings settings ) {
+	static Figure[string] figures;
 	if ( "" !in figures )
 		figures[""] = new Figure;
 
@@ -326,6 +331,7 @@ void handleMessage( string msg, ref Settings settings ) {
 
 	foreach( plotID, cMs1; columnData.groupBy!( (cm) => cm.plotID ) )
 	{
+		plotID = settings.outputFile ~ plotID;
 		if ( plotID !in figures )
 			figures[plotID] = new Figure;
 		foreach( dataID, cMs; cMs1.groupBy!( (cm) => cm.dataID ) ) {
@@ -417,10 +423,13 @@ void handleMessage( string msg, ref Settings settings ) {
 		}
 		figures[plotID].columnCount += 1;
 	}
+	return figures;
 }
 
-void saveFigures( string baseName ) {
+void saveFigures(Figure[string] figures) {
 	foreach ( plotID, figure; figures ) {
-		figure.plot.save( baseName ~ plotID ~ ".png" );
+		auto fname = plotID ~ ".png";
+		debug writeln( "Saving to file: " ~ fname );
+		figure.plot.save( fname );
 	}
 }

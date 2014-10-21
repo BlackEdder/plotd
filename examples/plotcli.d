@@ -28,6 +28,7 @@ import core.time : dur;
 import docopt;
 
 
+import cli.figure : Figure;
 import cli.parsing : handleMessage, saveFigures;
 import cli.options : helpText, Settings, updateSettings;
 
@@ -49,8 +50,10 @@ void main( string[] args ) {
 
 	SysTime lastTime;
 
+	Figure[string] figures;
+
 	while( settings.follow || msg.length > 0 ) {
-		handleMessage( msg, settings );
+		figures = handleMessage( msg, settings );
 
 		msg = readln();
 		while ( settings.follow && msg.length == 0 ) // Got to end of file
@@ -61,9 +64,9 @@ void main( string[] args ) {
 
 		auto curr = Clock.currTime;
 		if ( curr - lastTime > dur!("msecs")( 250 ) ) {
-			saveFigures( settings.outputFile );
+			saveFigures(figures);
 			lastTime = curr;
 		}
 	}
-	saveFigures( settings.outputFile );
+	saveFigures(figures);
 }
