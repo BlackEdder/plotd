@@ -412,7 +412,7 @@ Figure[string] handleMessage( string msg, ref Settings settings ) {
 				bins.width = 0.5;
 				bins.length = max( 11, min( 31, figures[plotID].histData.length/100 ) ); 
 				if( figures[plotID].histRange[0] != figures[plotID].histRange[1] )
-					bins.width = (figures[plotID].histRange[1]-figures[plotID].histRange[0])/bins.length;
+					bins.width = (1+1E-5)*(figures[plotID].histRange[1]-figures[plotID].histRange[0])/bins.length;
 				// add all data to bin
 				foreach( data; figures[plotID].histData )
 					bins = bins.addDataToBin( [bins.binId( data )] );
