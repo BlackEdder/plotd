@@ -74,3 +74,11 @@ Color getColor( Figure figure, int dataID, size_t id = 0 ) {
 	}
 	return figure.colors[dataID][id];
 }
+
+unittest {
+	auto fig = new Figure;
+	auto col = fig.getColor( -1, 0 );
+	assert( col == fig.getColor( -1, 0 ) ); 
+	assert( col != fig.getColor( 1, 0 ) ); 
+	assert( col != fig.getColor( -1, 1 ) ); 
+}
