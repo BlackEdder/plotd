@@ -41,7 +41,7 @@ import plotd.primitives;
 
 import cli.algorithm : groupBy;
 import cli.column;
-import cli.figure : Figure;
+import cli.figure : Figure, getColor;
 import cli.options : helpText, Settings, updateSettings;
 
 version( unittest ) {
@@ -343,26 +343,13 @@ Figure[string] handleMessage( string msg, ref Settings settings ) {
 			}
 
 			Event[] events;
-			// Make sure colors are set correctly:
-			foreach( i; 0..max( parsedRow.points.length, 
-						parsedRow.linePoints.length ) ) {
-				if (dataID !in figures[plotID].colors) {
-					figures[plotID].colors[dataID] ~= figures[plotID].colorRange.front;
-					figures[plotID].colorRange.popFront;
-				}
-				if (dataID == -1) {
-					while ( figures[plotID].colors[dataID].length <= i ) {
-						figures[plotID].colors[dataID] ~= figures[plotID].colorRange.front;
-						figures[plotID].colorRange.popFront;
-					}
-				}
-			}
 
 			foreach( i; 0..parsedRow.points.length ) {
 				if (dataID == -1) {
-					events ~= createColorEvent( figures[plotID].colors[dataID][i] );
+					events ~= createColorEvent( 
+							figures[plotID].getColor( dataID, i ) );
 				} else {
-					events ~= createColorEvent( figures[plotID].colors[dataID][0] );
+					events ~= createColorEvent( figures[plotID].getColor( dataID ) );
 				}
 				events ~= createPointEvent( parsedRow.points[i] );
 			}
@@ -376,11 +363,13 @@ Figure[string] handleMessage( string msg, ref Settings settings ) {
 					== parsedRow.linePoints.length ) {
 				foreach( i; 0..parsedRow.linePoints.length ) {
 					if (dataID == -1) {
-						events ~= createColorEvent( figures[plotID].colors[dataID][i] );
+						events ~= createColorEvent( 
+								figures[plotID].getColor( dataID, i ) );
 					} else {
-						events ~= createColorEvent( figures[plotID].colors[dataID][0] );
+						events ~= createColorEvent( figures[plotID].getColor( dataID ) );
 					}
-					events ~= createLineEvent( figures[plotID].previousLines[dataID][i],
+					events ~= createLineEvent( 
+							figures[plotID].previousLines[dataID][i],
 							parsedRow.linePoints[i] );
 				}
 			}

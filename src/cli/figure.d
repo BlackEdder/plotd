@@ -46,9 +46,6 @@ class Figure {
 	Point[] pointCache;
 	Point[][int] previousLines;
 
-	ColorRange colorRange;
-	Color[][int] colors;
-
 	double[] histData;
 	double[2] histRange;
 
@@ -59,4 +56,21 @@ class Figure {
 		plot = createPlotState( Bounds( 0, 1, 0, 1 ),
 				Bounds( 70, 400, 70, 400 ) );
 	}
+
+	private:
+  	ColorRange colorRange;
+	  Color[][int] colors;
+}
+
+Color getColor( Figure figure, int dataID, size_t id = 0 ) {
+	/// Make sure we cache the color
+	if (dataID !in figure.colors) {
+		figure.colors[dataID] ~= figure.colorRange.front;
+		figure.colorRange.popFront;
+	}
+	while ( figure.colors[dataID].length <= id ) {
+		figure.colors[dataID] ~= figure.colorRange.front;
+		figure.colorRange.popFront;
+	}
+	return figure.colors[dataID][id];
 }
