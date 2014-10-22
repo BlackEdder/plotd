@@ -87,45 +87,25 @@ unittest {
 	assert( equal([1.0,2.0].toPoints, [Point( 1, 2 )] ) );
 }
 
-Event[] toEvents( Point[] points ) {
-	Event[] events;
-
-	ColorRange colorRange;
-
-	// Workaround point not properly copied in foreach loop
-  void delegate( PlotState ) createEvent( Point point, Color col ) {
-		return delegate( PlotState plot ) {	
-			plot.plotContext = color( plot.plotContext, col );
-			colorRange.popFront;
-			point.draw( plot ); 
-		};
-  }
-
-	foreach( point; points ) {
-		events ~= createEvent( point, colorRange.front ); 
-		colorRange.popFront;
-	}
-	return events;
+// Workaround point not properly copied in foreach loop
+void delegate( PlotState ) createColorEvent( Color col ) {
+	return delegate( PlotState plot ) {	
+		plot.plotContext = color( plot.plotContext, col );
+	};
 }
 
-Event[] toLineEvents( Point[] points, Point[] previousPoints ) {
-	Event[] events;
+// Workaround point not properly copied in foreach loop
+void delegate( PlotState ) createPointEvent( Point point ) {
+	return delegate( PlotState plot ) {	
+		plot.plotContext = drawPoint( point, plot.plotContext ); 
+	};
+}
 
-	ColorRange colorRange;
-
-	// Workaround point not properly copied in foreach loop
-  void delegate( PlotState ) createEvent( size_t i, Color col ) {
-		return delegate( PlotState plot ) {	
-			plot.plotContext = color( plot.plotContext, col );
-			plot.plotContext = drawLine( previousPoints[i], points[i], plot.plotContext ); 
-		};
-  }
-
-	foreach( i; 0..points.length ) {
-		events ~= createEvent( i, colorRange.front ); 
-		colorRange.popFront;
-	}
-	return events;
+// Workaround point not properly copied in foreach loop
+void delegate( PlotState ) createLineEvent( Point toP, Point fromP ) {
+	return delegate( PlotState plot ) {	
+		plot.plotContext = drawLine( toP, fromP, plot.plotContext ); 
+	};
 }
 
 /// Struct to hold the different points etc
@@ -333,6 +313,7 @@ Figure[string] handleMessage( string msg, ref Settings settings ) {
 		if ( plotID !in figures )
 			figures[plotID] = new Figure;
 		foreach( dataID, cMs; cMs1.groupBy!( (cm) => cm.dataID ) ) {
+			debug writeln( "plotID: ", plotID, " dataID: ", dataID );
 			debug writeln( "Plotting data: ", cMs );
 			auto parsedRow = applyColumnData( cMs, figures[plotID].columnCount );
 
@@ -361,22 +342,51 @@ Figure[string] handleMessage( string msg, ref Settings settings ) {
 					event( figures[plotID].plot );
 			}
 
-			auto events = parsedRow.points.toEvents;
+			Event[] events;
+			// Make sure colors are set correctly:
+			foreach( i; 0..max( parsedRow.points.length, 
+						parsedRow.linePoints.length ) ) {
+				if (dataID !in figures[plotID].colors) {
+					figures[plotID].colors[dataID] ~= figures[plotID].colorRange.front;
+					figures[plotID].colorRange.popFront;
+				}
+				if (dataID == -1) {
+					while ( figures[plotID].colors[dataID].length <= i ) {
+						figures[plotID].colors[dataID] ~= figures[plotID].colorRange.front;
+						figures[plotID].colorRange.popFront;
+					}
+				}
+			}
+
+			foreach( i; 0..parsedRow.points.length ) {
+				if (dataID == -1) {
+					events ~= createColorEvent( figures[plotID].colors[dataID][i] );
+				} else {
+					events ~= createColorEvent( figures[plotID].colors[dataID][0] );
+				}
+				events ~= createPointEvent( parsedRow.points[i] );
+			}
 
 			if (dataID !in figures[plotID].previousLines) {
 				Point[] pnts;
 				figures[plotID].previousLines[dataID] = pnts;
 			}
 
-
 			if ( figures[plotID].previousLines[dataID].length 
-					== parsedRow.linePoints.length )
-				events ~= parsedRow.linePoints.toLineEvents( 
-						figures[plotID].previousLines[dataID] );
+					== parsedRow.linePoints.length ) {
+				foreach( i; 0..parsedRow.linePoints.length ) {
+					if (dataID == -1) {
+						events ~= createColorEvent( figures[plotID].colors[dataID][i] );
+					} else {
+						events ~= createColorEvent( figures[plotID].colors[dataID][0] );
+					}
+					events ~= createLineEvent( figures[plotID].previousLines[dataID][i],
+							parsedRow.linePoints[i] );
+				}
+			}
 
 			if (parsedRow.linePoints.length > 0)
 				figures[plotID].previousLines[dataID] = parsedRow.linePoints;
-
 
 			foreach( event; events )
 				event( figures[plotID].plot );

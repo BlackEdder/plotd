@@ -26,7 +26,16 @@ module cli.figure;
 import cli.parsing : Event;
 
 import plotd.plot : PlotState, createPlotState;
-import plotd.primitives : Bounds, Point;
+import plotd.primitives : Bounds, Color, ColorRange, Point;
+
+/*
+TODO: add unique id struct that can be calculated from plotID and either
+a dataID or a counter (columnID) if no dataID was given
+
+This can then be used to access previous line points and colorID...
+Isn't the previousLine cache already like that and an easier solution? Probably!
+Maybe jus separate color events is easier, instead of including them in points.i.e. always change color and add to events before the point.. Think that that is the solution.. foreach column -> eventCache ~ colorChange, eventCache point
+*/
 
 class Figure {
 	PlotState plot;
@@ -36,6 +45,10 @@ class Figure {
 	bool validBound = false;
 	Point[] pointCache;
 	Point[][int] previousLines;
+
+	ColorRange colorRange;
+	Color[][int] colors;
+
 	double[] histData;
 	double[2] histRange;
 
