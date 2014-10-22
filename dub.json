@@ -11,7 +11,16 @@
 		"dmocks-revived": "~master",
 		"docopt": ">=0.6.0"
 	},
+	"workingDirectory": "./",
 	"configurations": [
+		{
+			"name": "plotcli",
+			"workingDirectory": "./",
+			"targetType": "executable",
+			"sourceFiles": ["examples/plotcli.d"],
+			"targetName": "plotcli",
+			"targetPath": "bin",
+		},
 		{
 			"name": "plotd",
 			"targetType": "library",
@@ -21,13 +30,6 @@
 			"targetType": "executable",
 			"sourceFiles": ["examples/plot1.d"],
 			"targetName": "plot1",
-			"targetPath": "bin",
-		},
-		{
-			"name": "plotcli",
-			"targetType": "executable",
-			"sourceFiles": ["examples/plotcli.d"],
-			"targetName": "plotcli",
 			"targetPath": "bin",
 		}
 	]
