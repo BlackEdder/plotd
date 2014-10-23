@@ -41,7 +41,7 @@ import plotd.primitives;
 
 import cli.algorithm : groupBy;
 import cli.column;
-import cli.figure : Figure, getColor;
+import cli.figure : adjustBounds, Figure, getColor;
 import cli.options : helpText, Settings, updateSettings;
 
 version( unittest ) {
@@ -317,30 +317,9 @@ Figure[string] handleMessage( string msg, ref Settings settings ) {
 			debug writeln( "Plotting data: ", cMs );
 			auto parsedRow = applyColumnData( cMs, figures[plotID].columnCount );
 
-			bool needAdjusting = false;
-			if ( !figures[plotID].validBound ) {
-				needAdjusting = true;
-				figures[plotID].pointCache ~= parsedRow.points ~ parsedRow.linePoints;
-				figures[plotID].validBound = validBounds( figures[plotID].pointCache );
-				figures[plotID].plot.plotBounds = minimalBounds( figures[plotID].pointCache );
-				if (figures[plotID].validBound)
-					figures[plotID].pointCache = [];
-			} else {
-				foreach( point; parsedRow.points ~ parsedRow.linePoints ) {
-					if (!figures[plotID].plot.plotBounds.withinBounds( point )) {
-						figures[plotID].plot.plotBounds = adjustedBounds( figures[plotID].plot.plotBounds, point );
-						needAdjusting = true;
-					}
-				}
-			}
+			figures[plotID].adjustBounds( 
+					parsedRow.points ~ parsedRow.linePoints );
 
-			if (needAdjusting) {
-
-				figures[plotID].plot = createPlotState( figures[plotID].plot.plotBounds, 
-						figures[plotID].plot.marginBounds );
-				foreach( event; figures[plotID].eventCache )
-					event( figures[plotID].plot );
-			}
 
 			Event[] events;
 
