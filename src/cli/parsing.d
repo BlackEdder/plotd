@@ -356,34 +356,23 @@ Figure[string] handleMessage( string msg, ref Settings settings ) {
 			if (parsedRow.linePoints.length > 0)
 				figures[plotID].previousLines[dataID] = parsedRow.linePoints;
 
+			// TODO: Move all actually plotting outside of this handler. 
+			// Could just return the events that need to happen, although
+			// That is more difficult with histogram, since those events override
+			// Earlier, so return two types of events: Ones that can be forgotten
+			// the next time this method is called, ones that needs to be
+			// remembered till we execute them.
 			foreach( event; events )
 				event( figures[plotID].plot );
 
 			figures[plotID].eventCache ~= events;
 
 			// Histograms
-			foreach( data; parsedRow.histData ) {
-				if ( data < figures[plotID].histRange[0] || isNaN(figures[plotID].histRange[0]) ) {
-					figures[plotID].histRange[0] = data;
-				} 
-				if ( data > figures[plotID].histRange[1] || isNaN(figures[plotID].histRange[1]) ) {
-					figures[plotID].histRange[1] = data;
-				}
-				figures[plotID].histData ~= data;
-			}
-
-
+			figures[plotID].histData ~= parsedRow.histData;
 			if (figures[plotID].histData.length > 0) {
 				// Create bin
-				Bins!size_t bins;
-				bins.min = figures[plotID].histRange[0];
-				bins.width = 0.5;
-				bins.length = max( 11, min( 31, figures[plotID].histData.length/100 ) ); 
-				if( figures[plotID].histRange[0] != figures[plotID].histRange[1] )
-					bins.width = (1+1E-5)*(figures[plotID].histRange[1]-figures[plotID].histRange[0])/bins.length;
-				// add all data to bin
-				foreach( data; figures[plotID].histData )
-					bins = bins.addDataToBin( [bins.binId( data )] );
+				auto bins = figures[plotID].histData.toBins!size_t(
+						max( 11, min( 31, figures[plotID].histData.length/100 ) ) );
 
 				auto histBounds = bins.optimalBounds( 0.99 );
 

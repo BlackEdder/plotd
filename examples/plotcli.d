@@ -68,5 +68,6 @@ void main( string[] args ) {
 			lastTime = curr;
 		}
 	}
-	saveFigures(figures);
+	scope(exit) saveFigures(figures);
+	scope(failure) saveFigures(figures);
 }
