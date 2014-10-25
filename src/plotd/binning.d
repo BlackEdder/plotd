@@ -41,15 +41,15 @@ struct Bins(T) {
     double min;
     double width;
 
-		 @property double max() {
+		@property double max() {
 			return min + width*(mybins.length);
 		}
 
-    /// How many bins does the container have
-    @property size_t length() {
-        return mybins.length;
-    }
-	
+		/// How many bins does the container have
+		@property size_t length() {
+			return mybins.length;
+		}
+
 		/// Set length/number of bins
     @property void length( size_t noBins ) {
  			mybins.length = noBins;
@@ -256,6 +256,39 @@ unittest {
 	bins.mybins = [2,0,4,0];
 	bounds = bins.optimalBounds;
 	assert( bounds == Bounds( -1, 0.5, 0, 6 ) );
+}
+
+Bins!T toBins( T : size_t, R )( R range, size_t noBins = 4 ) {
+	Bins!T bins;
+	bins.min = range[0];
+	double max = range[0];
+	
+	foreach( el; range[1..$] ) {
+		if (el < bins.min) {
+			bins.min = el;
+		} else if ( el > max ) {
+			max = el;
+		}
+	}
+	bins.length = noBins; 
+	bins.width = 0.5;
+
+	if( bins.min != max )
+		// Slightly bigger so we include max value as well
+		bins.width = (1+1e-5)*(max-bins.min)/bins.length; 
+
+	// add all data to bin
+	foreach( data; range )
+		bins = bins.addDataToBin( [bins.binId( data )] );
+
+	return bins;
+};
+
+unittest {
+	auto bins = [1,2,3,3.1,4].toBins!size_t( 2 );
+	assert( bins.min == 1 );
+	assert( bins.max >= 4 );
+	assert( equal( bins.mybins, [2,3] ) );
 }
 
 /**
