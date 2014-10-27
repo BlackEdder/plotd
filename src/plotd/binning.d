@@ -152,6 +152,39 @@ unittest {
     assert( bins.binId( -0.25 ) == 1 );
 }
 
+size_t[] binIDs(T)( Bins!T bins, in double[] data ) {
+	size_t[] ids = [binId( bins, data[0] )];
+	static if (__traits( compiles, 
+				binIDs( bins.mybins[0], data[1..$] ) ) ) {
+		ids ~= binIDs( bins.mybins[0], data[1..$] );
+	}
+	return ids;
+}
+
+unittest {
+	Bins!size_t bins;
+	bins.min = -1;
+	bins.width = 0.5;
+	assert( binIDs!size_t( bins, [-1.0] ) == [0] );
+	assert( binIDs( bins, [-0.5] ) == [1] );
+	assert( bins.binIDs( [-0.25] ) == [1] );
+
+	Bins!(Bins!size_t) mbins;
+	mbins.min = -1;
+	mbins.width = 0.5;
+	mbins.mybins = [bins, bins];
+	assert( binIDs( mbins, [-1.0,-1.0] ) == [0,0] );
+	assert( binIDs( mbins, [-0.5,-1.0] ) == [1,0] );
+
+	Bins!(Bins!size_t) mbins2;
+	mbins2.min = 5;
+	mbins2.width = 1.0;
+	mbins2.mybins = [bins, bins];
+	assert( binIDs( mbins2, [5,-1.0] ) == [0,0] );
+	assert( binIDs( mbins2, [6.5,-1.0] ) == [1,0] );
+}
+
+
 /**
   Add data to the given bin id
 
@@ -196,6 +229,47 @@ unittest {
     assert( mbins.mybins[1].mybins[3] == 6 );
 }
 
+Bins!T addData( T )( Bins!T bins, const double[] data ) 
+{	
+	return bins.addDataToBin( bins.binIDs!T( data ) );
+}
+
+unittest {
+    Bins!size_t bins;
+    bins.min = -1;
+    bins.width = 0.5;
+    bins.mybins = [1,2,3,4];
+
+    bins.addData( [-0.1] );
+    assert( bins.mybins[1] == 3 );
+    bins.addData( [0.9] );
+    assert( bins.mybins[3] == 5 );
+
+    Bins!(Bins!size_t) mbins;
+    mbins.min = -1;
+    mbins.width = 0.5;
+    mbins.mybins = [bins, bins];
+    mbins.addData( [-0.1,0.1] );
+    assert( mbins.mybins[1].mybins[2] == 4 );
+    mbins.addData( [-0.1,-1.0] );
+    assert( mbins.mybins[0].mybins[1] == 3 );
+}
+
+unittest {
+    Bins!size_t bins;
+    bins.min = -1;
+    bins.width = 0.5;
+    bins.mybins = [1,2,3,4];
+
+    Bins!(Bins!size_t) mbins;
+    mbins.min = 5;
+    mbins.width = 1.0;
+    mbins.mybins = [bins, bins];
+    mbins.addData( [5,0.1] );
+    assert( mbins.mybins[0].mybins[2] == 4 );
+    mbins.addData( [6,-1] );
+    assert( mbins.mybins[1].mybins[0] == 2 );
+}
 /**
 	Calculate bounds that will at least cover the given percentage of data
 	*/
