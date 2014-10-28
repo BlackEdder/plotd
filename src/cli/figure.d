@@ -51,6 +51,7 @@ class Figure {
 	Point[][int] previousLines;
 
 	double[] histData;
+	Point[] histPoints;
 
 	size_t columnCount = 0;
 

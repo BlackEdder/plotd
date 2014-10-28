@@ -112,6 +112,7 @@ void delegate( PlotState ) createLineEvent( Point toP, Point fromP ) {
 struct ParsedRow {
 	Point[] points;
 	Point[] linePoints;
+	Point[] histPoints;
 	double[] histData;
 }
 
@@ -211,6 +212,8 @@ ParsedRow applyColumnData( ColumnData[] cMs, size_t columnID ) {
 				parsed.linePoints ~= addRange;
 			} else if ( type == "point" )
 				parsed.points ~= addRange;
+			else if ( type == "hist" )
+				parsed.histPoints ~= addRange;
 		}
 	}
 	return parsed;
@@ -269,6 +272,8 @@ unittest {
 	assert( pr.points == [Point( 2, 8 ),Point( 2, 1 ),Point( 4, 6 ),Point( 4, 3 )] );
 	assert( pr.linePoints == [Point( 11, 5 )] );
 	assert( pr.histData == [1.1,2.1] );
+	pr = applyColumnData( [cm("hx",1.1), cm("hy",2.1)], 0 );
+	assert( pr.histPoints == [Point(1.1,2.1)] );
 }
 
 /// Check whether current RowMode makes sense for new data.
@@ -385,6 +390,21 @@ Figure[string] handleMessage( string msg, ref Settings settings ) {
 				debug writeln( "Drawn bins to histogram: ", bins );
 			}
 
+			figures[plotID].histPoints ~= parsedRow.histPoints;
+			if (figures[plotID].histPoints.length > 0) {
+				auto bins = figures[plotID].histPoints
+					.map!( (pnt) => [pnt.x,pnt.y] )
+					.toBins!(Bins!size_t)( 11 );
+				debug writeln( "Drawing 2D histogram: ", bins );
+				auto histBounds = Bounds( bins.min, bins.max,
+							bins[0].min, bins[0].max);
+				debug writeln( "Adjusting 2D histogram to bounds: ", histBounds );
+				// Adjust plotBounds 
+				figures[plotID].plot = createPlotState( histBounds,
+						figures[plotID].plot.marginBounds );
+				figures[plotID].plot.plotContext 
+					= drawBins( figures[plotID].plot.plotContext, bins );
+			}
 		}
 		figures[plotID].columnCount += 1;
 	}
