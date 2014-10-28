@@ -250,6 +250,31 @@ unittest {
     mocker.verify;
 }
 
+CONTEXT drawBins( T : Bins!size_t, CONTEXT )( CONTEXT context, Bins!T bins ) {
+	// find tallest bin
+	double max = 0;
+	foreach ( x, ybins; bins ) {
+		foreach ( y, value; ybins ) {
+			if (value > max)
+				max = value;
+		}
+	}
+
+	foreach ( x, ybins; bins ) {
+		foreach ( y, value; ybins ) {
+			double z = value/max;
+			Color colour = new Color( 1-z,1-z,1-z, 1 );
+    	context = color( context, colour );
+			context.rectangle(
+					x, y, bins.width, ybins.width );
+			context.fill();
+		}
+	}
+
+  return context;
+}
+
+
 CONTEXT drawBins( T : size_t, CONTEXT )( CONTEXT context, Bins!T bins ) {
     foreach( x, count; bins ) {
         context = drawLine( Point( x, 0 ), 

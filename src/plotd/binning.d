@@ -23,6 +23,7 @@
 
 module plotd.binning;
 
+import std.algorithm : reduce;
 import std.array;
 import std.conv : to;
 import std.range;
@@ -30,7 +31,10 @@ import std.range;
 import plotd.primitives : Bounds;
 
 version( unittest ) {
-	import std.algorithm;
+	import std.stdio;
+}
+
+version( assert ) {
 	import std.stdio;
 }
 
@@ -332,12 +336,14 @@ unittest {
 	assert( bounds == Bounds( -1, 0.5, 0, 6 ) );
 }
 
-Bins!T toBins( T : size_t, R )( R range, size_t noBins = 4 ) {
+Bins!T toBins( T : size_t, R )( R range, size_t noBins = 4 ) 
+{
 	Bins!T bins;
+	// Should work, but for some reason plotcli compilation throws an error
 	auto r = range.reduce!(min, max);
 	bins.min = r[0];
 	double max = r[1];
-	
+
 	bins.length = noBins; 
 	bins.width = 0.5;
 
@@ -372,7 +378,7 @@ private	Bins!T emptyBins(T:size_t)( double[] mins, double[] maxs, size_t noBins 
 	return bins;
 }
 
-private	Bins!T emptyBins(T:Bins!size_t)( double[] mins, double[] maxs, 
+private	Bins!T emptyBins(T)( double[] mins, double[] maxs, 
 		size_t noBins ) {
 	Bins!T bins;
 	bins.min = mins[0];
@@ -384,8 +390,14 @@ private	Bins!T emptyBins(T:Bins!size_t)( double[] mins, double[] maxs,
 		bins.width = (1+1e-5)*(maxs[0]-bins.min)/bins.length;
 
 	foreach( i; 0..noBins ) {
-		bins.mybins[i] = 
+		static if (is(T t == Bins!U, U)) { 
+			bins.mybins[i] = 
+			emptyBins!U( mins[1..$], maxs[1..$], noBins );
+		}
+		else {
+			bins.mybins[i] = 
 				emptyBins!size_t( mins[1..$], maxs[1..$], noBins );
+		}
 	}
 	return bins;
 }
@@ -395,22 +407,23 @@ unittest {
 	assert( bins.min == 0.1 );
 	assert( bins[0].min == 1 );
 
-	// TODO: make this work for three dimensional
-	/*auto bins2 = emptyBins!(Bins!(Bins!size_t))( [0.1,1,2],[2.1,3,2.5], 4 );
+	auto bins2 = emptyBins!(Bins!(Bins!size_t))( [0.1,1,2],[2.1,3,2.5], 4 );
 	assert( bins2.min == 0.1 );
 	assert( bins2[0].min == 1 );
-	assert( bins2[0].mybins[0].min == 2 );*/
+	assert( bins2[0].mybins[0].min == 2 );
 }
 
 Bins!T toBins( T, R )( R range, size_t noBins = 4 ) {
 	double[] mins = range[0].dup;
 	double[] maxs = range[0].dup;
-	foreach ( row; range[1..$] ) {
-		foreach( i; 0..row.length ) {
-			if ( row[i] < mins[i] ) {
-				mins[i] = row[i];
-			} else if ( row[i] > maxs[i] )
-				maxs[i] = row[i];
+	if ( range.length > 1 ) {
+		foreach ( row; range[1..$] ) {
+			foreach( i; 0..row.length ) {
+				if ( row[i] < mins[i] ) {
+					mins[i] = row[i];
+				} else if ( row[i] > maxs[i] )
+					maxs[i] = row[i];
+			}
 		}
 	}
 
@@ -426,13 +439,19 @@ Bins!T toBins( T, R )( R range, size_t noBins = 4 ) {
 
 ///
 unittest {
-	auto bins = [[1.0,2],[3,3.1],[4.0,2]].toBins!(Bins!size_t)( 2 );
+	auto bins = [[1.0,2],[3,3.1],[4.0,2]]
+		.toBins!(Bins!size_t)( 2 );
 	assert( bins.min == 1 );
 	assert( bins.max >= 4 );
 
 	assert( bins[0].min == 2 );
 	assert( bins[0].max >= 3.1 );
 	assert( bins[0].mybins[0] == 1 );
+
+	bins = [[1.0,2]]
+		.toBins!(Bins!size_t)( 2 );
+	assert( bins.width == 0.5 );
+	assert( bins[0].width == 0.5 );
 }
 /**
   Resize the bins
