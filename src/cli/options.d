@@ -67,6 +67,7 @@ Data format:
   x,y		The x and y coordinate for points
   lx,ly	Line data
   h			Histogram data
+  hx,hy	2D Histogram data 
 	..		Extrapolate from previous options, i.e. x,y,.. -> x,y,x,y,..
 
 	Examples: x,y,y or h,x,y. When there are more ys provided than xs (or vice versa) the last x will be matched to all remaining ys.
@@ -88,12 +89,6 @@ Data format:
 	--xlabel XLABEL
 	--ylabel YLABEL
 	--debug 		Output lines that are not successfully parsed
-
-Future Data formats:
-  hx,hy	2D Histogram data (Not supported yet)
-
-You can also start a new plot by passing a new output file name in the stream (e.g. #plotcli -o newplot).
-
 	*/
 
 struct Settings {
