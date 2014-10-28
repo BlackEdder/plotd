@@ -394,7 +394,8 @@ Figure[string] handleMessage( string msg, ref Settings settings ) {
 			if (figures[plotID].histPoints.length > 0) {
 				auto bins = figures[plotID].histPoints
 					.map!( (pnt) => [pnt.x,pnt.y] )
-					.toBins!(Bins!size_t)( 11 );
+					.toBins!(Bins!size_t)( 
+							max( 11, min( 31, figures[plotID].histData.length/100 ) ) );
 				debug writeln( "Drawing 2D histogram: ", bins );
 				auto histBounds = Bounds( bins.min, bins.max,
 							bins[0].min, bins[0].max);
