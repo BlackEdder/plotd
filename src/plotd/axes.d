@@ -25,6 +25,14 @@ module plotd.axes;
 
 import std.math : floor, pow, abs, ceil, log10;
 
+enum AdaptationType { none, rolling, full }
+
+unittest {
+	AdaptationType adapt;
+	assert( adapt == AdaptationType.none );
+	assert( adapt != AdaptationType.full );
+}
+
 class Axis {
     this( double newmin, double newmax ) {
         min = newmin;
