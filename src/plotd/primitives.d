@@ -139,7 +139,7 @@ struct Bounds {
     }
 
     this( string value ) {
-        auto bnds = value.split( "," );
+        auto bnds = value.strip.split( "," );
         assert( bnds.length == 4 );
         min_x = to!double(bnds[0]); max_x = to!double(bnds[1]); 
         min_y = to!double(bnds[2]); max_y = to!double(bnds[3]);
@@ -147,6 +147,7 @@ struct Bounds {
 
     unittest {
         assert( Bounds( "0.1,0.2,0.3,0.4" ) == Bounds( 0.1, 0.2, 0.3, 0.4 ) );
+        assert( Bounds( "0.1,0.2,0.3,0.4\n" ) == Bounds( 0.1, 0.2, 0.3, 0.4 ) );
     }
 }
 

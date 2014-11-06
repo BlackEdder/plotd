@@ -28,6 +28,9 @@ import std.string : split;
 
 import docopt : ArgValue;
 
+import axes = plotd.axes : AdaptationMode;
+import plotd.primitives : Bounds;
+
 version( unittest ) {
 	import std.algorithm : equal;
 	import std.stdio : writeln;
@@ -52,7 +55,7 @@ unittest {
 	assert( aa1.merge( aa2 ) == ["x" : 1.0, "y": 3.0, "z":4.0] );
 }
 
-auto helpText = "Usage: plotcli [-f] [-o OUTPUT] [-d FORMAT]
+auto helpText = "Usage: plotcli [-f] [-o OUTPUT] [-d FORMAT] [-b BOUNDS]
 
 Plotcli is a plotting program that will plot data from provided data streams (files). It will ignore any lines it doesn't understand, making it possible to feed it \"dirty\" streams/files. All options can also be provided within the stream by using the prefix #plotcli (e.g. #plotcli -d x,y).
 
@@ -60,6 +63,7 @@ Options:
   -f          Follow the stream, i.e. keep listening for new lines.
   -d FORMAT		String describing the content of each row. Different row formats supported: x, y and h, with h indication histogram data. For more information see Data format section.
   -o OUTPUT		Outputfile (without extension).
+	-b BOUNDS   Give specific bounds for the plot in a comma separated list (min_x,max_x,min_y,max_y).
 
 Data format:
   Using -d it is possible to specify what each column in your data file represents. Supported formats are:
@@ -95,6 +99,8 @@ struct Settings {
 	Formats formats;
 	string outputFile = "plotcli";
 	bool follow = false;
+	auto adaptationMode = axes.AdaptationMode.full;
+	Bounds plotBounds = Bounds( 0, 1, 0, 1 );
 }
 
 unittest {
@@ -112,6 +118,10 @@ Settings updateSettings( Settings settings, ArgValue[string] options ) {
 		settings.outputFile = options["-o"].to!string;
 	if ( options["-f"].isTrue )
 		settings.follow = true;
+	if ( !options["-b"].isNull ) {
+		settings.adaptationMode = axes.AdaptationMode.none;
+		settings.plotBounds = Bounds( options["-b"].to!string );
+	}
 	return settings;
 }
 
@@ -140,4 +150,11 @@ unittest {
 	settings = settings.updateSettings( 
 			docopt(helpText, ["-o", "name"], true, "plotcli") );
 	assert( settings.follow == true );
+
+	// Bounds
+	assert( settings.adaptationMode == AdaptationMode.full );
+	settings = settings.updateSettings( 
+			docopt(helpText, ["-b", "-10,9,12,15"], true, "plotcli") );
+	assert( settings.adaptationMode == AdaptationMode.none );
+	assert( settings.plotBounds == Bounds( -10,9,12,15 ) );
 }

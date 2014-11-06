@@ -25,12 +25,12 @@ module plotd.axes;
 
 import std.math : floor, pow, abs, ceil, log10;
 
-enum AdaptationType { none, rolling, full }
+enum AdaptationMode { none, rolling, full }
 
 unittest {
-	AdaptationType adapt;
-	assert( adapt == AdaptationType.none );
-	assert( adapt != AdaptationType.full );
+	AdaptationMode adapt;
+	assert( adapt == AdaptationMode.none );
+	assert( adapt != AdaptationMode.full );
 }
 
 class Axis {

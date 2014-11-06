@@ -61,6 +61,11 @@ class Figure {
 				Bounds( 70, 400, 70, 400 ) );
 	}
 
+	this( Bounds bounds ) {
+		plot = createPlotState( bounds,
+				Bounds( 70, 400, 70, 400 ) );
+	}
+
 	private:
   	ColorRange colorRange;
 	  Color[][int] colors;

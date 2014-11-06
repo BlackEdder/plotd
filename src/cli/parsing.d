@@ -34,6 +34,7 @@ import std.regex : ctRegex, match, split;
 
 import docopt;
 
+import axes = plotd.axes : AdaptationMode;
 import plotd.binning;
 import plotd.drawing;
 import plotd.plot;
@@ -316,15 +317,16 @@ Figure[string] handleMessage( string msg, ref Settings settings ) {
 	{
 		plotID = settings.outputFile ~ plotID;
 		if ( plotID !in figures )
-			figures[plotID] = new Figure;
+			figures[plotID] = new Figure( settings.plotBounds );
 		foreach( dataID, cMs; cMs1.groupBy!( (cm) => cm.dataID ) ) {
 			debug writeln( "plotID: ", plotID, " dataID: ", dataID );
 			debug writeln( "Plotting data: ", cMs );
 			auto parsedRow = applyColumnData( cMs, figures[plotID].columnCount );
 
-			figures[plotID].adjustBounds( 
-					parsedRow.points ~ parsedRow.linePoints );
-
+			if ( settings.adaptationMode == axes.AdaptationMode.full ) {
+				figures[plotID].adjustBounds( 
+						parsedRow.points ~ parsedRow.linePoints );
+			}
 
 			Event[] events;
 
@@ -379,11 +381,14 @@ Figure[string] handleMessage( string msg, ref Settings settings ) {
 				auto bins = figures[plotID].histData.toBins!size_t(
 						max( 11, min( 31, figures[plotID].histData.length/100 ) ) );
 
-				auto histBounds = bins.optimalBounds( 0.99 );
-
-				debug writeln( "Adjusting histogram to bounds: ", histBounds );
-				// Adjust plotBounds 
-				figures[plotID].plot = createPlotState( histBounds,
+				if ( settings.adaptationMode == axes.AdaptationMode.full ) {
+					// Adjust plotBounds 
+					figures[plotID].plot.plotBounds = bins.optimalBounds( 0.99 );
+					debug writeln( "Adjusting histogram to bounds: ", 
+							figures[plotID].plot.plotBounds );
+				}
+				// Create empty plot
+				figures[plotID].plot = createPlotState( figures[plotID].plot.plotBounds,
 						figures[plotID].plot.marginBounds );
 				// Plot Bins
 				figures[plotID].plot.plotContext = drawBins( figures[plotID].plot.plotContext, bins );
@@ -397,11 +402,15 @@ Figure[string] handleMessage( string msg, ref Settings settings ) {
 					.toBins!(Bins!size_t)( 
 							max( 11, min( 31, figures[plotID].histData.length/100 ) ) );
 				debug writeln( "Drawing 2D histogram: ", bins );
-				auto histBounds = Bounds( bins.min, bins.max,
+				if ( settings.adaptationMode == axes.AdaptationMode.full ) {
+					// Adjust plotBounds 
+					figures[plotID].plot.plotBounds = Bounds( bins.min, bins.max,
 							bins[0].min, bins[0].max);
-				debug writeln( "Adjusting 2D histogram to bounds: ", histBounds );
-				// Adjust plotBounds 
-				figures[plotID].plot = createPlotState( histBounds,
+					debug writeln( "Adjusting 2D histogram to bounds: ", 
+							figures[plotID].plot.plotBounds );
+				}
+				// Create empty plot
+				figures[plotID].plot = createPlotState( figures[plotID].plot.plotBounds,
 						figures[plotID].plot.marginBounds );
 				figures[plotID].plot.plotContext 
 					= drawBins( figures[plotID].plot.plotContext, bins );
