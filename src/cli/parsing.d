@@ -42,7 +42,7 @@ import plotd.primitives;
 
 import cli.algorithm : groupBy;
 import cli.column;
-import cli.figure : adjustBounds, Figure, getColor;
+import cli.figure : adjustBounds, drawLabels, Figure, getColor;
 import cli.options : helpText, Settings, updateSettings;
 
 version( unittest ) {
@@ -326,6 +326,7 @@ Figure[string] handleMessage( string msg, ref Settings settings ) {
 			if ( settings.adaptationMode == axes.AdaptationMode.full ) {
 				figures[plotID].adjustBounds( 
 						parsedRow.points ~ parsedRow.linePoints );
+				figures[plotID].drawLabels( settings.xlabel, settings.ylabel );
 			}
 
 			Event[] events;
@@ -390,6 +391,7 @@ Figure[string] handleMessage( string msg, ref Settings settings ) {
 				// Create empty plot
 				figures[plotID].plot = createPlotState( figures[plotID].plot.plotBounds,
 						figures[plotID].plot.marginBounds );
+				figures[plotID].drawLabels( settings.xlabel, settings.ylabel );
 				// Plot Bins
 				figures[plotID].plot.plotContext = drawBins( figures[plotID].plot.plotContext, bins );
 				debug writeln( "Drawn bins to histogram: ", bins );
@@ -414,6 +416,7 @@ Figure[string] handleMessage( string msg, ref Settings settings ) {
 						figures[plotID].plot.marginBounds );
 				figures[plotID].plot.plotContext 
 					= drawBins( figures[plotID].plot.plotContext, bins );
+				figures[plotID].drawLabels( settings.xlabel, settings.ylabel );
 			}
 		}
 		figures[plotID].columnCount += 1;

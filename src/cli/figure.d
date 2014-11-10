@@ -141,3 +141,8 @@ unittest {
 			minimalBounds( [Point(-1,1),Point(0,2)] ) );
 }
 
+void drawLabels( Figure figure, string xlabel, string ylabel ) {
+	figure.plot.axesContext = drawXLabel( xlabel, figure.plot.plotBounds, figure.plot.axesContext );
+	figure.plot.axesContext = drawYLabel( ylabel, figure.plot.plotBounds, figure.plot.axesContext );
+}
+

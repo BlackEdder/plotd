@@ -55,7 +55,7 @@ unittest {
 	assert( aa1.merge( aa2 ) == ["x" : 1.0, "y": 3.0, "z":4.0] );
 }
 
-auto helpText = "Usage: plotcli [-f] [-o OUTPUT] [-d FORMAT] [-b BOUNDS]
+auto helpText = "Usage: plotcli [-f] [-o OUTPUT] [-d FORMAT] [-b BOUNDS] [--xlabel XLABEL] [--ylabel YLABEL]
 
 Plotcli is a plotting program that will plot data from provided data streams (files). It will ignore any lines it doesn't understand, making it possible to feed it \"dirty\" streams/files. All options can also be provided within the stream by using the prefix #plotcli (e.g. #plotcli -d x,y).
 
@@ -64,6 +64,8 @@ Options:
   -d FORMAT		String describing the content of each row. Different row formats supported: x, y and h, with h indication histogram data. For more information see Data format section.
   -o OUTPUT		Outputfile (without extension).
 	-b BOUNDS   Give specific bounds for the plot in a comma separated list (min_x,max_x,min_y,max_y).
+	--xlabel XLABEL
+	--ylabel YLABEL
 
 Data format:
   Using -d it is possible to specify what each column in your data file represents. Supported formats are:
@@ -90,8 +92,6 @@ Data format:
 	--adaptive-cache CACHESIZE (does it stop being adaptive after this or does it stop caching? Maybe combine with not adaptive or scrolling)
 	--bounds BOUNDS (minx,maxx,miny,maxy) sets default MODE to not
 	--image	IMAGETYPE (pdf,png)
-	--xlabel XLABEL
-	--ylabel YLABEL
 	--debug 		Output lines that are not successfully parsed
 	*/
 
@@ -101,6 +101,8 @@ struct Settings {
 	bool follow = false;
 	auto adaptationMode = axes.AdaptationMode.full;
 	Bounds plotBounds = Bounds( 0, 1, 0, 1 );
+	string xlabel = "x";
+	string ylabel = "y";
 }
 
 unittest {
@@ -122,6 +124,10 @@ Settings updateSettings( Settings settings, ArgValue[string] options ) {
 		settings.adaptationMode = axes.AdaptationMode.none;
 		settings.plotBounds = Bounds( options["-b"].to!string );
 	}
+	if ( !options["--xlabel"].isNull ) 
+		settings.xlabel = options["--xlabel"].to!string;
+	if ( !options["--ylabel"].isNull ) 
+		settings.ylabel = options["--ylabel"].to!string;
 	return settings;
 }
 
