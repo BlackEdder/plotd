@@ -287,6 +287,36 @@ Formats updateFormat( double[] floats, Formats formats ) {
 		return Formats( floats.length );
 }
 
+private string[] splitArgs( string args ) {
+	string[] splitted;
+	bool inner = false;
+	string curr = "";
+	foreach( s; args ) 
+	{
+		if (s == " ".to!char && !inner) 
+		{
+			splitted ~= curr;
+			curr = "";
+		}
+		else if ( s == "\"".to!char || s == "\'".to!char ) 
+		{
+			if (inner)
+				inner = false;
+			else
+				inner = true;
+		}
+		else
+			curr ~= s;
+	}
+	splitted ~= curr;
+	return splitted;
+}
+
+unittest {
+	assert( "-b arg".splitArgs.length == 2 );
+	assert( "-b \"arg b\"".splitArgs.length == 2 );
+	assert( "-b \"arg b\" -f".splitArgs.length == 3 );
+}
 
 
 // High level functionality for handlingMessages
@@ -298,8 +328,9 @@ Figure[string] handleMessage( string msg, ref Settings settings ) {
 	auto m = msg.match( r"^#plotcli (.*)" );
 	if (m) {
 		settings = settings.updateSettings( 
-				docopt.docopt(helpText, 
-					std.string.split( m.captures[1], " " ), true, "plotcli") );
+				docopt.docopt(helpText,
+					// TODO only split on first space
+					splitArgs( m.captures[1] ), true, "plotcli") );
 		//writeln( settings );
 	}
 

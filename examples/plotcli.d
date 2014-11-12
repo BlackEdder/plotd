@@ -40,6 +40,7 @@ import cli.options : helpText, Settings, updateSettings;
 
 void main( string[] args ) {
 	// Options
+	debug writeln( "Arguments: ", args );
 	auto doc = helpText;
 
 	auto arguments = docopt.docopt(doc, args[1..$], true, "plotcli");
