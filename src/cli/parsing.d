@@ -316,8 +316,10 @@ Figure[string] handleMessage( string msg, ref Settings settings ) {
 	foreach( plotID, cMs1; columnData.groupBy!( (cm) => cm.plotID ) )
 	{
 		plotID = settings.outputFile ~ plotID;
-		if ( plotID !in figures )
-			figures[plotID] = new Figure( settings.plotBounds );
+		if ( plotID !in figures ) {
+			figures[plotID] = new Figure( settings.plotBounds ); 
+			figures[plotID].drawLabels( settings.xlabel, settings.ylabel );
+		}
 		foreach( dataID, cMs; cMs1.groupBy!( (cm) => cm.dataID ) ) {
 			debug writeln( "plotID: ", plotID, " dataID: ", dataID );
 			debug writeln( "Plotting data: ", cMs );
@@ -414,9 +416,9 @@ Figure[string] handleMessage( string msg, ref Settings settings ) {
 				// Create empty plot
 				figures[plotID].plot = createPlotState( figures[plotID].plot.plotBounds,
 						figures[plotID].plot.marginBounds );
+				figures[plotID].drawLabels( settings.xlabel, settings.ylabel );
 				figures[plotID].plot.plotContext 
 					= drawBins( figures[plotID].plot.plotContext, bins );
-				figures[plotID].drawLabels( settings.xlabel, settings.ylabel );
 			}
 		}
 		figures[plotID].columnCount += 1;
