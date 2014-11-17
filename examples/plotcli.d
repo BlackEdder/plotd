@@ -29,7 +29,7 @@ import docopt;
 
 
 import cli.figure : Figure;
-import cli.parsing : handleMessage, saveFigures;
+import cli.parsing : handleMessage, plotFigures, saveFigures;
 import cli.options : helpText, Settings, updateSettings;
 
 /**
@@ -64,11 +64,16 @@ void main( string[] args ) {
 		}
 
 		auto curr = Clock.currTime;
-		if ( curr - lastTime > dur!("msecs")( 250 ) ) {
-			saveFigures(figures);
-			lastTime = curr;
+		if (settings.follow) {
+			if ( curr - lastTime > dur!("msecs")( 250 ) ) {
+				debug writeln( "Plotting figures" );
+				plotFigures(figures, settings);
+				saveFigures(figures);
+				lastTime = curr;
+			}
 		}
 	}
+	plotFigures(figures, settings);
 	scope(exit) saveFigures(figures);
 	scope(failure) saveFigures(figures);
 }

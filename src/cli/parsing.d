@@ -42,7 +42,7 @@ import plotd.primitives;
 
 import cli.algorithm : groupBy;
 import cli.column;
-import cli.figure : adjustBounds, drawLabels, Figure, getColor;
+import cli.figure : adjustBounds, drawHistogram, drawLabels, Figure, getColor;
 import cli.options : helpText, Settings, updateSettings;
 
 version( unittest ) {
@@ -356,10 +356,12 @@ Figure[string] handleMessage( string msg, ref Settings settings ) {
 			debug writeln( "Plotting data: ", cMs );
 			auto parsedRow = applyColumnData( cMs, figures[plotID].columnCount );
 
-			if ( settings.adaptationMode == axes.AdaptationMode.full ) {
-				figures[plotID].adjustBounds( 
-						parsedRow.points ~ parsedRow.linePoints );
-				figures[plotID].drawLabels( settings.xlabel, settings.ylabel );
+			{ // Plotting
+				if ( settings.adaptationMode == axes.AdaptationMode.full ) {
+					figures[plotID].adjustBounds( 
+							parsedRow.points ~ parsedRow.linePoints );
+					figures[plotID].drawLabels( settings.xlabel, settings.ylabel );
+				}
 			}
 
 			Event[] events;
@@ -410,51 +412,18 @@ Figure[string] handleMessage( string msg, ref Settings settings ) {
 
 			// Histograms
 			figures[plotID].histData ~= parsedRow.histData;
-			if (figures[plotID].histData.length > 0) {
-				// Create bin
-				auto bins = figures[plotID].histData.toBins!size_t(
-						max( 11, min( 31, figures[plotID].histData.length/100 ) ) );
-
-				if ( settings.adaptationMode == axes.AdaptationMode.full ) {
-					// Adjust plotBounds 
-					figures[plotID].plot.plotBounds = bins.optimalBounds( 0.99 );
-					debug writeln( "Adjusting histogram to bounds: ", 
-							figures[plotID].plot.plotBounds );
-				}
-				// Create empty plot
-				figures[plotID].plot = createPlotState( figures[plotID].plot.plotBounds,
-						figures[plotID].plot.marginBounds );
-				figures[plotID].drawLabels( settings.xlabel, settings.ylabel );
-				// Plot Bins
-				figures[plotID].plot.plotContext = drawBins( figures[plotID].plot.plotContext, bins );
-				debug writeln( "Drawn bins to histogram: ", bins );
-			}
-
 			figures[plotID].histPoints ~= parsedRow.histPoints;
-			if (figures[plotID].histPoints.length > 0) {
-				auto bins = figures[plotID].histPoints
-					.map!( (pnt) => [pnt.x,pnt.y] )
-					.toBins!(Bins!size_t)( 
-							max( 11, min( 31, figures[plotID].histData.length/100 ) ) );
-				debug writeln( "Drawing 2D histogram: ", bins );
-				if ( settings.adaptationMode == axes.AdaptationMode.full ) {
-					// Adjust plotBounds 
-					figures[plotID].plot.plotBounds = Bounds( bins.min, bins.max,
-							bins[0].min, bins[0].max);
-					debug writeln( "Adjusting 2D histogram to bounds: ", 
-							figures[plotID].plot.plotBounds );
-				}
-				// Create empty plot
-				figures[plotID].plot = createPlotState( figures[plotID].plot.plotBounds,
-						figures[plotID].plot.marginBounds );
-				figures[plotID].drawLabels( settings.xlabel, settings.ylabel );
-				figures[plotID].plot.plotContext 
-					= drawBins( figures[plotID].plot.plotContext, bins );
-			}
 		}
 		figures[plotID].columnCount += 1;
 	}
 	return figures;
+}
+
+void plotFigures( Figure[string] figures, Settings settings ) {
+	foreach ( plotID, figure; figures ) {
+		drawHistogram( figure, settings.xlabel, settings.ylabel, 
+				settings.adaptationMode );
+	}
 }
 
 void saveFigures(Figure[string] figures) {

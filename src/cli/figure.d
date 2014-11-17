@@ -23,14 +23,17 @@
 
 module cli.figure;
 
+import std.algorithm : map;
+
 import cli.parsing : Event;
 
 //import plotd.plot : PlotState, createPlotState;
 //import plotd.primitives : Bounds, Color, ColorRange, Point;
+import axes = plotd.axes : AdaptationMode;
+import plotd.binning : Bins, optimalBounds, toBins;
 import plotd.drawing;
 import plotd.plot;
 import plotd.primitives;
-
 
 /*
 TODO: add unique id struct that can be calculated from plotID and either
@@ -144,5 +147,48 @@ unittest {
 void drawLabels( Figure figure, string xlabel, string ylabel ) {
 	figure.plot.axesContext = drawXLabel( xlabel, figure.plot.plotBounds, figure.plot.axesContext );
 	figure.plot.axesContext = drawYLabel( ylabel, figure.plot.plotBounds, figure.plot.axesContext );
+}
+
+void drawHistogram( Figure figure, string xlabel, string ylabel, axes.AdaptationMode adaptationMode ) {
+	if (figure.histData.length > 0) {
+		// Create bin
+		auto bins = figure.histData.toBins!size_t(
+				max( 11, min( 31, figure.histData.length/100 ) ) );
+
+		if ( adaptationMode == axes.AdaptationMode.full ) {
+			// Adjust plotBounds 
+			figure.plot.plotBounds = bins.optimalBounds( 0.99 );
+			debug writeln( "Adjusting histogram to bounds: ", 
+					figure.plot.plotBounds );
+		}
+		// Create empty plot
+		figure.plot = createPlotState( figure.plot.plotBounds,
+				figure.plot.marginBounds );
+		figure.drawLabels( xlabel, ylabel );
+		// Plot Bins
+		figure.plot.plotContext = drawBins( figure.plot.plotContext, bins );
+		debug writeln( "Drawn bins to histogram: ", bins );
+	}
+
+	if (figure.histPoints.length > 0) {
+		auto bins = figure.histPoints
+			.map!( (pnt) => [pnt.x,pnt.y] )
+			.toBins!(Bins!size_t)( 
+					max( 11, min( 31, figure.histData.length/100 ) ) );
+		debug writeln( "Drawing 2D histogram: ", bins );
+		if ( adaptationMode == axes.AdaptationMode.full ) {
+			// Adjust plotBounds 
+			figure.plot.plotBounds = Bounds( bins.min, bins.max,
+					bins[0].min, bins[0].max);
+			debug writeln( "Adjusting 2D histogram to bounds: ", 
+					figure.plot.plotBounds );
+		}
+		// Create empty plot
+		figure.plot = createPlotState( figure.plot.plotBounds,
+				figure.plot.marginBounds );
+		figure.drawLabels( xlabel, ylabel );
+		figure.plot.plotContext 
+			= drawBins( figure.plot.plotContext, bins );
+	}
 }
 
