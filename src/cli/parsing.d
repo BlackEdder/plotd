@@ -25,6 +25,7 @@ module cli.parsing;
 
 import std.algorithm;
 import std.conv : ConvException, to;
+import std.functional: memoize;
 import std.math : isNaN;
 import std.range;
 import std.stdio : write, writeln;
@@ -318,6 +319,8 @@ unittest {
 	assert( "-b \"arg b\" -f".splitArgs.length == 3 );
 }
 
+alias memoize!(docopt.docopt) cachedDocopt;
+
 
 // High level functionality for handlingMessages
 Figure[string] handleMessage( string msg, ref Settings settings ) {
@@ -328,9 +331,8 @@ Figure[string] handleMessage( string msg, ref Settings settings ) {
 	auto m = msg.match( r"^#plotcli (.*)" );
 	if (m) {
 		settings = settings.updateSettings( 
-				docopt.docopt(helpText,
-					// TODO only split on first space
-					splitArgs( m.captures[1] ), true, "plotcli") );
+				cachedDocopt(helpText,
+					splitArgs( m.captures[1] ), true, "plotcli", false) );
 		//writeln( settings );
 	}
 
