@@ -49,7 +49,6 @@ class Figure {
 
 	Event[] eventCache;
 
-	bool validBound = false;
 	Point[] pointCache;
 	Point[][int] previousLines;
 
@@ -58,6 +57,7 @@ class Figure {
 
 	size_t columnCount = 0;
 
+	AdaptiveBounds plotBounds;
 
 	this() {
 		plot = createPlotState( Bounds( 0, 1, 0, 1 ),
@@ -97,35 +97,12 @@ unittest {
 
 void adjustBounds( Figure figure, Point[] newPoints ) 
 {
-	// Two scenarios. 
-	// 1) we do not have enough points to properly 
-	// initialize the bounds (if we have only one point, or multiple points
-	// with the same x or y coordinate.
-	//
-	// 2) New points fall outside of the current validBounds and we 
-	// need to adjust the bounds to incorporate the new points
-	bool needAdjusting = false;
-	if ( !figure.validBound ) {
-		needAdjusting = true;
-		figure.pointCache ~= newPoints;
-		figure.validBound = validBounds( figure.pointCache );
-		figure.plot.plotBounds = minimalBounds( 
-				figure.pointCache );
-		if (figure.validBound)
-			figure.pointCache = [];
-	} else {
-		foreach( point; newPoints ) {
-			if (!figure.plot.plotBounds.withinBounds( point )) {
-				figure.plot.plotBounds = adjustedBounds( figure.plot.plotBounds, point );
-				needAdjusting = true;
-			}
-		}
-	}
+	bool needAdjusting = figure.plotBounds.adapt( newPoints );
 
 	if (needAdjusting) {
 		// create new plot surface
 		figure.plot = createPlotState( 
-				figure.plot.plotBounds, 
+				figure.plotBounds, 
 				figure.plot.marginBounds );
 
 		// Repaint all previous points and lines
@@ -137,9 +114,7 @@ void adjustBounds( Figure figure, Point[] newPoints )
 unittest {
 	auto fig = new Figure;
 	fig.adjustBounds( [Point(0,1), Point( 0,2 )] );
-	assert( fig.validBound == false );
 	fig.adjustBounds( [Point(-1,1)] );
-	assert( fig.validBound == true );
 	assert( fig.plot.plotBounds == 
 			minimalBounds( [Point(-1,1),Point(0,2)] ) );
 }
