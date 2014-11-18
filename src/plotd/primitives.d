@@ -24,8 +24,9 @@
 module plotd.primitives;
 
 import std.algorithm : min, max;
-import std.conv;
+import std.conv : to;
 import std.math;
+import std.range: isInputRange;
 import std.stdio;
 import std.string;
 
@@ -274,6 +275,97 @@ unittest {
 	assert( minimalBounds( [Point(0,0)] ) == Bounds( -0.5, 0.5, -0.5, 0.5 ) );
 	assert( minimalBounds( [Point(0,0),Point(0,0)] ) == Bounds( -0.5, 0.5, -0.5, 0.5 ) );
 	assert( minimalBounds( [Point(0.1,0),Point(0,0.2)] ) == Bounds( 0, 0.1, 0, 0.2 ) );
+}
+
+///
+struct AdaptiveBounds {
+	/*
+Notes: the main problem with adaptive bounds is the beginning, where we need to
+make sure we have enough points to form valid bounds (i.e. with width and height
+> 0). For example if all points fall on a vertical lines, we have no information
+for the width of the plot
+
+Here we take care to always return a valid set of bounds
+	 */
+	Bounds bounds = Bounds( 0,1,0,1 );
+	alias bounds this;
+
+	this( string str ) {
+		bounds = Bounds( str );
+	}
+  this( double my_min_x, double my_max_x, double my_min_y, double my_max_y ) {
+		bounds = Bounds( my_min_x, my_max_x, my_min_y, my_max_y );
+	}
+	this( Bounds bnds ) {
+		bounds = bnds;
+	}
+		
+	bool adapt( T : Point )( T point ) {
+		bool adapted = false;
+		if ( !valid ) {
+			adapted = true;
+			pointCache ~= point;
+			valid = validBounds( pointCache );
+			bounds = minimalBounds( pointCache );
+			if (valid)
+				pointCache = [];
+		} else {
+			if (!bounds.withinBounds( point )) {
+				bounds = bounds.adjustedBounds( point );
+				adapted = true;
+			}
+		}
+		assert( (valid && pointCache.length == 0) || !valid );
+
+		return adapted;
+	}
+
+	bool adapt( T )( T points ) if (isInputRange!T)
+	{
+		bool adapted = false;
+		foreach ( point; points ) {
+			auto a = adapt( point );
+			if ( a )
+				adapted = true;
+		}
+		return adapted;
+	}
+
+	private:
+		Point[] pointCache;
+		bool valid = false;
+}
+
+unittest {
+	assert( AdaptiveBounds( "0.1,0.2,0.3,0.4" ) == Bounds( 0.1, 0.2, 0.3, 0.4 ) );
+
+	// Test adapt
+	AdaptiveBounds bounds;
+	assert( bounds.width > 0 );
+	assert( bounds.height > 0 );
+	auto pnt = Point( 5,2 );
+	assert( bounds.adapt( pnt ) );
+	assert( bounds.width > 0 );
+	assert( bounds.height > 0 );
+	assert( bounds.withinBounds( pnt ) );
+	assert( !bounds.valid );
+
+	pnt = Point( 3,2 );
+	assert( bounds.adapt( pnt ) );
+	assert( bounds.width >= 2 );
+	assert( bounds.height > 0 );
+	assert( bounds.withinBounds( pnt ) );
+	assert( !bounds.valid );
+
+	pnt = Point( 3,5 );
+	assert( bounds.adapt( pnt ) );
+	assert( bounds.width >= 2 );
+	assert( bounds.height >= 3 );
+	assert( bounds.withinBounds( pnt ) );
+	assert( bounds.valid );
+
+	pnt = Point( 4,4 );
+	assert( !bounds.adapt( pnt ) );
 }
 
 struct Point {
