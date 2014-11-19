@@ -350,7 +350,7 @@ Figure[string] handleMessage( string msg, ref Settings settings ) {
 	{
 		plotID = settings.outputFile ~ plotID;
 		if ( plotID !in figures ) {
-			figures[plotID] = new Figure( settings.plotBounds ); 
+			figures[plotID] = new Figure( settings.plotBounds, settings.marginBounds ); 
 			figures[plotID].drawLabels( settings.xlabel, settings.ylabel );
 		}
 		foreach( dataID, cMs; cMs1.groupBy!( (cm) => cm.dataID ) ) {

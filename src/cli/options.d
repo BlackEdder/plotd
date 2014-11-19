@@ -55,7 +55,7 @@ unittest {
 	assert( aa1.merge( aa2 ) == ["x" : 1.0, "y": 3.0, "z":4.0] );
 }
 
-auto helpText = "Usage: plotcli [-f] [-o OUTPUT] [-d FORMAT] [-b BOUNDS] [--xlabel XLABEL] [--ylabel YLABEL]
+auto helpText = "Usage: plotcli [-f] [-o OUTPUT] [-d FORMAT] [-b BOUNDS] [--xlabel XLABEL] [--ylabel YLABEL] [--margin-bounds MARGINBOUNDS]
 
 Plotcli is a plotting program that will plot data from provided data streams (files). It will ignore any lines it doesn't understand, making it possible to feed it \"dirty\" streams/files. All options can also be provided within the stream by using the prefix #plotcli (e.g. #plotcli -d x,y).
 
@@ -66,6 +66,7 @@ Options:
   -b BOUNDS   Give specific bounds for the plot in a comma separated list (min_x,max_x,min_y,max_y).
   --xlabel XLABEL
   --ylabel YLABEL
+  --margin-bounds MARGINBOUNDS  Specific bounds (in pixel size) for the margins. Format (all in pixels): xmargin,xwidth,ymargin,yheight. Default values 70,400,70,400.
 
 Data format:
   Using -d it is possible to specify what each column in your data file represents. Supported formats are:
@@ -82,7 +83,7 @@ Data format:
 
   Plot ids: if you want to plot the data to different figures you can add a letter/name at the end: xa,ya or x1a,y1a. This plot id will be appended to the OUTPUT file name. 
 
-  Extrapolatin (..): plotcli will try to extrapolate from your previous options. This also works for simple plot ids. I.e. if you want a separate histogram for each column: ha,hb,.. results in ha,hb,hc,hd,he etc. Other examples: y,.. -> y,y,y,y etc. x,y,y,.. -> x,y,y,y,y etc.
+  Extrapolating (..): plotcli will try to extrapolate from your previous options. This also works for simple plot ids. I.e. if you want a separate histogram for each column: ha,hb,.. results in ha,hb,hc,hd,he etc. Other examples: y,.. -> y,y,y,y etc. x,y,y,.. -> x,y,y,y,y etc.
 
 ";
 
@@ -101,6 +102,7 @@ struct Settings {
 	bool follow = false;
 	auto adaptationMode = axes.AdaptationMode.full;
 	Bounds plotBounds = Bounds( 0, 1, 0, 1 );
+	Bounds marginBounds = Bounds( 70, 400, 70, 400 );
 	string xlabel = "x";
 	string ylabel = "y";
 }
@@ -124,6 +126,9 @@ Settings updateSettings( Settings settings, ArgValue[string] options ) {
 		settings.adaptationMode = axes.AdaptationMode.none;
 		settings.plotBounds = Bounds( options["-b"].to!string );
 	}
+	if ( !options["--margin-bounds"].isNull ) {
+		settings.marginBounds = Bounds( options["--margin-bounds"].to!string );
+	}	
 	if ( !options["--xlabel"].isNull ) 
 		settings.xlabel = options["--xlabel"].to!string;
 	if ( !options["--ylabel"].isNull ) 

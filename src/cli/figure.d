@@ -64,9 +64,9 @@ class Figure {
 				Bounds( 70, 400, 70, 400 ) );
 	}
 
-	this( Bounds bounds ) {
+	this( Bounds bounds, Bounds marginBounds ) {
 		plot = createPlotState( bounds,
-				Bounds( 70, 400, 70, 400 ) );
+				marginBounds );
 	}
 
 	private:
