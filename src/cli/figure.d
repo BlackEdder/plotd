@@ -36,18 +36,9 @@ import plotd.plot;
 import plotd.primitives;
 
 /*
-TODO: add unique id struct that can be calculated from plotID and either
-a dataID or a counter (columnID) if no dataID was given
-
-This can then be used to access previous line points and colorID...
-Isn't the previousLine cache already like that and an easier solution? Probably!
-Maybe jus separate color events is easier, instead of including them in points.i.e. always change color and add to events before the point.. Think that that is the solution.. foreach column -> eventCache ~ colorChange, eventCache point
+TODO: Rename this to better fit with its function, i.e. mostly keeping color data around
 */
-
 class Figure {
-	Event[] eventCache;
-
-	Point[] pointCache;
 	Point[][int] previousLines;
 
 	double[] histData;
@@ -55,16 +46,16 @@ class Figure {
 
 	size_t columnCount = 0;
 
-	AdaptiveBounds plotBounds;
-
-	LazyFigure lf = new LazyFigure;
+	LazyFigure lf;
 
 	this() {
+		lf = new LazyFigure;
 		lf.plotBounds = Bounds( 0, 1, 0, 1 );
 		lf.marginBounds = Bounds( 70, 400, 70, 400 );
 	}
 
 	this( Bounds bounds, Bounds marginBounds ) {
+		lf = new LazyFigure;
 		lf.plotBounds = bounds;
 		lf.marginBounds = marginBounds;
 	}
@@ -98,48 +89,7 @@ unittest {
 	assert( col != fig.getColor( -1, 1 ) ); 
 }
 
-/*void drawHistogram( Figure figure, string xlabel, string ylabel, axes.AdaptationMode adaptationMode ) {
-	if (figure.histData.length > 0) {
-		// Create bin
-		auto bins = figure.histData.toBins!size_t(
-				max( 11, min( 31, figure.histData.length/100 ) ) );
 
-		if ( adaptationMode == axes.AdaptationMode.full ) {
-			// Adjust plotBounds 
-			figure.plotBounds = bins.optimalBounds( 0.99 );
-			debug writeln( "Adjusting histogram to bounds: ", 
-					figure.plot.plotBounds );
-		}
-		// Create empty plot
-		figure.lf._plot = createPlotState( figure.lf._plotBounds,
-				figure.lf._marginBounds );
-		figure.drawLabels( xlabel, ylabel );
-		// Plot Bins
-		figure.plot.plotContext = draw.drawBins( figure.plot.plotContext, bins );
-		debug writeln( "Drawn bins to histogram: ", bins );
-	}
-
-	if (figure.histPoints.length > 0) {
-		auto bins = figure.histPoints
-			.map!( (pnt) => [pnt.x,pnt.y] )
-			.toBins!(Bins!size_t)( 
-					max( 11, min( 31, figure.histData.length/100 ) ) );
-		debug writeln( "Drawing 2D histogram: ", bins );
-		if ( adaptationMode == axes.AdaptationMode.full ) {
-			// Adjust plotBounds 
-			figure.plot.plotBounds = Bounds( bins.min, bins.max,
-					bins[0].min, bins[0].max);
-			debug writeln( "Adjusting 2D histogram to bounds: ", 
-					figure.plot.plotBounds );
-		}
-		// Create empty plot
-		figure.plot = createPlotState( figure.plot.plotBounds,
-				figure.plot.marginBounds );
-		figure.drawLabels( xlabel, ylabel );
-		figure.plot.plotContext 
-			= draw.drawBins( figure.plot.plotContext, bins );
-	}
-}*/
 
 /// Only plot when needed not before
 class LazyFigure {
@@ -169,6 +119,11 @@ class LazyFigure {
 
 	@property ylabel( string yl ) {
 		_ylabel = yl;
+	}
+
+	@property adaptationMode() 
+	{
+		return _adaptionMode;
 	}
 
 	@property adaptationMode( axes.AdaptationMode am ) 
@@ -244,3 +199,52 @@ class LazyFigure {
 		axes.AdaptationMode _adaptionMode;
 }
 
+//TODO: this is a bit of a hack, need to properly implement separate context
+// for histograms and then combining contexts
+void drawHistogram( Figure figure ) {
+	if (figure.histData.length > 0) {
+		// Create bin
+		auto bins = figure.histData.toBins!size_t(
+				max( 11, min( 31, figure.histData.length/100 ) ) );
+
+		if ( figure.lf.adaptationMode == axes.AdaptationMode.full ) {
+			// Adjust plotBounds 
+			figure.lf.plotBounds = bins.optimalBounds( 0.99 );
+			debug writeln( "Adjusting histogram to bounds: ", 
+					figure.lf._plotBounds );
+		}
+		// Empty current events/plot (this is the hacky bit)
+		figure.lf.fullRedraw = true;
+		figure.lf._events.length = 0;
+		figure.lf._eventCache.length = 0;
+		figure.lf.plot;
+
+		// Plot Bins
+		figure.lf._plot.plotContext = draw.drawBins( 
+				figure.lf._plot.plotContext, bins );
+		debug writeln( "Drawn bins to histogram: ", bins );
+	}
+
+	if (figure.histPoints.length > 0) {
+		auto bins = figure.histPoints
+			.map!( (pnt) => [pnt.x,pnt.y] )
+			.toBins!(Bins!size_t)( 
+					max( 11, min( 31, figure.histData.length/100 ) ) );
+		debug writeln( "Drawing 2D histogram: ", bins );
+		if ( figure.lf.adaptationMode == axes.AdaptationMode.full ) {
+			// Adjust plotBounds 
+			figure.lf.plotBounds = Bounds( bins.min, bins.max,
+					bins[0].min, bins[0].max);
+			debug writeln( "Adjusting 2D histogram to bounds: ", 
+					figure.lf._plotBounds );
+		}
+		// Empty current events/plot (this is the hacky bit)
+		figure.lf.fullRedraw = true;
+		figure.lf._events.length = 0;
+		figure.lf._eventCache.length = 0;
+		figure.lf.plot;
+
+		figure.lf._plot.plotContext 
+			= draw.drawBins( figure.lf._plot.plotContext, bins );
+	}
+}

@@ -43,7 +43,7 @@ import plotd.primitives;
 
 import cli.algorithm : groupBy;
 import cli.column;
-import cli.figure : Figure, getColor;
+import cli.figure : drawHistogram, Figure, getColor;
 import cli.options : helpText, Settings, updateSettings;
 
 version( unittest ) {
@@ -392,13 +392,6 @@ Figure[string] handleMessage( string msg, ref Settings settings ) {
 			if (parsedRow.linePoints.length > 0)
 				figures[plotID].previousLines[dataID] = parsedRow.linePoints;
 
-			// TODO: Move all actually plotting outside of this handler. 
-			// Could just return the events that need to happen, although
-			// That is more difficult with histogram, since those events override
-			// Earlier, so return two types of events: Ones that can be forgotten
-			// the next time this method is called, ones that needs to be
-			// remembered till we execute them.
-
 			// Histograms
 			figures[plotID].histData ~= parsedRow.histData;
 			figures[plotID].histPoints ~= parsedRow.histPoints;
@@ -410,9 +403,7 @@ Figure[string] handleMessage( string msg, ref Settings settings ) {
 
 void plotFigures( Figure[string] figures, Settings settings ) {
 	foreach ( plotID, figure; figures ) {
-		writeln( "Need to implement histogram drawing" );
-		//drawHistogram( figure, settings.xlabel, settings.ylabel, 
-		//		settings.adaptationMode );
+		drawHistogram( figure );
 		figure.lf.plot();
 	}
 }
