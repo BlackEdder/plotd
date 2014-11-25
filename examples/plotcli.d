@@ -38,6 +38,12 @@ import cli.options : helpText, Settings, updateSettings;
 	Mainly used to pipe data into
 	*/
 
+void drawAndSave( ref Figure[string] figures, ref Settings settings ) {
+	debug writeln( "Plotting figures" );
+	plotFigures(figures, settings);
+	saveFigures(figures);
+}
+
 void main( string[] args ) {
 	// Options
 	debug writeln( "Arguments: ", args );
@@ -57,19 +63,22 @@ void main( string[] args ) {
 		figures = handleMessage( msg, settings );
 
 		msg = readln();
+
+		bool waiting = false;
 		while ( settings.follow && msg.length == 0 ) // Got to end of file
 		{
+			if (!waiting) // Always draw once when waiting
+				drawAndSave( figures, settings );
+			waiting = true;
 			Thread.sleep( dur!("msecs")( 100 ) );
 			msg = readln();
+		}
 
-			auto curr = Clock.currTime;
-			if (settings.follow) {
-				if ( curr - lastTime > dur!("msecs")( 500 ) ) {
-					debug writeln( "Plotting figures" );
-					plotFigures(figures, settings);
-					saveFigures(figures);
-					lastTime = curr;
-				}
+		auto curr = Clock.currTime;
+		if (settings.follow) {
+			if ( curr - lastTime > dur!("msecs")( 500 ) ) {
+				drawAndSave( figures, settings );
+				lastTime = curr;
 			}
 		}
 	}
