@@ -61,15 +61,15 @@ void main( string[] args ) {
 		{
 			Thread.sleep( dur!("msecs")( 100 ) );
 			msg = readln();
-		}
 
-		auto curr = Clock.currTime;
-		if (settings.follow) {
-			if ( curr - lastTime > dur!("msecs")( 250 ) ) {
-				debug writeln( "Plotting figures" );
-				plotFigures(figures, settings);
-				saveFigures(figures);
-				lastTime = curr;
+			auto curr = Clock.currTime;
+			if (settings.follow) {
+				if ( curr - lastTime > dur!("msecs")( 500 ) ) {
+					debug writeln( "Plotting figures" );
+					plotFigures(figures, settings);
+					saveFigures(figures);
+					lastTime = curr;
+				}
 			}
 		}
 	}
