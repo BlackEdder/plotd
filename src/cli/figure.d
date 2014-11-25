@@ -31,7 +31,7 @@ import cli.parsing : Event;
 //import plotd.primitives : Bounds, Color, ColorRange, Point;
 import axes = plotd.axes : AdaptationMode;
 import plotd.binning : Bins, optimalBounds, toBins;
-import plotd.drawing;
+import draw = plotd.drawing;
 import plotd.plot;
 import plotd.primitives;
 
@@ -45,8 +45,6 @@ Maybe jus separate color events is easier, instead of including them in points.i
 */
 
 class Figure {
-	PlotState plot;
-
 	Event[] eventCache;
 
 	Point[] pointCache;
@@ -59,14 +57,16 @@ class Figure {
 
 	AdaptiveBounds plotBounds;
 
+	LazyFigure lf = new LazyFigure;
+
 	this() {
-		plot = createPlotState( Bounds( 0, 1, 0, 1 ),
-				Bounds( 70, 400, 70, 400 ) );
+		lf.plotBounds = Bounds( 0, 1, 0, 1 );
+		lf.marginBounds = Bounds( 70, 400, 70, 400 );
 	}
 
 	this( Bounds bounds, Bounds marginBounds ) {
-		plot = createPlotState( bounds,
-				marginBounds );
+		lf.plotBounds = bounds;
+		lf.marginBounds = marginBounds;
 	}
 
 	private:
@@ -86,6 +86,9 @@ Color getColor( Figure figure, int dataID, size_t id = 0 ) {
 	}
 	return figure.colors[dataID][id];
 }
+unittest {
+	assert( true );
+}
 
 unittest {
 	auto fig = new Figure;
@@ -95,36 +98,7 @@ unittest {
 	assert( col != fig.getColor( -1, 1 ) ); 
 }
 
-void adjustBounds( Figure figure, Point[] newPoints ) 
-{
-	bool needAdjusting = figure.plotBounds.adapt( newPoints );
-
-	if (needAdjusting) {
-		// create new plot surface
-		figure.plot = createPlotState( 
-				figure.plotBounds, 
-				figure.plot.marginBounds );
-
-		// Repaint all previous points and lines
-		foreach( event; figure.eventCache )
-			event( figure.plot );
-	}
-}
-
-unittest {
-	auto fig = new Figure;
-	fig.adjustBounds( [Point(0,1), Point( 0,2 )] );
-	fig.adjustBounds( [Point(-1,1)] );
-	assert( fig.plot.plotBounds == 
-			minimalBounds( [Point(-1,1),Point(0,2)] ) );
-}
-
-void drawLabels( Figure figure, string xlabel, string ylabel ) {
-	figure.plot.axesContext = drawXLabel( xlabel, figure.plot.plotBounds, figure.plot.axesContext );
-	figure.plot.axesContext = drawYLabel( ylabel, figure.plot.plotBounds, figure.plot.axesContext );
-}
-
-void drawHistogram( Figure figure, string xlabel, string ylabel, axes.AdaptationMode adaptationMode ) {
+/*void drawHistogram( Figure figure, string xlabel, string ylabel, axes.AdaptationMode adaptationMode ) {
 	if (figure.histData.length > 0) {
 		// Create bin
 		auto bins = figure.histData.toBins!size_t(
@@ -132,16 +106,16 @@ void drawHistogram( Figure figure, string xlabel, string ylabel, axes.Adaptation
 
 		if ( adaptationMode == axes.AdaptationMode.full ) {
 			// Adjust plotBounds 
-			figure.plot.plotBounds = bins.optimalBounds( 0.99 );
+			figure.plotBounds = bins.optimalBounds( 0.99 );
 			debug writeln( "Adjusting histogram to bounds: ", 
 					figure.plot.plotBounds );
 		}
 		// Create empty plot
-		figure.plot = createPlotState( figure.plot.plotBounds,
-				figure.plot.marginBounds );
+		figure.lf._plot = createPlotState( figure.lf._plotBounds,
+				figure.lf._marginBounds );
 		figure.drawLabels( xlabel, ylabel );
 		// Plot Bins
-		figure.plot.plotContext = drawBins( figure.plot.plotContext, bins );
+		figure.plot.plotContext = draw.drawBins( figure.plot.plotContext, bins );
 		debug writeln( "Drawn bins to histogram: ", bins );
 	}
 
@@ -163,7 +137,110 @@ void drawHistogram( Figure figure, string xlabel, string ylabel, axes.Adaptation
 				figure.plot.marginBounds );
 		figure.drawLabels( xlabel, ylabel );
 		figure.plot.plotContext 
-			= drawBins( figure.plot.plotContext, bins );
+			= draw.drawBins( figure.plot.plotContext, bins );
 	}
+}*/
+
+/// Only plot when needed not before
+class LazyFigure {
+	@property point( Point pnt ) {
+		if ( _adaptionMode == axes.AdaptationMode.full )
+		{
+			auto needAdjusting = _plotBounds.adapt( pnt );
+
+			if (needAdjusting)
+				fullRedraw = true;
+		}
+
+		_events ~= delegate( PlotState plot ) {	
+			plot.plotContext = draw.drawPoint( pnt, plot.plotContext ); 
+		};
+	}
+
+	@property color( Color clr ) {
+		_events ~= delegate( PlotState plot ) {	
+			plot.plotContext = draw.color( plot.plotContext, clr );
+		};
+	}
+
+	@property xlabel( string xl ) {
+		_xlabel = xl;
+	}
+
+	@property ylabel( string yl ) {
+		_ylabel = yl;
+	}
+
+	@property adaptationMode( axes.AdaptationMode am ) 
+	{
+		_adaptionMode = am;
+	}
+
+	@property plotBounds( Bounds pB )
+	{
+		_plotBounds = pB;
+		fullRedraw = true;
+	}
+
+	@property marginBounds( Bounds mB )
+	{
+		_marginBounds = mB;
+		fullRedraw = true;
+	}
+
+	void line( Point fromP, Point toP ) {
+		if ( _adaptionMode == axes.AdaptationMode.full ) {
+			auto needAdjustingFrom = _plotBounds.adapt( fromP );
+			auto needAdjustingTo = _plotBounds.adapt( toP );
+			if (needAdjustingFrom || needAdjustingTo)
+				fullRedraw = true;
+		}
+
+		_events ~= delegate( PlotState plot ) {	
+			plot.plotContext = draw.drawLine( toP, fromP, plot.plotContext );
+		};
+	}
+
+	void plot() {
+		if ( fullRedraw ) 
+		{
+			_plot = createPlotState( _plotBounds,
+					_marginBounds );
+			foreach( event; _eventCache )
+				event( _plot );
+			fullRedraw = false;
+		}
+
+		debug writeln( "LazyFigure::plot plotting xlabel ", _xlabel );
+
+		_plot.axesContext = draw.drawXLabel( _xlabel, _plot.plotBounds, 
+				_plot.axesContext );
+		_plot.axesContext = draw.drawYLabel( _ylabel, _plot.plotBounds, 
+				_plot.axesContext );
+
+		foreach( event; _events ) {
+			event( _plot );
+			_eventCache ~= event;
+		}
+		_events.length = 0;
+	}
+
+	void save( string fn )
+	{
+		_plot.save( fn );
+	}
+
+	private:
+		bool fullRedraw = true; // Is a new redraw needed 
+		PlotState _plot;
+		AdaptiveBounds _plotBounds;
+		Bounds _marginBounds;
+		Event[] _eventCache; // Old events
+		Event[] _events; // Events since last plot
+
+		string _xlabel;
+		string _ylabel;
+
+		axes.AdaptationMode _adaptionMode;
 }
 

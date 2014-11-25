@@ -43,7 +43,7 @@ import plotd.primitives;
 
 import cli.algorithm : groupBy;
 import cli.column;
-import cli.figure : adjustBounds, drawHistogram, drawLabels, Figure, getColor;
+import cli.figure : Figure, getColor;
 import cli.options : helpText, Settings, updateSettings;
 
 version( unittest ) {
@@ -351,31 +351,23 @@ Figure[string] handleMessage( string msg, ref Settings settings ) {
 		plotID = settings.outputFile ~ plotID;
 		if ( plotID !in figures ) {
 			figures[plotID] = new Figure( settings.plotBounds, settings.marginBounds ); 
-			figures[plotID].drawLabels( settings.xlabel, settings.ylabel );
+			figures[plotID].lf.xlabel = settings.xlabel;
+			figures[plotID].lf.ylabel = settings.ylabel;
 		}
+		auto figure = figures[plotID];
+		figure.lf.adaptationMode = settings.adaptationMode;
 		foreach( dataID, cMs; cMs1.groupBy!( (cm) => cm.dataID ) ) {
 			debug writeln( "plotID: ", plotID, " dataID: ", dataID );
 			debug writeln( "Plotting data: ", cMs );
 			auto parsedRow = applyColumnData( cMs, figures[plotID].columnCount );
 
-			{ // Plotting
-				if ( settings.adaptationMode == axes.AdaptationMode.full ) {
-					figures[plotID].adjustBounds( 
-							parsedRow.points ~ parsedRow.linePoints );
-					figures[plotID].drawLabels( settings.xlabel, settings.ylabel );
-				}
-			}
-
-			Event[] events;
-
 			foreach( i; 0..parsedRow.points.length ) {
 				if (dataID == -1) {
-					events ~= createColorEvent( 
-							figures[plotID].getColor( dataID, i ) );
+					figure.lf.color = figure.getColor( dataID, i );
 				} else {
-					events ~= createColorEvent( figures[plotID].getColor( dataID ) );
+					figure.lf.color = figure.getColor( dataID );
 				}
-				events ~= createPointEvent( parsedRow.points[i] );
+				figure.lf.point = parsedRow.points[i];
 			}
 
 			if (dataID !in figures[plotID].previousLines) {
@@ -387,12 +379,11 @@ Figure[string] handleMessage( string msg, ref Settings settings ) {
 					== parsedRow.linePoints.length ) {
 				foreach( i; 0..parsedRow.linePoints.length ) {
 					if (dataID == -1) {
-						events ~= createColorEvent( 
-								figures[plotID].getColor( dataID, i ) );
+						figure.lf.color = figure.getColor( dataID, i );
 					} else {
-						events ~= createColorEvent( figures[plotID].getColor( dataID ) );
+						figure.lf.color = figure.getColor( dataID );
 					}
-					events ~= createLineEvent( 
+					figure.lf.line( 
 							figures[plotID].previousLines[dataID][i],
 							parsedRow.linePoints[i] );
 				}
@@ -407,10 +398,6 @@ Figure[string] handleMessage( string msg, ref Settings settings ) {
 			// Earlier, so return two types of events: Ones that can be forgotten
 			// the next time this method is called, ones that needs to be
 			// remembered till we execute them.
-			foreach( event; events )
-				event( figures[plotID].plot );
-
-			figures[plotID].eventCache ~= events;
 
 			// Histograms
 			figures[plotID].histData ~= parsedRow.histData;
@@ -423,8 +410,10 @@ Figure[string] handleMessage( string msg, ref Settings settings ) {
 
 void plotFigures( Figure[string] figures, Settings settings ) {
 	foreach ( plotID, figure; figures ) {
-		drawHistogram( figure, settings.xlabel, settings.ylabel, 
-				settings.adaptationMode );
+		writeln( "Need to implement histogram drawing" );
+		//drawHistogram( figure, settings.xlabel, settings.ylabel, 
+		//		settings.adaptationMode );
+		figure.lf.plot();
 	}
 }
 
@@ -432,6 +421,6 @@ void saveFigures(Figure[string] figures) {
 	foreach ( plotID, figure; figures ) {
 		auto fname = plotID ~ ".png";
 		debug writeln( "Saving to file: " ~ fname );
-		figure.plot.save( fname );
+		figure.lf.save( fname );
 	}
 }
