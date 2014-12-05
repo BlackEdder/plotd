@@ -63,6 +63,12 @@ plotcli < examples/1/data.txt
 ```
 This will create a png file in the current directory.
 
+Of course plotcli can easily be used together with other command line tools. For example I used the following command 
+```
+awk '{ print $3 }' abc_data/10_samples2 | plotcli -b 0,1,0,50
+```
+To plot a histogram of the third column.
+
 ## License
 
 The library is distributed under the GPL-v3 license. See the file COPYING for more details.
