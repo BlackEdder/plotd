@@ -22,7 +22,7 @@ This will create a binary in bin/plotcli which you can copy anywhere in your pat
 
 ## Usage:
 
-``
+```
 $ plotcli --help
 Usage: plotcli [-f] [-o OUTPUT] [-d FORMAT] [-b BOUNDS] [--xlabel XLABEL] [--ylabel YLABEL] [--margin-bounds MARGINBOUNDS]
 
@@ -53,7 +53,7 @@ Data format:
   Plot ids: if you want to plot the data to different figures you can add a letter/name at the end: xa,ya or x1a,y1a. This plot id will be appended to the OUTPUT file name. 
 
   Extrapolating (..): plotcli will try to extrapolate from your previous options. This also works for simple plot ids. I.e. if you want a separate histogram for each column: ha,hb,.. results in ha,hb,hc,hd,he etc. Other examples: y,.. -> y,y,y,y etc. x,y,y,.. -> x,y,y,y,y etc.
-``
+```
 
 ## Examples
 
