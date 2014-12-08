@@ -1,16 +1,20 @@
 # Plotcli: Plot streams of data from the command line
 
-Plotcli is a command line application that can create plots from text/csv files. It will ignore any lines it does not understand, so it is safe to use with files that contain non csv data as well. Typically I use it during simulations, where I simulate data, which I pipe to a file and then I plot it using plotcli
+Plotcli is a command line application that can create plots from text/csv files and from piped data, making it useful during data analysis. Plotcli work best in combination with other command line tools such as awk. Plotcli will ignore any lines it does not understand, so it is safe to use with files that contain non csv data as well. Typically I use it during simulations, where I simulate data, which I pipe to a file and then I plot it using plotcli:
 
 ```
 plotcli < path/to/file
 ```
 
-While new data is coming in it will plot them and save the plot to a file (by default plotcli.png). I then normally use the eye of gnome (eog) to open the plot. The nice thing about eog is that it will keep reloading the updated plot, every time it is being written to. Currently plotcli will keep checking for new data until it is killed with ctrl+c.
+It will plot the data and save the plot to a file (by default plotcli.png). Plotcli has a command line switch similar to tail (-f) so that it will keep checking for new data until it is killed with ctrl+c.
 
 Plotcli is meant to be adaptive and will automatically adapt the plot boundaries to encompass all the data.
 
 ## Installation
+
+You need to have dub and cairo installed
+(https://github.com/D-Programming-Language/dub). Then you can install
+plotcli as follows:
 
 ```
 git clone http://github.com/BlackEdder/plotd.git
