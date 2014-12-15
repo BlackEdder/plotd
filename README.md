@@ -32,12 +32,12 @@ This will create a binary in bin/plotcli which you can copy anywhere in your pat
 $ plotcli --help
 Usage: plotcli [-f] [-o OUTPUT] [-d FORMAT] [-b BOUNDS] [--xlabel XLABEL] [--ylabel YLABEL] [--margin-bounds MARGINBOUNDS]
 
-Plotcli is a plotting program that will plot data from provided data streams (files). It will ignore any lines it doesn't understand, making it possible to feed it "dirty" streams/files. All options can also be provided within the stream by using the prefix #plotcli (e.g. #plotcli -d x,y).
+Plotcli is a plotting program that will plot data from provided data streams (files). It will ignore any lines it doesn't understand, making it possible to feed it \"dirty\" streams/files. All options can also be provided within the stream by using the prefix #plotcli (e.g. #plotcli -d x,y).
 
 Options:
   -f          Follow the stream, i.e. keep listening for new lines.
   -d FORMAT   String describing the content of each row. Different row formats supported: x, y and h, with h indication histogram data. For more information see Data format section.
-  -o OUTPUT       Outputfile (without extension).
+  -o OUTPUT	  Outputfile (without extension).
   -b BOUNDS   Give specific bounds for the plot in a comma separated list (min_x,max_x,min_y,max_y).
   --xlabel XLABEL
   --ylabel YLABEL
@@ -50,7 +50,9 @@ Data format:
   lx,ly Line data
   h     Histogram data
   hx,hy 2D Histogram data 
-  ..      Extrapolate from previous options, i.e. x,y,.. -> x,y,x,y,..
+  ..	  Extrapolate from previous options, i.e. x,y,.. -> x,y,x,y,..
+  id    Default data id to use for this row of data (it is also possible to provide a column specific id (see Data ids below))
+  pn    Default plot id id to use for this row of data (it is also possible to provide a column specific id (see Plot ids below))
 
   Examples: x,y,y or h,x,y. When there are more ys provided than xs (or vice versa) the last x will be matched to all remaining ys.
 

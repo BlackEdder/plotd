@@ -275,15 +275,15 @@ unittest {
 }
 
 /// Check whether current RowMode makes sense for new data.
-Formats updateFormat( string[] floats, Formats formats ) {
-	if ( floats.length == 0 )
+Formats updateFormat( string[] columns, Formats formats ) {
+	if ( columns.length == 0 )
 		return formats;
-	if ( formats.validFormat( floats ) )
+	if ( formats.validFormat( columns ) )
 		return formats;
-  else if (floats.find!((a) => !a.isNumeric).length > 0)
+  else if (columns.find!((a) => !a.isNumeric).length > 0)
     return formats;
 	else 
-		return Formats( floats.length );
+		return Formats( columns.length );
 }
 
 unittest {
@@ -343,22 +343,23 @@ Figure[string] handleMessage( string msg, ref Settings settings ) {
 		//writeln( settings );
 	}
 
-	auto floats = msg.strip
+	auto columns = msg.strip
 		.toRange;
 
-	debug writeln( "Converted to doubles: ", floats );
+	debug writeln( "Converted to columns: ", columns );
 
-	settings.formats = updateFormat( floats, settings.formats );
+	settings.formats = updateFormat( columns, settings.formats );
 
-  if (validFormat( settings.formats, floats ) ) {
-    auto columnData = settings.formats.zip(floats).map!( 
-        (mv) { auto cD = ColumnData( mv[0] ); cD.value = mv[1].to!double; return cD; } );
+  if (validFormat( settings.formats, columns ) ) {
+    auto columnData = settings.formats.zip(columns).map!( 
+        (mv) { auto cD = ColumnData( mv[0] ); if( cD.mode.length > 0 ) 
+          cD.value = mv[1].to!double; return cD; } );
 
     foreach( plotID, cMs1; columnData.groupBy!( (cm) => cm.plotID ) )
     {
       if (plotID.length == 0)
         foreach ( i; settings.formats.defaultPlotIDColumns )
-          plotID ~= floats[i];
+          plotID ~= columns[i];
       plotID = settings.outputFile ~ plotID;
       if ( plotID !in figures ) {
         figures[plotID] = new Figure( settings.plotBounds, settings.marginBounds ); 
@@ -370,7 +371,7 @@ Figure[string] handleMessage( string msg, ref Settings settings ) {
       foreach( dataID, cMs; cMs1.groupBy!( (cm) => cm.dataID ) ) {
         if (dataID.length == 0)
         foreach ( i; settings.formats.defaultDataIDColumns )
-          dataID ~= floats[i];
+          dataID ~= columns[i];
 
         debug writeln( "plotID: ", plotID, " dataID: ", dataID );
         debug writeln( "Plotting data: ", cMs );
