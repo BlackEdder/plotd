@@ -6,7 +6,6 @@
 	"license": "GPL-3.0",
 	"libs": ["cairo"],
 	"dependencies": {
-		"tested": "~master",
 		"cairod": "~master",
 		"dmocks-revived": "~master",
 		"docopt": ">=0.6.0"

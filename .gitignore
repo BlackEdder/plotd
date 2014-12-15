@@ -9,3 +9,6 @@ dub.selections.json
 *.png
 /*.csv
 /*.d
+.stversions/
+*.plotcli
+tmp/
