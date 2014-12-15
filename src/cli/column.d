@@ -24,7 +24,7 @@
 module cli.column;
 
 import std.conv : to;
-import std.regex : ctRegex, match;
+import std.regex : ctRegex, match, matchFirst;
 import std.range;
 import std.string;
 
@@ -117,6 +117,8 @@ unittest {
 
 ///
 struct Formats {
+  int defaultPlotIDColumn = -1;
+  int defaultDataIDColumn = -1;
 
 	this( size_t noColumns ) {
 		if (noColumns > 1)
@@ -168,8 +170,19 @@ struct Formats {
 ///
 Formats parseDataFormat( string dataFormat ) {
 	Formats formats;
+  int id = 0;
 	foreach( fm; dataFormat.split( ',' ) ) {
-		formats._formats ~= parseColumnFormat( fm ); 
+    // Is it a default value:
+    if (fm.matchFirst( "id" ) ) {
+      formats.defaultDataIDColumn = id;
+      formats._formats ~= Format();
+    } else if (fm.matchFirst( "pn" ) ) {
+      formats.defaultPlotIDColumn = id;
+      formats._formats ~= Format();
+    } else {
+		  formats._formats ~= parseColumnFormat( fm ); 
+    }
+    ++id;
 	}
 	return formats;
 }
@@ -243,16 +256,14 @@ unittest {
 }
 
 unittest {
-  // Possible data format:
-  // id,pl,x,y,y,lx1,ly1,x1a,y1a,hx,hy
-  // id results in a default id (overruled by x1a (where id is 1)
-  // pl gives the plotname (appended to -o plotname)
-  // We want a parsing function that takes default id and 
-  // default plotname (plotcli)
+  auto formats = parseDataFormat( "x,y,x1,y1,x1a,y1a" );
 
-  // Solution: Make formats keep default names around and set them
-  // when needed!
+  assert( formats.defaultDataIDColumn == -1 );
+  assert( formats.defaultPlotIDColumn == -1 );
+  assert( formats.walkLength == 6 );
 
-  // Ideally -d id,.. Would generate a pegged parser 
-  // that can be applied to a column
+  formats = parseDataFormat( "id,pn,x,y,x1,y1,x1a,y1a" );
+  assert( formats.defaultDataIDColumn == 0 );
+  assert( formats.defaultPlotIDColumn == 1 );
+  assert( formats.walkLength == 8 );
 }
