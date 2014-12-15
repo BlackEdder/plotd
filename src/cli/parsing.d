@@ -223,7 +223,7 @@ ParsedRow applyColumnData( ColumnData[] cMs, size_t columnID ) {
 
 unittest {
 	ColumnData cm( string mode, double value ) {
-		return ColumnData( mode, -1, "", value );
+		return ColumnData( mode, "", "", value );
 	}
 	
 	auto pr = applyColumnData( [cm("x",1), cm("y",2)], 0 );
@@ -362,7 +362,7 @@ Figure[string] handleMessage( string msg, ref Settings settings ) {
 			auto parsedRow = applyColumnData( cMs, figures[plotID].columnCount );
 
 			foreach( i; 0..parsedRow.points.length ) {
-				if (dataID == -1) {
+				if (dataID.length == 0) {
 					figure.lf.color = figure.getColor( dataID, i );
 				} else {
 					figure.lf.color = figure.getColor( dataID );
@@ -378,7 +378,7 @@ Figure[string] handleMessage( string msg, ref Settings settings ) {
 			if ( figures[plotID].previousLines[dataID].length 
 					== parsedRow.linePoints.length ) {
 				foreach( i; 0..parsedRow.linePoints.length ) {
-					if (dataID == -1) {
+					if (dataID.length == 0) {
 						figure.lf.color = figure.getColor( dataID, i );
 					} else {
 						figure.lf.color = figure.getColor( dataID );

@@ -34,7 +34,7 @@ version( unittest ) {
 
 struct Format {
 	string mode; /// x,y,lx,ly,h
-	int dataID = -1; /// -1 is the default value
+	string dataID; /// empty is the default value
 	string plotID; /// plotName/id 
 }
 
@@ -44,7 +44,7 @@ Format parseColumnFormat( string mode ) {
 	auto m = mode.match( columnRegex );
 	colMode.mode = m.captures[1];
 	if ( m.captures[2].length > 0 )
-		colMode.dataID = m.captures[2].to!int;
+		colMode.dataID = m.captures[2];
 	colMode.plotID = m.captures[3];
 	return colMode;
 }
@@ -52,18 +52,18 @@ Format parseColumnFormat( string mode ) {
 unittest {
 	auto col = parseColumnFormat( "lx1a" );
 	assert( col.mode == "lx" );
-	assert( col.dataID == 1 );
+	assert( col.dataID == "1" );
 	assert( col.plotID == "a" );
 	col = parseColumnFormat( "ly1a" );
 	assert( col.mode == "ly" );
 	col = parseColumnFormat( "xb" );
 	assert( col.mode == "x" );
-	assert( col.dataID == -1 );
+	assert( col.dataID == "" );
 	assert( col.plotID == "b" );
 
 	col = parseColumnFormat( "y3" );
 	assert( col.mode == "y" );
-	assert( col.dataID == 3 );
+	assert( col.dataID == "3" );
 	assert( col.plotID == "" );
 
 	col = parseColumnFormat( "hx" );
@@ -222,7 +222,7 @@ struct ColumnData {
 		_format = fm;
 	}
 
-	this( string mode, int dataID, string plotID, double v ) {
+	this( string mode, string dataID, string plotID, double v ) {
 		_format.mode = mode;
 		_format.dataID = dataID;
 		_format.plotID = plotID;
@@ -235,9 +235,24 @@ struct ColumnData {
 }
 
 unittest {
-	auto fm = Format( "lx", 1, "a" );
+	auto fm = Format( "lx", "1", "a" );
 	ColumnData cm = ColumnData( fm );
 	assert( cm.mode == "lx" );
-	assert( cm.dataID == 1 );
+	assert( cm.dataID == "1" );
 	assert( cm.plotID == "a" );
+}
+
+unittest {
+  // Possible data format:
+  // id,pl,x,y,y,lx1,ly1,x1a,y1a,hx,hy
+  // id results in a default id (overruled by x1a (where id is 1)
+  // pl gives the plotname (appended to -o plotname)
+  // We want a parsing function that takes default id and 
+  // default plotname (plotcli)
+
+  // Solution: Make formats keep default names around and set them
+  // when needed!
+
+  // Ideally -d id,.. Would generate a pegged parser 
+  // that can be applied to a column
 }

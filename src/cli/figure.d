@@ -39,7 +39,7 @@ import plotd.primitives;
 TODO: Rename this to better fit with its function, i.e. mostly keeping color data around
 */
 class Figure {
-	Point[][int] previousLines;
+	Point[][string] previousLines;
 
 	double[] histData;
 	Point[] histPoints;
@@ -62,10 +62,10 @@ class Figure {
 
 	private:
   	ColorRange colorRange;
-	  Color[][int] colors;
+	  Color[][string] colors;
 }
 
-Color getColor( Figure figure, int dataID, size_t id = 0 ) {
+Color getColor( Figure figure, string dataID, size_t id = 0 ) {
 	/// Make sure we cache the color
 	if (dataID !in figure.colors) {
 		figure.colors[dataID] ~= figure.colorRange.front;
@@ -83,10 +83,10 @@ unittest {
 
 unittest {
 	auto fig = new Figure;
-	auto col = fig.getColor( -1, 0 );
-	assert( col == fig.getColor( -1, 0 ) ); 
-	assert( col != fig.getColor( 1, 0 ) ); 
-	assert( col != fig.getColor( -1, 1 ) ); 
+	auto col = fig.getColor( "", 0 );
+	assert( col == fig.getColor( "", 0 ) ); 
+	assert( col != fig.getColor( "1", 0 ) ); 
+	assert( col != fig.getColor( "", 1 ) ); 
 }
 
 
