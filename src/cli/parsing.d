@@ -54,27 +54,18 @@ alias void delegate( PlotState plot ) Event;
 
 private auto csvRegex = ctRegex!(`,\s*|\s`);
 
-double[] toRange( string line ) {
-	try {
-		auto doubles = line.split( csvRegex )
-			.map!( (d) => d.strip( ' ' ).to!double );
-		
-		if ( doubles.any!isNaN )
-			return [];
-		else 
-			return doubles.array;
-	} catch (ConvException exp) { 
-		return [];
-	}
+auto toRange( string line ) {
+  return line.split( csvRegex )
+    .map!( (d) => d.strip( ' ' )).array;
 }
 
 unittest {
-	assert( "1,2".toRange == [1,2] );
-	assert( "0.5, 2".toRange == [0.5,2] );
-	assert( "bla, 2".toRange == [] );
-	assert( "1\t2".toRange == [1,2] );
-	assert( "1 2".toRange == [1,2] );
-	assert( "nan, 2".toRange == [] );
+	assert( "1,2".toRange == ["1","2"] );
+	assert( "0.5, 2".toRange == ["0.5","2"] );
+	assert( "bla, 2".toRange == ["bla","2"] );
+	assert( "1\t2".toRange == ["1","2"] );
+	assert( "1 2".toRange == ["1","2"] );
+	assert( "nan, 2".toRange == ["nan","2"] );
 }
 
 Point[] toPoints( double[] coords ) {
@@ -279,7 +270,7 @@ unittest {
 }
 
 /// Check whether current RowMode makes sense for new data.
-Formats updateFormat( double[] floats, Formats formats ) {
+Formats updateFormat( string[] floats, Formats formats ) {
 	if ( floats.length == 0 )
 		return formats;
 	if ( formats.validFormat( floats.length ) )
@@ -344,10 +335,12 @@ Figure[string] handleMessage( string msg, ref Settings settings ) {
 	settings.formats = updateFormat( floats, settings.formats );
 
 	auto columnData = settings.formats.zip(floats).map!( 
-			(mv) { auto cD = ColumnData( mv[0] ); cD.value = mv[1]; return cD; } );
+			(mv) { auto cD = ColumnData( mv[0] ); cD.value = mv[1].to!double; return cD; } );
 
 	foreach( plotID, cMs1; columnData.groupBy!( (cm) => cm.plotID ) )
 	{
+    if (plotID.length == 0)
+      plotID = floats[settings.formats.defaultPlotIDColumn];
 		plotID = settings.outputFile ~ plotID;
 		if ( plotID !in figures ) {
 			figures[plotID] = new Figure( settings.plotBounds, settings.marginBounds ); 
@@ -357,7 +350,9 @@ Figure[string] handleMessage( string msg, ref Settings settings ) {
 		auto figure = figures[plotID];
 		figure.lf.adaptationMode = settings.adaptationMode;
 		foreach( dataID, cMs; cMs1.groupBy!( (cm) => cm.dataID ) ) {
-			debug writeln( "plotID: ", plotID, " dataID: ", dataID );
+      if (dataID.length == 0)
+        dataID = floats[settings.formats.defaultDataIDColumn];
+      debug writeln( "plotID: ", plotID, " dataID: ", dataID );
 			debug writeln( "Plotting data: ", cMs );
 			auto parsedRow = applyColumnData( cMs, figures[plotID].columnCount );
 

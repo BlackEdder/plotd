@@ -213,6 +213,7 @@ unittest {
 
 ///
 bool validFormat( Formats formats, size_t noColumns ) {
+  // TODO: validFormat should actually check isNumeric etc
 	if ( formats.empty )
 		return false;
 	if ( formats._formats.length == noColumns ||
