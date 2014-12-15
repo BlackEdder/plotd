@@ -52,7 +52,7 @@ Data format:
   hx,hy 2D Histogram data 
   ..	  Extrapolate from previous options, i.e. x,y,.. -> x,y,x,y,..
   id    Default data id to use for this row of data (it is also possible to provide a column specific id (see Data ids below))
-  pn    Default plot id id to use for this row of data (it is also possible to provide a column specific id (see Plot ids below))
+  pn    Default plot name to use for this row of data (it is also possible to provide a column specific id (see Plot ids below))
 
   Examples: x,y,y or h,x,y. When there are more ys provided than xs (or vice versa) the last x will be matched to all remaining ys.
 
