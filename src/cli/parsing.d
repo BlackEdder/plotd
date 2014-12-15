@@ -28,6 +28,7 @@ import std.conv : ConvException, to;
 import std.functional: memoize;
 import std.math : isNaN;
 import std.range;
+import std.regex : regex, replaceFirst;
 import std.stdio : write, writeln;
 import std.string;
 
@@ -54,13 +55,17 @@ alias void delegate( PlotState plot ) Event;
 
 private auto csvRegex = ctRegex!(`,\s*|\s`);
 
-auto toRange( string line ) {
+string[] toRange( string line ) {
+  // Cut of any comments
+  line = line.replaceFirst( regex("#.*"), "" );
   return line.split( csvRegex )
-    .map!( (d) => d.strip( ' ' )).array;
+    .map!( (d) => d.strip( ' ' )).array.filter!("a!=\"\"").array;
 }
 
 unittest {
 	assert( "1,2".toRange == ["1","2"] );
+	assert( "1,2 #bla".toRange == ["1","2"] );
+	assert( "#bla".toRange == [] );
 	assert( "0.5, 2".toRange == ["0.5","2"] );
 	assert( "bla, 2".toRange == ["bla","2"] );
 	assert( "1\t2".toRange == ["1","2"] );
@@ -273,10 +278,21 @@ unittest {
 Formats updateFormat( string[] floats, Formats formats ) {
 	if ( floats.length == 0 )
 		return formats;
-	if ( formats.validFormat( floats.length ) )
+	if ( formats.validFormat( floats ) )
 		return formats;
+  else if (floats.find!((a) => !a.isNumeric).length > 0)
+    return formats;
 	else 
 		return Formats( floats.length );
+}
+
+unittest {
+  auto formats = updateFormat( "1,2".toRange, parseDataFormat( "x,y" ) );
+  assert( formats.front.mode ==  "x" );
+  formats = updateFormat( "1,2".toRange, parseDataFormat( "y,y,y" ) );
+  assert( formats.front.mode ==  "x" );
+  formats = updateFormat( "a,2".toRange, parseDataFormat( "y,y,y" ) );
+  assert( formats.front.mode ==  "y" );
 }
 
 private string[] splitArgs( string args ) {
@@ -334,67 +350,74 @@ Figure[string] handleMessage( string msg, ref Settings settings ) {
 
 	settings.formats = updateFormat( floats, settings.formats );
 
-	auto columnData = settings.formats.zip(floats).map!( 
-			(mv) { auto cD = ColumnData( mv[0] ); cD.value = mv[1].to!double; return cD; } );
+  if (validFormat( settings.formats, floats ) ) {
+    auto columnData = settings.formats.zip(floats).map!( 
+        (mv) { auto cD = ColumnData( mv[0] ); cD.value = mv[1].to!double; return cD; } );
 
-	foreach( plotID, cMs1; columnData.groupBy!( (cm) => cm.plotID ) )
-	{
-    if (plotID.length == 0)
-      plotID = floats[settings.formats.defaultPlotIDColumn];
-		plotID = settings.outputFile ~ plotID;
-		if ( plotID !in figures ) {
-			figures[plotID] = new Figure( settings.plotBounds, settings.marginBounds ); 
-			figures[plotID].lf.xlabel = settings.xlabel;
-			figures[plotID].lf.ylabel = settings.ylabel;
-		}
-		auto figure = figures[plotID];
-		figure.lf.adaptationMode = settings.adaptationMode;
-		foreach( dataID, cMs; cMs1.groupBy!( (cm) => cm.dataID ) ) {
-      if (dataID.length == 0)
-        dataID = floats[settings.formats.defaultDataIDColumn];
-      debug writeln( "plotID: ", plotID, " dataID: ", dataID );
-			debug writeln( "Plotting data: ", cMs );
-			auto parsedRow = applyColumnData( cMs, figures[plotID].columnCount );
+    foreach( plotID, cMs1; columnData.groupBy!( (cm) => cm.plotID ) )
+    {
+      if (plotID.length == 0)
+        foreach ( i; settings.formats.defaultPlotIDColumns )
+          plotID ~= floats[i];
+      plotID = settings.outputFile ~ plotID;
+      if ( plotID !in figures ) {
+        figures[plotID] = new Figure( settings.plotBounds, settings.marginBounds ); 
+        figures[plotID].lf.xlabel = settings.xlabel;
+        figures[plotID].lf.ylabel = settings.ylabel;
+      }
+      auto figure = figures[plotID];
+      figure.lf.adaptationMode = settings.adaptationMode;
+      foreach( dataID, cMs; cMs1.groupBy!( (cm) => cm.dataID ) ) {
+        if (dataID.length == 0)
+        foreach ( i; settings.formats.defaultDataIDColumns )
+          dataID ~= floats[i];
 
-			foreach( i; 0..parsedRow.points.length ) {
-				if (dataID.length == 0) {
-					figure.lf.color = figure.getColor( dataID, i );
-				} else {
-					figure.lf.color = figure.getColor( dataID );
-				}
-				figure.lf.point = parsedRow.points[i];
-			}
+        debug writeln( "plotID: ", plotID, " dataID: ", dataID );
+        debug writeln( "Plotting data: ", cMs );
+        auto parsedRow = applyColumnData( cMs, figures[plotID].columnCount );
 
-			if (dataID !in figures[plotID].previousLines) {
-				Point[] pnts;
-				figures[plotID].previousLines[dataID] = pnts;
-			}
+        foreach( i; 0..parsedRow.points.length ) {
+          if (dataID.length == 0) {
+            figure.lf.color = figure.getColor( dataID, i );
+          } else {
+            figure.lf.color = figure.getColor( dataID );
+          }
+          figure.lf.point = parsedRow.points[i];
+        }
 
-			if ( figures[plotID].previousLines[dataID].length 
-					== parsedRow.linePoints.length ) {
-				foreach( i; 0..parsedRow.linePoints.length ) {
-					if (dataID.length == 0) {
-						figure.lf.color = figure.getColor( dataID, i );
-					} else {
-						figure.lf.color = figure.getColor( dataID );
-					}
-					figure.lf.line( 
-							figures[plotID].previousLines[dataID][i],
-							parsedRow.linePoints[i] );
-				}
-			}
+        if (dataID !in figures[plotID].previousLines) {
+          Point[] pnts;
+          figures[plotID].previousLines[dataID] = pnts;
+        }
 
-			if (parsedRow.linePoints.length > 0)
-				figures[plotID].previousLines[dataID] = parsedRow.linePoints;
+        if ( figures[plotID].previousLines[dataID].length 
+            == parsedRow.linePoints.length ) {
+          foreach( i; 0..parsedRow.linePoints.length ) {
+            if (dataID.length == 0) {
+              figure.lf.color = figure.getColor( dataID, i );
+            } else {
+              figure.lf.color = figure.getColor( dataID );
+            }
+            figure.lf.line( 
+                figures[plotID].previousLines[dataID][i],
+                parsedRow.linePoints[i] );
+          }
+        }
 
-			// Histograms
-			figures[plotID].histData ~= parsedRow.histData;
-			figures[plotID].histPoints ~= parsedRow.histPoints;
-		}
-		figures[plotID].columnCount += 1;
-	}
+        if (parsedRow.linePoints.length > 0)
+          figures[plotID].previousLines[dataID] = parsedRow.linePoints;
+
+        // Histograms
+        figures[plotID].histData ~= parsedRow.histData;
+        figures[plotID].histPoints ~= parsedRow.histPoints;
+      }
+      figures[plotID].columnCount += 1;
+    }
+  }
 	return figures;
 }
+
+// TODO: Add better tests valid columns etc
 
 void plotFigures( Figure[string] figures, Settings settings ) {
 	foreach ( plotID, figure; figures ) {

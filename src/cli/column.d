@@ -117,8 +117,8 @@ unittest {
 
 ///
 struct Formats {
-  int defaultPlotIDColumn = -1;
-  int defaultDataIDColumn = -1;
+  int[] defaultPlotIDColumns;
+  int[] defaultDataIDColumns;
 
 	this( size_t noColumns ) {
 		if (noColumns > 1)
@@ -174,10 +174,10 @@ Formats parseDataFormat( string dataFormat ) {
 	foreach( fm; dataFormat.split( ',' ) ) {
     // Is it a default value:
     if (fm.matchFirst( "id" ) ) {
-      formats.defaultDataIDColumn = id;
+      formats.defaultDataIDColumns ~= id;
       formats._formats ~= Format();
     } else if (fm.matchFirst( "pn" ) ) {
-      formats.defaultPlotIDColumn = id;
+      formats.defaultPlotIDColumns ~= id;
       formats._formats ~= Format();
     } else {
 		  formats._formats ~= parseColumnFormat( fm ); 
@@ -212,20 +212,24 @@ unittest {
 }
 
 ///
-bool validFormat( Formats formats, size_t noColumns ) {
+bool validFormat( Formats formats, string[] columns ) {
   // TODO: validFormat should actually check isNumeric etc
 	if ( formats.empty )
 		return false;
-	if ( formats._formats.length == noColumns ||
+	if ( formats._formats.length == columns.length ||
 			formats._formats.back.mode == ".." 	) {
-		return true;
-	}
+    foreach( tup; formats.zip( columns ) ) {
+      if( tup[0].mode != "" && !tup[1].isNumeric )
+        return false;
+    }
+    return true;
+  }
 	return false;
 }
 
 unittest {
 	Formats fmts;
-	assert( !validFormat( fmts, 2 ) );
+	assert( !validFormat( fmts, ["",""] ) );
 }
 
 /// Format and data of a specific column
@@ -259,12 +263,16 @@ unittest {
 unittest {
   auto formats = parseDataFormat( "x,y,x1,y1,x1a,y1a" );
 
-  assert( formats.defaultDataIDColumn == -1 );
-  assert( formats.defaultPlotIDColumn == -1 );
+  assert( formats.defaultDataIDColumns.length == 0 );
+  assert( formats.defaultPlotIDColumns.length == 0 );
   assert( formats.walkLength == 6 );
 
   formats = parseDataFormat( "id,pn,x,y,x1,y1,x1a,y1a" );
-  assert( formats.defaultDataIDColumn == 0 );
-  assert( formats.defaultPlotIDColumn == 1 );
+  assert( formats.defaultDataIDColumns == [0] );
+  assert( formats.defaultPlotIDColumns == [1] );
+  assert( formats.walkLength == 8 );
+
+  formats = parseDataFormat( "id,id,x,y,x1,y1,x1a,y1a" );
+  assert( formats.defaultDataIDColumns == [0,1] );
   assert( formats.walkLength == 8 );
 }
