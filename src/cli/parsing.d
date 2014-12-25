@@ -282,8 +282,10 @@ Formats updateFormat( string[] columns, Formats formats ) {
 		return formats;
   else if (columns.find!((a) => !a.isNumeric).length > 0)
     return formats;
-	else 
+	else {
+    debug writeln( "Changing format to default format" );
 		return Formats( columns.length );
+  }
 }
 
 unittest {
