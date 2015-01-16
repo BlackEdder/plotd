@@ -52,7 +52,7 @@ CONTEXT drawFunction(CONTEXT)( double delegate(double) func,
 }
 
 /// Class that holds all state to do with one figure 
-class PlotState {
+class PlotState( string fileFormat = "png" ) {
 	Bounds plotBounds = Bounds( 0, 1, 0, 1 );
 	Bounds marginBounds = Bounds( 70, 400, 70, 400 );
 
@@ -61,9 +61,13 @@ class PlotState {
 	cairo.Context plotContext;
 }
 
+unittest {
+  new PlotState!"png";
+}
+
 /// Instantiate a new plot
-PlotState createPlotState( Bounds plotBounds, Bounds marginBounds ) {
-	auto plot = new PlotState;
+PlotState!("png") createPlotState( Bounds plotBounds, Bounds marginBounds ) {
+	auto plot = new PlotState!"png";
 	plot.plotBounds = plotBounds;
 	plot.marginBounds = marginBounds;
 
@@ -98,19 +102,19 @@ void drawRange(RANGE)( RANGE range, PlotState plot ) {
 }
 
 /// Draw function on our plot
-void drawFunction(CONTEXT)( double delegate(double) func,
-		PlotState plot ) {
+void drawFunction(T)( double delegate(double) func,
+		PlotState!T plot ) {
 	iota( plot.plotBounds.min_x, plot.plotBounds.max_x, 
 				plot.plotBounds.width/100.0 )
 			.map!( a => Point( a, func( a ) ) ).drawRange( plot );
 }
 
 /// Draw point on the plot
-void draw( Point point, PlotState plot ) {
+void draw(T)( Point point, PlotState!T plot ) {
 	plot.plotContext = drawPoint( point, plot.plotContext );
 }
 
 /// Save plot to a file
-void save( PlotState plot, string name = "example.png" ) {
+void save(T)( PlotState!T plot, string name = "example.png" ) {
     (cast(cairo.ImageSurface)( plot.surface )).writeToPNG( name );
 }
