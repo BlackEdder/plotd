@@ -24,7 +24,7 @@
 /**
 	High level interface to the plotting library
 	*/
-module plotd.plot;
+module plotd.plotformat;
 
 import std.conv;
 import std.range;
@@ -52,34 +52,76 @@ CONTEXT drawFunction(CONTEXT)( double delegate(double) func,
 }
 
 /// Class that holds all state to do with one figure 
-class PlotState {
+class PlotState( string fileFormat = "png" ) {
 	Bounds plotBounds = Bounds( 0, 1, 0, 1 );
 	Bounds marginBounds = Bounds( 70, 400, 70, 400 );
+
+    string name = "plotcli" ~ fileFormat;
 
 	cairo.Surface surface;
 	cairo.Context axesContext;
 	cairo.Context plotContext;
 }
 
+unittest {
+  new PlotState!"png";
+}
+
 /// Instantiate a new plot
-PlotState createPlotState( Bounds plotBounds, Bounds marginBounds ) {
-	auto plot = new PlotState;
-	plot.plotBounds = plotBounds;
-	plot.marginBounds = marginBounds;
+PlotState!("png") createPlotStatePNG( Bounds plotBounds, Bounds marginBounds ) {
+    auto plot = new PlotState!"png";
+    plot.plotBounds = plotBounds;
+    plot.marginBounds = marginBounds;
 
-	plot.surface = createPlotSurface( plot.marginBounds.max_x.to!int, 
-			plot.marginBounds.max_y.to!int );
+    plot.surface = createPlotSurface( plot.marginBounds.max_x.to!int, 
+            plot.marginBounds.max_y.to!int );
 
-	// setup axes
-	plot.axesContext = axesContextFromSurface( plot.surface, 
-			plot.plotBounds, plot.marginBounds );
+    // setup axes
+    plot.axesContext = axesContextFromSurface( plot.surface, 
+            plot.plotBounds, plot.marginBounds );
 
-	plot.axesContext = drawAxes( plot.plotBounds, plot.axesContext );
+    plot.axesContext = drawAxes( plot.plotBounds, plot.axesContext );
 
-	plot.plotContext = plotContextFromSurface( plot.surface, 
-			plot.plotBounds, plot.marginBounds );
+    plot.plotContext = plotContextFromSurface( plot.surface, 
+            plot.plotBounds, plot.marginBounds );
 
-	return plot;
+    return plot;
+}
+
+/++ 
+Create plotState of type T with given name, plot bounds and margin bounds
+
+Name gets as extension the given type
++/ 
+PlotState!T createPlotState(alias string T)( string name, Bounds plotBounds, 
+        Bounds marginBounds ) {
+    auto plot = new PlotState!T;
+    plot.plotBounds = plotBounds;
+    plot.marginBounds = marginBounds;
+    plot.name = name ~ "." ~ T;
+
+    // TODO Here the typing should start to happen
+    plot.surface = createPlotSurface( plot.marginBounds.max_x.to!int, 
+            plot.marginBounds.max_y.to!int );
+
+    // setup axes
+    plot.axesContext = axesContextFromSurface( plot.surface, 
+            plot.plotBounds, plot.marginBounds );
+
+    plot.axesContext = drawAxes( plot.plotBounds, plot.axesContext );
+
+    plot.plotContext = plotContextFromSurface( plot.surface, 
+            plot.plotBounds, plot.marginBounds );
+
+    return plot;
+}
+
+unittest {
+    auto plot = createPlotState!"pdf"( "test", Bounds( 0, 1, 0, 1 ),
+         Bounds( 10, 100, 10, 100 ) );
+    assert( plot.name == "test.pdf" );
+    // TODO Test that this works
+    //(cast(cairo.ImageSurface)( plot.surface ));
 }
 
 /// Draw a range of points as a line
@@ -98,19 +140,20 @@ void drawRange(RANGE)( RANGE range, PlotState plot ) {
 }
 
 /// Draw function on our plot
-void drawFunction(CONTEXT)( double delegate(double) func,
-		PlotState plot ) {
+void drawFunction(T)( double delegate(double) func,
+		PlotState!T plot ) {
 	iota( plot.plotBounds.min_x, plot.plotBounds.max_x, 
 				plot.plotBounds.width/100.0 )
 			.map!( a => Point( a, func( a ) ) ).drawRange( plot );
 }
 
 /// Draw point on the plot
-void draw( Point point, PlotState plot ) {
+void draw(T)( Point point, PlotState!T plot ) {
 	plot.plotContext = drawPoint( point, plot.plotContext );
 }
 
-/// Save plot to a file
-void save( PlotState plot, string name = "example.png" ) {
-    (cast(cairo.ImageSurface)( plot.surface )).writeToPNG( name );
+/// Save plot to a file if format is "png" does nothing otherwise
+void save(T)( PlotState!T plot ) {
+    static if (T=="png")
+        (cast(cairo.ImageSurface)( plot.surface )).writeToPNG( plot.name );
 }
