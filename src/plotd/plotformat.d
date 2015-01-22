@@ -101,8 +101,14 @@ PlotState!T createPlotState(alias string T)( string name, Bounds plotBounds,
     plot.name = name ~ "." ~ T;
 
     // TODO Here the typing should start to happen
-    plot.surface = createPlotSurface( plot.marginBounds.max_x.to!int, 
-            plot.marginBounds.max_y.to!int );
+    static if (T == "pdf") {
+        plot.surface = createPlotSurfacePDF( plot.name, 
+                plot.marginBounds.max_x.to!int, 
+                plot.marginBounds.max_y.to!int );
+    } else {
+        plot.surface = createPlotSurface( plot.marginBounds.max_x.to!int, 
+                plot.marginBounds.max_y.to!int );
+    }
 
     // setup axes
     plot.axesContext = axesContextFromSurface( plot.surface, 
@@ -121,7 +127,8 @@ unittest {
          Bounds( 10, 100, 10, 100 ) );
     assert( plot.name == "test.pdf" );
     // TODO Test that this works
-    //(cast(cairo.ImageSurface)( plot.surface ));
+    assert( plot.surface.getType() == 
+            cairo.SurfaceType.CAIRO_SURFACE_TYPE_PDF );
 }
 
 /// Draw a range of points as a line

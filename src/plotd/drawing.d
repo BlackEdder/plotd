@@ -24,6 +24,7 @@
 module plotd.drawing;
 import std.conv;
 
+import cpdf = cairo.pdf;
 import cairo = cairo;
 
 import plotd.axes : Axis, adjustTickWidth, tickLength;
@@ -44,6 +45,14 @@ version( assert ) {
 cairo.Surface createPlotSurface( int width = 400, int height = 400 ) {
     auto surface = new cairo.ImageSurface(
             cairo.Format.CAIRO_FORMAT_ARGB32, width, height );
+    auto context = cairo.Context( surface );
+    clearContext( context );
+    return surface;
+}
+cairo.Surface createPlotSurfacePDF( string name, int width = 400, 
+        int height = 400 ) {
+    cairo.Surface surface = new cpdf.PDFSurface(
+            name, width, height );
     auto context = cairo.Context( surface );
     clearContext( context );
     return surface;
