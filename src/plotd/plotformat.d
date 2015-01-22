@@ -122,32 +122,50 @@ PlotState!T createPlotState(alias string T)( string name, Bounds plotBounds,
     return plot;
 }
 
+/// Create pdf plot
 unittest {
     auto plot = createPlotState!"pdf"( "test", Bounds( 0, 1, 0, 1 ),
          Bounds( 10, 100, 10, 100 ) );
     assert( plot.name == "test.pdf" );
-    // TODO Test that this works
     assert( plot.surface.getType() == 
             cairo.SurfaceType.CAIRO_SURFACE_TYPE_PDF );
 }
 
+/// Create png plot
+unittest {
+    auto plot = createPlotState!"png"( "test", Bounds( 0, 1, 0, 1 ),
+         Bounds( 10, 100, 10, 100 ) );
+    assert( plot.name == "test.png" );
+    assert( plot.surface.getType() == 
+            cairo.SurfaceType.CAIRO_SURFACE_TYPE_IMAGE );
+}
+
 /// Draw a range of points as a line
-void drawRange(RANGE)( RANGE range, PlotState plot ) {
-	if (!range.empty) {
-		auto firstPoint = range.front;
-		range.popFront;
-		while (!range.empty) {
-			auto nextPoint = range.front;
-			range.popFront;
-			plot.plotContext = 
-				drawLine( firstPoint, nextPoint, plot.plotContext );
-			firstPoint = nextPoint;
-		}
-	}
+void drawRange(RANGE, alias string T)( RANGE range, PlotState!T plot )
+{
+    if (!range.empty) {
+        auto firstPoint = range.front;
+        range.popFront;
+        while (!range.empty) {
+            auto nextPoint = range.front;
+            range.popFront;
+            plot.plotContext = 
+                drawLine( firstPoint, nextPoint, plot.plotContext );
+            firstPoint = nextPoint;
+        }
+    }
+}
+
+/// Draw line on plot
+unittest
+{
+    auto plot = createPlotState!"pdf"( "testLine", Bounds( 0, 1, 0, 1 ),
+         Bounds( 10, 100, 10, 100 ) );
+    drawRange( [Point(0,0),Point( 1,1 )], plot );
 }
 
 /// Draw function on our plot
-void drawFunction(T)( double delegate(double) func,
+void drawFunction(alias string T)( double delegate(double) func,
 		PlotState!T plot ) {
 	iota( plot.plotBounds.min_x, plot.plotBounds.max_x, 
 				plot.plotBounds.width/100.0 )
@@ -155,12 +173,20 @@ void drawFunction(T)( double delegate(double) func,
 }
 
 /// Draw point on the plot
-void draw(T)( Point point, PlotState!T plot ) {
+void draw(alias string T)( Point point, PlotState!T plot ) {
 	plot.plotContext = drawPoint( point, plot.plotContext );
 }
 
+/// Draw point on plot
+unittest
+{
+    auto plot = createPlotState!"pdf"( "testPoint", Bounds( 0, 1, 0, 1 ),
+         Bounds( 10, 100, 10, 100 ) );
+    draw( Point(0.5,0.5), plot );
+}
+
 /// Save plot to a file if format is "png" does nothing otherwise
-void save(T)( PlotState!T plot ) {
+void save(alias string T)( PlotState!T plot ) {
     static if (T=="png")
         (cast(cairo.ImageSurface)( plot.surface )).writeToPNG( plot.name );
 }

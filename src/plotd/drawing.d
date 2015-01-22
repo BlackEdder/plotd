@@ -49,6 +49,7 @@ cairo.Surface createPlotSurface( int width = 400, int height = 400 ) {
     clearContext( context );
     return surface;
 }
+
 cairo.Surface createPlotSurfacePDF( string name, int width = 400, 
         int height = 400 ) {
     cairo.Surface surface = new cpdf.PDFSurface(
