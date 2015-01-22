@@ -52,65 +52,141 @@ CONTEXT drawFunction(CONTEXT)( double delegate(double) func,
 }
 
 /// Class that holds all state to do with one figure 
-class PlotState {
+class PlotState( string fileFormat = "png" ) {
 	Bounds plotBounds = Bounds( 0, 1, 0, 1 );
 	Bounds marginBounds = Bounds( 70, 400, 70, 400 );
+
+    string name = "plotcli" ~ fileFormat;
 
 	cairo.Surface surface;
 	cairo.Context axesContext;
 	cairo.Context plotContext;
 }
 
+unittest {
+  new PlotState!"png";
+}
+
 /// Instantiate a new plot
-PlotState createPlotState( Bounds plotBounds, Bounds marginBounds ) {
-	auto plot = new PlotState;
-	plot.plotBounds = plotBounds;
-	plot.marginBounds = marginBounds;
+PlotState!("png") createPlotStatePNG( Bounds plotBounds, Bounds marginBounds ) {
+    auto plot = new PlotState!"png";
+    plot.plotBounds = plotBounds;
+    plot.marginBounds = marginBounds;
 
-	plot.surface = createPlotSurface( plot.marginBounds.max_x.to!int, 
-			plot.marginBounds.max_y.to!int );
+    plot.surface = createPlotSurface( plot.marginBounds.max_x.to!int, 
+            plot.marginBounds.max_y.to!int );
 
-	// setup axes
-	plot.axesContext = axesContextFromSurface( plot.surface, 
-			plot.plotBounds, plot.marginBounds );
+    // setup axes
+    plot.axesContext = axesContextFromSurface( plot.surface, 
+            plot.plotBounds, plot.marginBounds );
 
-	plot.axesContext = drawAxes( plot.plotBounds, plot.axesContext );
+    plot.axesContext = drawAxes( plot.plotBounds, plot.axesContext );
 
-	plot.plotContext = plotContextFromSurface( plot.surface, 
-			plot.plotBounds, plot.marginBounds );
+    plot.plotContext = plotContextFromSurface( plot.surface, 
+            plot.plotBounds, plot.marginBounds );
 
-	return plot;
+    return plot;
+}
+
+/++ 
+Create plotState of type T with given name, plot bounds and margin bounds
+
+Name gets as extension the given type
++/ 
+PlotState!T createPlotState(alias string T)( string name, Bounds plotBounds, 
+        Bounds marginBounds ) {
+    auto plot = new PlotState!T;
+    plot.plotBounds = plotBounds;
+    plot.marginBounds = marginBounds;
+    plot.name = name ~ "." ~ T;
+
+    // TODO Here the typing should start to happen
+    static if (T == "pdf") {
+        plot.surface = createPlotSurfacePDF( plot.name, 
+                plot.marginBounds.max_x.to!int, 
+                plot.marginBounds.max_y.to!int );
+    } else {
+        plot.surface = createPlotSurface( plot.marginBounds.max_x.to!int, 
+                plot.marginBounds.max_y.to!int );
+    }
+
+    // setup axes
+    plot.axesContext = axesContextFromSurface( plot.surface, 
+            plot.plotBounds, plot.marginBounds );
+
+    plot.axesContext = drawAxes( plot.plotBounds, plot.axesContext );
+
+    plot.plotContext = plotContextFromSurface( plot.surface, 
+            plot.plotBounds, plot.marginBounds );
+
+    return plot;
+}
+
+/// Create pdf plot
+unittest {
+    auto plot = createPlotState!"pdf"( "test", Bounds( 0, 1, 0, 1 ),
+         Bounds( 10, 100, 10, 100 ) );
+    assert( plot.name == "test.pdf" );
+    assert( plot.surface.getType() == 
+            cairo.SurfaceType.CAIRO_SURFACE_TYPE_PDF );
+}
+
+/// Create png plot
+unittest {
+    auto plot = createPlotState!"png"( "test", Bounds( 0, 1, 0, 1 ),
+         Bounds( 10, 100, 10, 100 ) );
+    assert( plot.name == "test.png" );
+    assert( plot.surface.getType() == 
+            cairo.SurfaceType.CAIRO_SURFACE_TYPE_IMAGE );
 }
 
 /// Draw a range of points as a line
-void drawRange(RANGE)( RANGE range, PlotState plot ) {
-	if (!range.empty) {
-		auto firstPoint = range.front;
-		range.popFront;
-		while (!range.empty) {
-			auto nextPoint = range.front;
-			range.popFront;
-			plot.plotContext = 
-				drawLine( firstPoint, nextPoint, plot.plotContext );
-			firstPoint = nextPoint;
-		}
-	}
+void drawRange(RANGE, alias string T)( RANGE range, PlotState!T plot )
+{
+    if (!range.empty) {
+        auto firstPoint = range.front;
+        range.popFront;
+        while (!range.empty) {
+            auto nextPoint = range.front;
+            range.popFront;
+            plot.plotContext = 
+                drawLine( firstPoint, nextPoint, plot.plotContext );
+            firstPoint = nextPoint;
+        }
+    }
+}
+
+/// Draw line on plot
+unittest
+{
+    auto plot = createPlotState!"pdf"( "testLine", Bounds( 0, 1, 0, 1 ),
+         Bounds( 10, 100, 10, 100 ) );
+    drawRange( [Point(0,0),Point( 1,1 )], plot );
 }
 
 /// Draw function on our plot
-void drawFunction(CONTEXT)( double delegate(double) func,
-		PlotState plot ) {
+void drawFunction(alias string T)( double delegate(double) func,
+		PlotState!T plot ) {
 	iota( plot.plotBounds.min_x, plot.plotBounds.max_x, 
 				plot.plotBounds.width/100.0 )
 			.map!( a => Point( a, func( a ) ) ).drawRange( plot );
 }
 
 /// Draw point on the plot
-void draw( Point point, PlotState plot ) {
+void draw(alias string T)( Point point, PlotState!T plot ) {
 	plot.plotContext = drawPoint( point, plot.plotContext );
 }
 
-/// Save plot to a file
-void save( PlotState plot, string name = "example.png" ) {
-    (cast(cairo.ImageSurface)( plot.surface )).writeToPNG( name );
+/// Draw point on plot
+unittest
+{
+    auto plot = createPlotState!"pdf"( "testPoint", Bounds( 0, 1, 0, 1 ),
+         Bounds( 10, 100, 10, 100 ) );
+    draw( Point(0.5,0.5), plot );
+}
+
+/// Save plot to a file if format is "png" does nothing otherwise
+void save(alias string T)( PlotState!T plot ) {
+    static if (T=="png")
+        (cast(cairo.ImageSurface)( plot.surface )).writeToPNG( plot.name );
 }

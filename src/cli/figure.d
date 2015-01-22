@@ -54,8 +54,8 @@ class Figure {
 		lf.marginBounds = Bounds( 70, 400, 70, 400 );
 	}
 
-	this( Bounds bounds, Bounds marginBounds ) {
-		lf = new LazyFigure;
+	this( string name, Bounds bounds, Bounds marginBounds ) {
+		lf = new LazyFigure( name );
 		lf.plotBounds = bounds;
 		lf.marginBounds = marginBounds;
 	}
@@ -93,6 +93,14 @@ unittest {
 
 /// Only plot when needed not before
 class LazyFigure {
+    string _name = "plotcli";
+    this() {}
+
+    this( string name ) 
+    {
+        _name = name;
+    }
+
 	@property point( Point pnt ) {
 		if ( _adaptionMode == axes.AdaptationMode.full )
 		{
@@ -102,13 +110,13 @@ class LazyFigure {
 				fullRedraw = true;
 		}
 
-		_events ~= delegate( PlotState plot ) {	
+		_events ~= delegate( PlotState!"png" plot ) {	
 			plot.plotContext = draw.drawPoint( pnt, plot.plotContext ); 
 		};
 	}
 
 	@property color( Color clr ) {
-		_events ~= delegate( PlotState plot ) {	
+		_events ~= delegate( PlotState!"png" plot ) {	
 			plot.plotContext = draw.color( plot.plotContext, clr );
 		};
 	}
@@ -151,7 +159,7 @@ class LazyFigure {
 				fullRedraw = true;
 		}
 
-		_events ~= delegate( PlotState plot ) {	
+		_events ~= delegate( PlotState!"png" plot ) {	
 			plot.plotContext = draw.drawLine( toP, fromP, plot.plotContext );
 		};
 	}
@@ -159,7 +167,7 @@ class LazyFigure {
 	void plot() {
 		if ( fullRedraw ) 
 		{
-			_plot = createPlotState( _plotBounds,
+			_plot = createPlotState!"png"( _name, _plotBounds,
 					_marginBounds );
 			foreach( event; _eventCache )
 				event( _plot );
@@ -180,14 +188,14 @@ class LazyFigure {
 		_events.length = 0;
 	}
 
-	void save( string fn )
-	{
-		_plot.save( fn );
-	}
+    void save()
+    {
+        _plot.save!"png"();
+    }
 
 	private:
 		bool fullRedraw = true; // Is a new redraw needed 
-		PlotState _plot;
+		PlotState!"png" _plot;
 		AdaptiveBounds _plotBounds;
 		Bounds _marginBounds;
 		Event[] _eventCache; // Old events

@@ -51,7 +51,7 @@ version( unittest ) {
 	import std.stdio;
 }
 
-alias void delegate( PlotState plot ) Event;
+alias void delegate( PlotState!"png" plot ) Event;
 
 private auto csvRegex = ctRegex!(`,\s*|\s`);
 
@@ -86,22 +86,22 @@ unittest {
 }
 
 // Workaround point not properly copied in foreach loop
-void delegate( PlotState ) createColorEvent( Color col ) {
-	return delegate( PlotState plot ) {	
+void delegate( PlotState!"png" ) createColorEvent( Color col ) {
+	return delegate( PlotState!"png" plot ) {	
 		plot.plotContext = color( plot.plotContext, col );
 	};
 }
 
 // Workaround point not properly copied in foreach loop
-void delegate( PlotState ) createPointEvent( Point point ) {
-	return delegate( PlotState plot ) {	
+void delegate( PlotState!"png" ) createPointEvent( Point point ) {
+	return delegate( PlotState!"png" plot ) {	
 		plot.plotContext = drawPoint( point, plot.plotContext ); 
 	};
 }
 
 // Workaround point not properly copied in foreach loop
-void delegate( PlotState ) createLineEvent( Point toP, Point fromP ) {
-	return delegate( PlotState plot ) {	
+void delegate( PlotState!"png" ) createLineEvent( Point toP, Point fromP ) {
+	return delegate( PlotState!"png" plot ) {	
 		plot.plotContext = drawLine( toP, fromP, plot.plotContext ); 
 	};
 }
@@ -364,7 +364,8 @@ Figure[string] handleMessage( string msg, ref Settings settings ) {
           plotID ~= columns[i];
       plotID = settings.outputFile ~ plotID;
       if ( plotID !in figures ) {
-        figures[plotID] = new Figure( settings.plotBounds, settings.marginBounds ); 
+        figures[plotID] = new Figure( plotID, 
+                settings.plotBounds, settings.marginBounds ); 
         figures[plotID].lf.xlabel = settings.xlabel;
         figures[plotID].lf.ylabel = settings.ylabel;
       }
@@ -430,9 +431,8 @@ void plotFigures( Figure[string] figures, Settings settings ) {
 }
 
 void saveFigures(Figure[string] figures) {
-	foreach ( plotID, figure; figures ) {
-		auto fname = plotID ~ ".png";
-		debug writeln( "Saving to file: " ~ fname );
-		figure.lf.save( fname );
+    foreach ( _, figure; figures ) {
+        debug writeln( "Saving to file"  );
+        figure.lf.save();
 	}
 }
