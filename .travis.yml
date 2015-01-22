@@ -1,8 +1,13 @@
+before_install:
+    - git clone https://github.com/jpf91/cairoD
+    - sed -i 's/PDF_SURFACE = false/PDF_SURFACE = true/g' cairoD/src/cairo/c/config.d
+    - dub add-local cairoD
+
 language: d
 
 d:
-  - dmd-2.065.0
-  - dmd-2.066.1
-  - ldc-0.14.0
-  - ldc-0.15.1
-  - gdc-4.9.0
+    - dmd-2.065.0
+    - dmd-2.066.1
+    - ldc-0.14.0
+    - ldc-0.15.1
+    - gdc-4.9.0
