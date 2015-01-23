@@ -226,8 +226,7 @@ void drawHistogram( Figure figure ) {
 		figure.lf.plot;
 
 		// Plot Bins
-		figure.lf._plot.plotContext = draw.drawBins( 
-				figure.lf._plot.plotContext, bins );
+        drawBins( bins, figure.lf._plot );
 		debug writeln( "Drawn bins to histogram: ", bins );
 	}
 

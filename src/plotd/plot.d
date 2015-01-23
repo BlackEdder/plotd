@@ -199,6 +199,12 @@ void drawYLabel(alias string T)( string ylabel, PlotState!T plot )
             plot.axesContext );
 }
 
+void drawBins(BINS, alias string T)( BINS bins, PlotState!T plot )
+{
+    plot.plotContext = plotd.drawing.drawBins( 
+            plot.plotContext, bins );
+}
+
 /// Save plot to a file if format is "png" does nothing otherwise
 void save(alias string T)( PlotState!T plot ) {
     static if (T=="png")
