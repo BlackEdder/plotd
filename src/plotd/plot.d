@@ -185,6 +185,20 @@ unittest
     draw( Point(0.5,0.5), plot );
 }
 
+/// Draw xlabel
+void drawXLabel(alias string T)( string xlabel, PlotState!T plot ) 
+{
+    plot.axesContext = plotd.drawing.drawXLabel( xlabel, plot.plotBounds, 
+            plot.axesContext );
+}
+
+/// Draw ylabel
+void drawYLabel(alias string T)( string ylabel, PlotState!T plot ) 
+{
+    plot.axesContext = plotd.drawing.drawYLabel( ylabel, plot.plotBounds, 
+            plot.axesContext );
+}
+
 /// Save plot to a file if format is "png" does nothing otherwise
 void save(alias string T)( PlotState!T plot ) {
     static if (T=="png")

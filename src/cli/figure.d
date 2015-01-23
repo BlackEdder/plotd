@@ -176,10 +176,8 @@ class LazyFigure {
 
 		debug writeln( "LazyFigure::plot plotting xlabel ", _xlabel );
 
-		_plot.axesContext = draw.drawXLabel( _xlabel, _plot.plotBounds, 
-				_plot.axesContext );
-		_plot.axesContext = draw.drawYLabel( _ylabel, _plot.plotBounds, 
-				_plot.axesContext );
+        drawXLabel( _xlabel, _plot );
+        drawYLabel( _ylabel, _plot );
 
 		foreach( event; _events ) {
 			event( _plot );
