@@ -89,7 +89,6 @@ unittest {
 	assert( col != fig.getColor( "", 1 ) ); 
 }
 
-
 // Wrapper classes for PlotState, to make them inheritable
 interface PlotInterface
 {
@@ -133,7 +132,6 @@ class PNGPlot : PlotInterface
         _plot.plotContext = draw.drawLine( toP, fromP, _plot.plotContext );
     }
 
-
     void drawXLabel( string xlabel )
     {
         plotd.plot.drawXLabel( xlabel, _plot );
@@ -164,6 +162,63 @@ class PNGPlot : PlotInterface
         PlotState!"png" _plot;
 }
 
+class PDFPlot : PlotInterface
+{
+    void create( string name, Bounds plotBounds, Bounds marginBounds )
+    {
+        _plot = createPlotState!"pdf"( name, plotBounds,
+            marginBounds );
+    }
+
+    void save() 
+    {
+        _plot.save();
+    }
+
+    void drawPoint( Point pnt )
+    {
+        _plot.plotContext = draw.drawPoint( pnt, _plot.plotContext ); 
+    }
+
+    void drawColor( Color clr )
+    {
+        _plot.plotContext = draw.color( _plot.plotContext, clr );
+    }
+
+    void drawLine( Point toP, Point fromP )
+    {
+        _plot.plotContext = draw.drawLine( toP, fromP, _plot.plotContext );
+    }
+
+    void drawXLabel( string xlabel )
+    {
+        plotd.plot.drawXLabel( xlabel, _plot );
+    }
+
+    void drawYLabel( string ylabel )
+    {
+        plotd.plot.drawYLabel( ylabel, _plot );
+    }
+
+    void drawBins2D( Bins!size_t bins )
+    {
+        plotd.plot.drawBins( bins, _plot );
+    }
+
+    void drawBins3D( Bins!(Bins!(size_t)) bins )
+    {
+        plotd.plot.drawBins( bins, _plot );
+    }
+
+    // This seems not to work correctly, use drawBins2D/3D instead
+    void drawBins(BINS)( BINS bins )
+    {
+        plotd.plot.drawBins!BINS( bins, _plot );
+    }
+
+    private:
+        PlotState!"pdf" _plot;
+}
 
 /// Only plot when needed not before
 class LazyFigure {
