@@ -24,6 +24,7 @@
 module cli.figure;
 
 import std.algorithm : map;
+import std.string : toUpper, format;
 
 import cli.parsing : Event;
 
@@ -104,11 +105,12 @@ interface PlotInterface
     void drawBins(BINS)( BINS bins );
 }
 
-class PNGPlot : PlotInterface
+enum plotFormat = q{ 
+class %sPlot : PlotInterface
 {
     void create( string name, Bounds plotBounds, Bounds marginBounds )
     {
-        _plot = createPlotState!"png"( name, plotBounds,
+        _plot = createPlotState!"%s"( name, plotBounds,
             marginBounds );
     }
 
@@ -159,66 +161,11 @@ class PNGPlot : PlotInterface
     }
 
     private:
-        PlotState!"png" _plot;
-}
+        PlotState!"%s" _plot;
+}};
 
-class PDFPlot : PlotInterface
-{
-    void create( string name, Bounds plotBounds, Bounds marginBounds )
-    {
-        _plot = createPlotState!"pdf"( name, plotBounds,
-            marginBounds );
-    }
-
-    void save() 
-    {
-        _plot.save();
-    }
-
-    void drawPoint( Point pnt )
-    {
-        _plot.plotContext = draw.drawPoint( pnt, _plot.plotContext ); 
-    }
-
-    void drawColor( Color clr )
-    {
-        _plot.plotContext = draw.color( _plot.plotContext, clr );
-    }
-
-    void drawLine( Point toP, Point fromP )
-    {
-        _plot.plotContext = draw.drawLine( toP, fromP, _plot.plotContext );
-    }
-
-    void drawXLabel( string xlabel )
-    {
-        plotd.plot.drawXLabel( xlabel, _plot );
-    }
-
-    void drawYLabel( string ylabel )
-    {
-        plotd.plot.drawYLabel( ylabel, _plot );
-    }
-
-    void drawBins2D( Bins!size_t bins )
-    {
-        plotd.plot.drawBins( bins, _plot );
-    }
-
-    void drawBins3D( Bins!(Bins!(size_t)) bins )
-    {
-        plotd.plot.drawBins( bins, _plot );
-    }
-
-    // This seems not to work correctly, use drawBins2D/3D instead
-    void drawBins(BINS)( BINS bins )
-    {
-        plotd.plot.drawBins!BINS( bins, _plot );
-    }
-
-    private:
-        PlotState!"pdf" _plot;
-}
+mixin( format( plotFormat, "PNG", "png", "png" ) );
+mixin( format( plotFormat, "PDF", "pdf", "pdf" ) );
 
 /// Only plot when needed not before
 class LazyFigure {
