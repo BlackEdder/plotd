@@ -90,6 +90,80 @@ unittest {
 }
 
 
+// Wrapper classes for PlotState, to make them inheritable
+interface PlotInterface
+{
+    void create( string name, Bounds plotBounds, Bounds marginBounds );
+    void save();
+    void drawPoint( Point pnt );
+    void drawColor( Color clr );
+    void drawLine( Point toP, Point fromP );
+    void drawXLabel( string xlabel );
+    void drawYLabel( string ylabel );
+    void drawBins2D( Bins!size_t bins );
+    void drawBins3D( Bins!(Bins!(size_t)) bins );
+    void drawBins(BINS)( BINS bins );
+}
+
+class PNGPlot : PlotInterface
+{
+    void create( string name, Bounds plotBounds, Bounds marginBounds )
+    {
+        _plot = createPlotState!"png"( name, plotBounds,
+            marginBounds );
+    }
+
+    void save() 
+    {
+        _plot.save();
+    }
+
+    void drawPoint( Point pnt )
+    {
+        _plot.plotContext = draw.drawPoint( pnt, _plot.plotContext ); 
+    }
+
+    void drawColor( Color clr )
+    {
+        _plot.plotContext = draw.color( _plot.plotContext, clr );
+    }
+
+    void drawLine( Point toP, Point fromP )
+    {
+        _plot.plotContext = draw.drawLine( toP, fromP, _plot.plotContext );
+    }
+
+
+    void drawXLabel( string xlabel )
+    {
+        plotd.plot.drawXLabel( xlabel, _plot );
+    }
+
+    void drawYLabel( string ylabel )
+    {
+        plotd.plot.drawYLabel( ylabel, _plot );
+    }
+
+    void drawBins2D( Bins!size_t bins )
+    {
+        plotd.plot.drawBins( bins, _plot );
+    }
+
+    void drawBins3D( Bins!(Bins!(size_t)) bins )
+    {
+        plotd.plot.drawBins( bins, _plot );
+    }
+
+    // This seems not to work correctly, use drawBins2D/3D instead
+    void drawBins(BINS)( BINS bins )
+    {
+        plotd.plot.drawBins!BINS( bins, _plot );
+    }
+
+    private:
+        PlotState!"png" _plot;
+}
+
 
 /// Only plot when needed not before
 class LazyFigure {
@@ -110,14 +184,14 @@ class LazyFigure {
 				fullRedraw = true;
 		}
 
-		_events ~= delegate( PlotState!"png" plot ) {	
-			plot.plotContext = draw.drawPoint( pnt, plot.plotContext ); 
+		_events ~= delegate( PlotInterface plot ) {	
+            plot.drawPoint( pnt );
 		};
 	}
 
 	@property color( Color clr ) {
-		_events ~= delegate( PlotState!"png" plot ) {	
-			plot.plotContext = draw.color( plot.plotContext, clr );
+		_events ~= delegate( PlotInterface plot ) {	
+            plot.drawColor( clr );
 		};
 	}
 
@@ -159,25 +233,28 @@ class LazyFigure {
 				fullRedraw = true;
 		}
 
-		_events ~= delegate( PlotState!"png" plot ) {	
-			plot.plotContext = draw.drawLine( toP, fromP, plot.plotContext );
+		_events ~= delegate( PlotInterface plot ) {	
+            plot.drawLine( toP, fromP );
 		};
 	}
 
 	void plot() {
-		if ( fullRedraw ) 
-		{
-			_plot = createPlotState!"png"( _name, _plotBounds,
-					_marginBounds );
-			foreach( event; _eventCache )
-				event( _plot );
-			fullRedraw = false;
-		}
+        if ( fullRedraw ) 
+        {
+            if (true) // TODO make if format is ...
+            {
+                _plot = new PNGPlot;
+            }
+            _plot.create( _name, _plotBounds, _marginBounds );
+            foreach( event; _eventCache )
+                event( _plot );
+            fullRedraw = false;
+        }
 
 		debug writeln( "LazyFigure::plot plotting xlabel ", _xlabel );
 
-        drawXLabel( _xlabel, _plot );
-        drawYLabel( _ylabel, _plot );
+        _plot.drawXLabel( _xlabel );
+        _plot.drawYLabel( _ylabel );
 
 		foreach( event; _events ) {
 			event( _plot );
@@ -188,12 +265,12 @@ class LazyFigure {
 
     void save()
     {
-        _plot.save!"png"();
+        _plot.save();
     }
 
 	private:
 		bool fullRedraw = true; // Is a new redraw needed 
-		PlotState!"png" _plot;
+		PlotInterface _plot;
 		AdaptiveBounds _plotBounds;
 		Bounds _marginBounds;
 		Event[] _eventCache; // Old events
@@ -226,7 +303,7 @@ void drawHistogram( Figure figure ) {
 		figure.lf.plot;
 
 		// Plot Bins
-        drawBins( bins, figure.lf._plot );
+        figure.lf._plot.drawBins2D( bins );
 		debug writeln( "Drawn bins to histogram: ", bins );
 	}
 
@@ -249,7 +326,6 @@ void drawHistogram( Figure figure ) {
 		figure.lf._eventCache.length = 0;
 		figure.lf.plot;
 
-		figure.lf._plot.plotContext 
-			= draw.drawBins( figure.lf._plot.plotContext, bins );
+		figure.lf._plot.drawBins3D( bins );
 	}
 }

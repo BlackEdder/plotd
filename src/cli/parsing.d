@@ -44,14 +44,14 @@ import plotd.primitives;
 
 import cli.algorithm : groupBy;
 import cli.column;
-import cli.figure : drawHistogram, Figure, getColor;
+import cli.figure : drawHistogram, Figure, getColor, PlotInterface;
 import cli.options : helpText, Settings, updateSettings;
 
 version( unittest ) {
 	import std.stdio;
 }
 
-alias void delegate( PlotState!"png" plot ) Event;
+alias void delegate( PlotInterface plot ) Event;
 
 private auto csvRegex = ctRegex!(`,\s*|\s`);
 
