@@ -55,8 +55,8 @@ class Figure {
 		lf.marginBounds = Bounds( 70, 400, 70, 400 );
 	}
 
-	this( string name, Bounds bounds, Bounds marginBounds ) {
-		lf = new LazyFigure( name );
+	this( string name, string imageFormat, Bounds bounds, Bounds marginBounds ) {
+		lf = new LazyFigure( name, imageFormat );
 		lf.plotBounds = bounds;
 		lf.marginBounds = marginBounds;
 	}
@@ -170,11 +170,14 @@ mixin( format( plotFormat, "PDF", "pdf", "pdf" ) );
 /// Only plot when needed not before
 class LazyFigure {
     string _name = "plotcli";
+    string _imageFormat;
+
     this() {}
 
-    this( string name ) 
+    this( string name, string imageFormat ) 
     {
         _name = name;
+        _imageFormat = imageFormat;
     }
 
 	@property point( Point pnt ) {
@@ -243,7 +246,11 @@ class LazyFigure {
 	void plot() {
         if ( fullRedraw ) 
         {
-            if (true) // TODO make if format is ...
+            if (_imageFormat == "pdf") // TODO make if format is ...
+            {
+                _plot = new PDFPlot;
+            }
+            else
             {
                 _plot = new PNGPlot;
             }

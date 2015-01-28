@@ -55,7 +55,7 @@ unittest {
 	assert( aa1.merge( aa2 ) == ["x" : 1.0, "y": 3.0, "z":4.0] );
 }
 
-auto helpText = "Usage: plotcli [-f] [-o OUTPUT] [-d FORMAT] [-b BOUNDS] [--xlabel XLABEL] [--ylabel YLABEL] [--margin-bounds MARGINBOUNDS]
+auto helpText = "Usage: plotcli [-f] [-o OUTPUT] [-d FORMAT] [-b BOUNDS] [--xlabel XLABEL] [--ylabel YLABEL] [--margin-bounds MARGINBOUNDS] [--image IMAGEFORMAT]
 
 Plotcli is a plotting program that will plot data from provided data streams (files). It will ignore any lines it doesn't understand, making it possible to feed it \"dirty\" streams/files. All options can also be provided within the stream by using the prefix #plotcli (e.g. #plotcli -d x,y).
 
@@ -67,6 +67,7 @@ Options:
   --xlabel XLABEL
   --ylabel YLABEL
   --margin-bounds MARGINBOUNDS  Specific bounds (in pixel size) for the margins. Format (all in pixels): xmargin,xwidth,ymargin,yheight. Default values 70,400,70,400.
+  --image IMAGEFORMAT  Format of the resulting image (png/pdf).
 
 Data format:
   Using -d it is possible to specify what each column in your data file represents. Supported formats are:
@@ -93,7 +94,6 @@ Data format:
 
 	--adaptive MODE (not adaptive, scrolling, full) First two need bounds or alternatively adaptive-cache for initial bounds 
 	--adaptive-cache CACHESIZE (does it stop being adaptive after this or does it stop caching? Maybe combine with not adaptive or scrolling)
-	--bounds BOUNDS (minx,maxx,miny,maxy) sets default MODE to not
 	--image	IMAGETYPE (pdf,png)
 	--debug 		Output lines that are not successfully parsed
 	*/
@@ -107,6 +107,7 @@ struct Settings {
 	Bounds marginBounds = Bounds( 70, 400, 70, 400 );
 	string xlabel = "x";
 	string ylabel = "y";
+    string imageFormat = "png";
 }
 
 unittest {
@@ -122,6 +123,8 @@ Settings updateSettings( Settings settings, ArgValue[string] options ) {
 	}
 	if ( !options["-o"].isNull )
 		settings.outputFile = options["-o"].to!string;
+	if ( !options["--image"].isNull )
+		settings.imageFormat = options["--image"].to!string;
 	if ( options["-f"].isTrue )
 		settings.follow = true;
 	if ( !options["-b"].isNull ) {

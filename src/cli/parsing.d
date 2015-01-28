@@ -364,7 +364,7 @@ Figure[string] handleMessage( string msg, ref Settings settings ) {
           plotID ~= columns[i];
       plotID = settings.outputFile ~ plotID;
       if ( plotID !in figures ) {
-        figures[plotID] = new Figure( plotID, 
+        figures[plotID] = new Figure( plotID, settings.imageFormat, 
                 settings.plotBounds, settings.marginBounds ); 
         figures[plotID].lf.xlabel = settings.xlabel;
         figures[plotID].lf.ylabel = settings.ylabel;
