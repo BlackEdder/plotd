@@ -24,6 +24,7 @@
 module plotd.drawing;
 import std.conv;
 
+import cconfig = cairo.c.config;
 import cpdf = cairo.pdf;
 import cairo = cairo;
 
@@ -52,11 +53,19 @@ cairo.Surface createPlotSurface( int width = 400, int height = 400 ) {
 
 cairo.Surface createPlotSurfacePDF( string name, int width = 400, 
         int height = 400 ) {
-    cairo.Surface surface = new cpdf.PDFSurface(
-            name, width, height );
-    auto context = cairo.Context( surface );
-    clearContext( context );
-    return surface;
+    static if (cconfig.CAIRO_HAS_PDF_SURFACE)
+    {
+        cairo.Surface surface = new cpdf.PDFSurface(
+                name, width, height );
+        auto context = cairo.Context( surface );
+        clearContext( context );
+        return surface;
+    }
+    else
+    {
+        writeln( "CairoD was compiled without pdf support. Creating png surface instead" );
+        return createPlotSurface( width, height );
+    }
 }
 
 /// Save surface to a file

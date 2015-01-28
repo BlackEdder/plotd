@@ -29,6 +29,8 @@ module plotd.plot;
 import std.conv;
 import std.range;
 
+import cairo.c.config;
+
 import plotd.drawing;
 import plotd.primitives;
 
@@ -101,7 +103,7 @@ PlotState!T createPlotState(alias string T)( string name, Bounds plotBounds,
     plot.name = name ~ "." ~ T;
 
     // TODO Here the typing should start to happen
-    static if (T == "pdf") {
+    static if (T == "pdf" && CAIRO_HAS_PDF_SURFACE) {
         plot.surface = createPlotSurfacePDF( plot.name, 
                 plot.marginBounds.max_x.to!int, 
                 plot.marginBounds.max_y.to!int );
@@ -124,11 +126,18 @@ PlotState!T createPlotState(alias string T)( string name, Bounds plotBounds,
 
 /// Create pdf plot
 unittest {
-    auto plot = createPlotState!"pdf"( "test", Bounds( 0, 1, 0, 1 ),
-         Bounds( 10, 100, 10, 100 ) );
-    assert( plot.name == "test.pdf" );
-    assert( plot.surface.getType() == 
-            cairo.SurfaceType.CAIRO_SURFACE_TYPE_PDF );
+    static if ( CAIRO_HAS_PDF_SURFACE )
+    {
+        auto plot = createPlotState!"pdf"( "test", Bounds( 0, 1, 0, 1 ),
+             Bounds( 10, 100, 10, 100 ) );
+        assert( plot.name == "test.pdf" );
+        assert( plot.surface.getType() == 
+                cairo.SurfaceType.CAIRO_SURFACE_TYPE_PDF );
+    }
+    else
+    {
+        writeln( "CairoD compiled without pdf support" );
+    }
 }
 
 /// Create png plot
@@ -159,9 +168,16 @@ void drawRange(RANGE, alias string T)( RANGE range, PlotState!T plot )
 /// Draw line on plot
 unittest
 {
-    auto plot = createPlotState!"pdf"( "testLine", Bounds( 0, 1, 0, 1 ),
-         Bounds( 10, 100, 10, 100 ) );
-    drawRange( [Point(0,0),Point( 1,1 )], plot );
+    static if ( CAIRO_HAS_PDF_SURFACE )
+    {
+        auto plot = createPlotState!"pdf"( "testLine", Bounds( 0, 1, 0, 1 ),
+             Bounds( 10, 100, 10, 100 ) );
+        drawRange( [Point(0,0),Point( 1,1 )], plot );
+    }
+    else
+    {
+        writeln( "CairoD compiled without pdf support" );
+    }
 }
 
 /// Draw function on our plot
@@ -180,9 +196,12 @@ void draw(alias string T)( Point point, PlotState!T plot ) {
 /// Draw point on plot
 unittest
 {
-    auto plot = createPlotState!"pdf"( "testPoint", Bounds( 0, 1, 0, 1 ),
-         Bounds( 10, 100, 10, 100 ) );
-    draw( Point(0.5,0.5), plot );
+    static if ( CAIRO_HAS_PDF_SURFACE )
+    {
+        auto plot = createPlotState!"pdf"( "testPoint", Bounds( 0, 1, 0, 1 ),
+            Bounds( 10, 100, 10, 100 ) );
+        draw( Point(0.5,0.5), plot );
+    }
 }
 
 /// Draw xlabel

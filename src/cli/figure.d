@@ -26,6 +26,8 @@ module cli.figure;
 import std.algorithm : map;
 import std.string : toUpper, format;
 
+import cairo.c.config;
+
 import cli.parsing : Event;
 
 //import plotd.plot : PlotState, createPlotState;
@@ -165,7 +167,10 @@ class %sPlot : PlotInterface
 }};
 
 mixin( format( plotFormat, "PNG", "png", "png" ) );
-mixin( format( plotFormat, "PDF", "pdf", "pdf" ) );
+static if ( CAIRO_HAS_PDF_SURFACE ) 
+{
+    mixin( format( plotFormat, "PDF", "pdf", "pdf" ) );
+}
 
 /// Only plot when needed not before
 class LazyFigure {
@@ -243,13 +248,18 @@ class LazyFigure {
 		};
 	}
 
-	void plot() {
+    void plot() {
         if ( fullRedraw ) 
         {
-            if (_imageFormat == "pdf") // TODO make if format is ...
-            {
-                _plot = new PDFPlot;
-            }
+            static if ( CAIRO_HAS_PDF_SURFACE ) 
+                if (_imageFormat == "pdf") // TODO make if format is ...
+                {
+                    _plot = new PDFPlot;
+                }
+                else
+                {
+                    _plot = new PNGPlot;
+                }
             else
             {
                 _plot = new PNGPlot;
@@ -260,7 +270,7 @@ class LazyFigure {
             fullRedraw = false;
         }
 
-		debug writeln( "LazyFigure::plot plotting xlabel ", _xlabel );
+        debug writeln( "LazyFigure::plot plotting xlabel ", _xlabel );
 
         _plot.drawXLabel( _xlabel );
         _plot.drawYLabel( _ylabel );
