@@ -32,14 +32,12 @@ By default cairoD disables pdf and svg support. To use it any way you need to en
 
 ```
 mkdir extern && cd extern
-https://github.com/jpf91/cairoD.git
+git clone https://github.com/jpf91/cairoD.git
 sed -i 's/PDF_SURFACE = false/PDF_SURFACE = true/g' cairoD/src/cairo/c/config.d
 sed -i 's/SVG_SURFACE = false/SVG_SURFACE = true/g' cairoD/src/cairo/c/config.d
 dub add-local cairoD
 cd ..
 dub build -b release --force
-
-
 ```
 
 ## Usage:
