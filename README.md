@@ -44,41 +44,97 @@ Which will create a new binary in bin/plotcli which you can copy anywhere in you
 
 ## Usage:
 
-```
-$ plotcli --help
-Usage: plotcli [-f] [-o OUTPUT] [-d FORMAT] [-b BOUNDS] [--xlabel XLABEL] [--ylabel YLABEL] [--margin-bounds MARGINBOUNDS]
+### NAME
 
-Plotcli is a plotting program that will plot data from provided data streams (files). It will ignore any lines it doesn't understand, making it possible to feed it \"dirty\" streams/files. All options can also be provided within the stream by using the prefix #plotcli (e.g. #plotcli -d x,y).
+plotcli − manual page for plotcli plotcli
 
-Options:
-  -f          Follow the stream, i.e. keep listening for new lines.
-  -d FORMAT   String describing the content of each row. Different row formats supported: x, y and h, with h indication histogram data. For more information see Data format section.
-  -o OUTPUT	  Outputfile (without extension).
-  -b BOUNDS   Give specific bounds for the plot in a comma separated list (min_x,max_x,min_y,max_y).
-  --xlabel XLABEL
-  --ylabel YLABEL
-  --margin-bounds MARGINBOUNDS  Specific bounds (in pixel size) for the margins. Format (all in pixels): xmargin,xwidth,ymargin,yheight. Default values 70,400,70,400.
-  --image IMAGEFORMAT  Format of the resulting image (png/pdf/svg).
+### SYNOPSIS
 
-Data format:
-  Using -d it is possible to specify what each column in your data file represents. Supported formats are:
+**plotcli** [*-f*] [*-o OUTPUT*] [*-d FORMAT*] [*-b BOUNDS*] [*--xlabel
+XLABEL*] [*--ylabel YLABEL*] [*--margin-bounds MARGINBOUNDS*] [*--image
+IMAGEFORMAT*]
 
-  x,y   The x and y coordinate for points
-  lx,ly Line data
-  h     Histogram data
-  hx,hy 2D Histogram data 
-  ..	  Extrapolate from previous options, i.e. x,y,.. -> x,y,x,y,..
-  id    Default data id to use for this row of data (it is also possible to provide a column specific id (see Data ids below))
-  pn    Default plot name to use for this row of data (it is also possible to provide a column specific id (see Plot ids below))
+### DESCRIPTION
 
-  Examples: x,y,y or h,x,y. When there are more ys provided than xs (or vice versa) the last x will be matched to all remaining ys.
+Plotcli is a plotting program that will plot data from provided data
+streams (files). It will ignore any lines it doesn’t understand, making
+it possible to feed it "dirty" streams/files. All options can also be
+provided within the stream by using the prefix \#plotcli (e.g. \#plotcli
+**−d** x,y).
 
-  Data ids: plotcli by default does a good job of figuring out which x and y data belong together, but you can optionally provide an numeric id to make this completely clear. I.e. x1,y1. Data ids always need to directly follow the format type (before plot ids).
+### OPTIONS
 
-  Plot ids: if you want to plot the data to different figures you can add a letter/name at the end: xa,ya or x1a,y1a. This plot id will be appended to the OUTPUT file name. 
++--------------------+--------------------+--------------------+--------------------+
+|                    | **−f**             |                    | Follow the stream, |
+|                    |                    |                    | i.e. keep          |
+|                    |                    |                    | listening for new  |
+|                    |                    |                    | lines.             |
++--------------------+--------------------+--------------------+--------------------+
 
-  Extrapolating (..): plotcli will try to extrapolate from your previous options. This also works for simple plot ids. I.e. if you want a separate histogram for each column: ha,hb,.. results in ha,hb,hc,hd,he etc. Other examples: y,.. -> y,y,y,y etc. x,y,y,.. -> x,y,y,y,y etc.
-```
+**−d** FORMAT
+
+String describing the content of each row. Different row formats
+supported: x, y and h, with h indication histogram data. For more
+information see Data format section.
+
+**−o** OUTPUT
+
+Outputfile (without extension).
+
+**−b** BOUNDS
+
+Give specific bounds for the plot in a comma separated list
+(min\_x,max\_x,min\_y,max\_y).
+
++--------------------------+--------------------------+--------------------------+
+|                          | **−−xlabel** XLABEL      |                          |
++--------------------------+--------------------------+--------------------------+
+|                          | **−−ylabel** YLABEL      |                          |
++--------------------------+--------------------------+--------------------------+
+
+**−−margin−bounds** MARGINBOUNDS
+
+Specific bounds (in pixel size) for the margins. Format (all in pixels):
+xmargin,xwidth,ymargin,yheight. Default values 70,400,70,400.
+
+**−−image** IMAGEFORMAT
+
+Format of the resulting image (png/pdf/svg).
+
+### Data format
+
+Using **−d** it is possible to specify what each column in your data
+file represents. Supported formats are:
+
++----------------+----------------+----------------+----------------+----------------+
+|                | x,y            |                | The x and y    |                |
+|                |                |                | coordinate for |                |
+|                |                |                | points         |                |
++----------------+----------------+----------------+----------------+----------------+
+
+lx,ly Line data h Histogram data hx,hy 2D Histogram data .. Extrapolate
+from previous options, i.e. x,y,.. −\> x,y,x,y,.. id Default data id to
+use for this row of data (it is also possible to provide a column
+specific id (see Data ids below)) pn Default plot name to use for this
+row of data (it is also possible to provide a column specific id (see
+Plot ids below))
+
+Examples: x,y,y or h,x,y. When there are more ys provided than xs (or
+vice versa) the last x will be matched to all remaining ys.
+
+Data ids: plotcli by default does a good job of figuring out which x and
+y data belong together, but you can optionally provide an numeric id to
+make this completely clear. I.e. x1,y1. Data ids always need to directly
+follow the format type (before plot ids).
+
+Plot ids: if you want to plot the data to different figures you can add
+a letter/name at the end: xa,ya or x1a,y1a. This plot id will be
+appended to the OUTPUT file name.
+
+Extrapolating (..): plotcli will try to extrapolate from your previous
+options. This also works for simple plot ids. I.e. if you want a
+separate histogram for each column: ha,hb,.. results in ha,hb,hc,hd,he
+etc. Other examples: y,.. −\> y,y,y,y etc. x,y,y,.. −\> x,y,y,y,y etc.
 
 ## Examples
 
