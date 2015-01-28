@@ -25,11 +25,8 @@ module cli.figure;
 
 import std.algorithm : map;
 import std.string : toUpper, format;
-
 import cairo.c.config;
-
 import cli.parsing : Event;
-
 //import plotd.plot : PlotState, createPlotState;
 //import plotd.primitives : Bounds, Color, ColorRange, Point;
 import axes = plotd.axes : AdaptationMode;
@@ -37,74 +34,79 @@ import plotd.binning : Bins, optimalBounds, toBins;
 import draw = plotd.drawing;
 import plotd.plot;
 import plotd.primitives;
-
 /*
 TODO: Rename this to better fit with its function, i.e. mostly keeping color data around
 */
-class Figure {
-	Point[][string] previousLines;
 
-	double[] histData;
-	Point[] histPoints;
+class Figure
+{
+    Point[][string] previousLines;
+    double[] histData;
+    Point[] histPoints;
+    size_t columnCount = 0;
+    LazyFigure lf;
+    this()
+    {
+        lf = new LazyFigure;
+        lf.plotBounds = Bounds(0, 1, 0, 1);
+        lf.marginBounds = Bounds(70, 400, 70, 400);
+    }
 
-	size_t columnCount = 0;
+    this(string name, string imageFormat, Bounds bounds, Bounds marginBounds)
+    {
+        lf = new LazyFigure(name, imageFormat);
+        lf.plotBounds = bounds;
+        lf.marginBounds = marginBounds;
+    }
 
-	LazyFigure lf;
-
-	this() {
-		lf = new LazyFigure;
-		lf.plotBounds = Bounds( 0, 1, 0, 1 );
-		lf.marginBounds = Bounds( 70, 400, 70, 400 );
-	}
-
-	this( string name, string imageFormat, Bounds bounds, Bounds marginBounds ) {
-		lf = new LazyFigure( name, imageFormat );
-		lf.plotBounds = bounds;
-		lf.marginBounds = marginBounds;
-	}
-
-	private:
-  	ColorRange colorRange;
-	  Color[][string] colors;
+    private  : ColorRange colorRange;
+    Color[][string] colors;
 }
 
-Color getColor( Figure figure, string dataID, size_t id = 0 ) {
-	/// Make sure we cache the color
-	if (dataID !in figure.colors) {
-		figure.colors[dataID] ~= figure.colorRange.front;
-		figure.colorRange.popFront;
-	}
-	while ( figure.colors[dataID].length <= id ) {
-		figure.colors[dataID] ~= figure.colorRange.front;
-		figure.colorRange.popFront;
-	}
-	return figure.colors[dataID][id];
-}
-unittest {
-	assert( true );
+Color getColor(Figure figure, string dataID, size_t id = 0)
+{
+    /// Make sure we cache the color
+    if (dataID!in figure.colors)
+    {
+        figure.colors[dataID] ~= figure.colorRange.front;
+        figure.colorRange.popFront;
+    }
+    while (figure.colors[dataID].length <= id)
+    {
+        figure.colors[dataID] ~= figure.colorRange.front;
+        figure.colorRange.popFront;
+    }
+    return figure.colors[dataID][id];
 }
 
-unittest {
-	auto fig = new Figure;
-	auto col = fig.getColor( "", 0 );
-	assert( col == fig.getColor( "", 0 ) ); 
-	assert( col != fig.getColor( "1", 0 ) ); 
-	assert( col != fig.getColor( "", 1 ) ); 
+unittest
+{
+    assert(true);
 }
+
+unittest
+{
+    auto fig = new Figure;
+    auto col = fig.getColor("", 0);
+    assert(col == fig.getColor("", 0));
+    assert(col != fig.getColor("1", 0));
+    assert(col != fig.getColor("", 1));
+}
+
 
 // Wrapper classes for PlotState, to make them inheritable
 interface PlotInterface
 {
-    void create( string name, Bounds plotBounds, Bounds marginBounds );
+    void create(string name, Bounds plotBounds, Bounds marginBounds);
     void save();
-    void drawPoint( Point pnt );
-    void drawColor( Color clr );
-    void drawLine( Point toP, Point fromP );
-    void drawXLabel( string xlabel );
-    void drawYLabel( string ylabel );
-    void drawBins2D( Bins!size_t bins );
-    void drawBins3D( Bins!(Bins!(size_t)) bins );
-    void drawBins(BINS)( BINS bins );
+    void drawPoint(Point pnt);
+    void drawColor(Color clr);
+    void drawLine(Point toP, Point fromP);
+    void drawXLabel(string xlabel);
+    void drawYLabel(string ylabel);
+    void drawBins2D(Bins!size_t bins);
+    void drawBins3D(Bins!(Bins!(size_t)) bins);
+    void drawBins(BINS)(BINS bins);
 }
 
 enum plotFormat = q{ 
@@ -166,193 +168,212 @@ class %sPlot : PlotInterface
     private:
         PlotState!"%s" _plot;
 }};
-
-mixin( format( plotFormat, "PNG", "png", "png" ) );
-static if ( CAIRO_HAS_PDF_SURFACE ) 
+mixin (format(plotFormat, "PNG", "png", "png"));
+static if (CAIRO_HAS_PDF_SURFACE)
 {
-    mixin( format( plotFormat, "PDF", "pdf", "pdf" ) );
+    mixin (format(plotFormat, "PDF", "pdf", "pdf"));
 }
-
-static if ( CAIRO_HAS_SVG_SURFACE ) 
+static if (CAIRO_HAS_SVG_SURFACE)
 {
-    mixin( format( plotFormat, "SVG", "svg", "svg" ) );
+    mixin (format(plotFormat, "SVG", "svg", "svg"));
 }
 
 /// Only plot when needed not before
-class LazyFigure {
+class LazyFigure
+{
     string _name = "plotcli";
     string _imageFormat;
+    this()
+    {
+    }
 
-    this() {}
-
-    this( string name, string imageFormat ) 
+    this(string name, string imageFormat)
     {
         _name = name;
         _imageFormat = imageFormat;
     }
 
-	@property point( Point pnt ) {
-		if ( _adaptionMode == axes.AdaptationMode.full )
-		{
-			auto needAdjusting = _plotBounds.adapt( pnt );
-
-			if (needAdjusting)
-				fullRedraw = true;
-		}
-
-		_events ~= delegate( PlotInterface plot ) {	
-            plot.drawPoint( pnt );
-		};
-	}
-
-	@property color( Color clr ) {
-		_events ~= delegate( PlotInterface plot ) {	
-            plot.drawColor( clr );
-		};
-	}
-
-	@property xlabel( string xl ) {
-		_xlabel = xl;
-	}
-
-	@property ylabel( string yl ) {
-		_ylabel = yl;
-	}
-
-	@property adaptationMode() 
-	{
-		return _adaptionMode;
-	}
-
-	@property adaptationMode( axes.AdaptationMode am ) 
-	{
-		_adaptionMode = am;
-	}
-
-	@property plotBounds( Bounds pB )
-	{
-		_plotBounds = pB;
-		fullRedraw = true;
-	}
-
-	@property marginBounds( Bounds mB )
-	{
-		_marginBounds = mB;
-		fullRedraw = true;
-	}
-
-	void line( Point fromP, Point toP ) {
-		if ( _adaptionMode == axes.AdaptationMode.full ) {
-			auto needAdjustingFrom = _plotBounds.adapt( fromP );
-			auto needAdjustingTo = _plotBounds.adapt( toP );
-			if (needAdjustingFrom || needAdjustingTo)
-				fullRedraw = true;
-		}
-
-		_events ~= delegate( PlotInterface plot ) {	
-            plot.drawLine( toP, fromP );
-		};
-	}
-
-    void plot() {
-        if ( fullRedraw ) 
+    @property point(Point pnt)
+    {
+        if (_adaptionMode == axes.AdaptationMode.full)
         {
-            _plot = new PNGPlot; // Constructor does not create yet, so we can do this
-            static if ( CAIRO_HAS_PDF_SURFACE ) 
-            {
-                if (_imageFormat == "pdf") // TODO make if format is ...
-                {
-                    _plot = new PDFPlot;
-                }
-            }
-            static if ( CAIRO_HAS_SVG_SURFACE )
-            {
-                if (_imageFormat == "svg") // TODO make if format is ...
-                {
-                    _plot = new SVGPlot;
-                }
-            }
-            _plot.create( _name, _plotBounds, _marginBounds );
-            foreach( event; _eventCache )
-                event( _plot );
-            fullRedraw = false;
+            auto needAdjusting = _plotBounds.adapt(pnt);
+            if (needAdjusting)
+                fullRedraw = true;
+        }
+        _events ~= delegate(PlotInterface plot)
+        {
+            plot.drawPoint(pnt);
         }
 
-        debug writeln( "LazyFigure::plot plotting xlabel ", _xlabel );
+        ;
+    }
 
-        _plot.drawXLabel( _xlabel );
-        _plot.drawYLabel( _ylabel );
+    @property color(Color clr)
+    {
+        _events ~= delegate(PlotInterface plot)
+        {
+            plot.drawColor(clr);
+        }
 
-		foreach( event; _events ) {
-			event( _plot );
-			_eventCache ~= event;
-		}
-		_events.length = 0;
-	}
+        ;
+    }
+
+    @property xlabel(string xl)
+    {
+        _xlabel = xl;
+    }
+
+    @property ylabel(string yl)
+    {
+        _ylabel = yl;
+    }
+
+    @property adaptationMode()
+    {
+        return _adaptionMode;
+    }
+
+    @property adaptationMode(axes.AdaptationMode am)
+    {
+        _adaptionMode = am;
+    }
+
+    @property plotBounds(Bounds pB)
+    {
+        _plotBounds = pB;
+        fullRedraw = true;
+    }
+
+    @property marginBounds(Bounds mB)
+    {
+        _marginBounds = mB;
+        fullRedraw = true;
+    }
+
+    void line(Point fromP, Point toP)
+    {
+        if (_adaptionMode == axes.AdaptationMode.full)
+        {
+            auto needAdjustingFrom = _plotBounds.adapt(fromP);
+            auto needAdjustingTo = _plotBounds.adapt(toP);
+            if (needAdjustingFrom || needAdjustingTo)
+                fullRedraw = true;
+        }
+        _events ~= delegate(PlotInterface plot)
+        {
+            plot.drawLine(toP, fromP);
+        }
+
+        ;
+    }
+
+    void plot()
+    {
+        if (fullRedraw)
+        {
+            _plot = new PNGPlot; // Constructor does not create yet, so we can do this
+            static if (CAIRO_HAS_PDF_SURFACE)
+            {
+                if (_imageFormat == "pdf")
+                    
+                    // TODO make if format is ...
+                    
+                    
+                    {
+                        _plot = new PDFPlot;
+                }
+            }
+            static if (CAIRO_HAS_SVG_SURFACE)
+            {
+                if (_imageFormat == "svg")
+                    
+                    // TODO make if format is ...
+                    
+                    
+                    {
+                        _plot = new SVGPlot;
+                }
+            }
+            _plot.create(_name, _plotBounds, _marginBounds);
+            foreach (event; _eventCache)
+                event(_plot);
+            fullRedraw = false;
+        }
+        debug writeln("LazyFigure::plot plotting xlabel ", _xlabel);
+        _plot.drawXLabel(_xlabel);
+        _plot.drawYLabel(_ylabel);
+        foreach (event; _events)
+        {
+            event(_plot);
+            _eventCache ~= event;
+        }
+        _events.length = 0;
+    }
 
     void save()
     {
         _plot.save();
     }
 
-	private:
-		bool fullRedraw = true; // Is a new redraw needed 
-		PlotInterface _plot;
-		AdaptiveBounds _plotBounds;
-		Bounds _marginBounds;
-		Event[] _eventCache; // Old events
-		Event[] _events; // Events since last plot
-
-		string _xlabel;
-		string _ylabel;
-
-		axes.AdaptationMode _adaptionMode;
+    private  : bool fullRedraw = true; // Is a new redraw needed 
+    PlotInterface _plot;
+    AdaptiveBounds _plotBounds;
+    Bounds _marginBounds;
+    Event[] _eventCache; // Old events
+    Event[] _events; // Events since last plot
+    
+    string _xlabel;
+    string _ylabel;
+    axes.AdaptationMode _adaptionMode;
 }
+
 
 //TODO: this is a bit of a hack, need to properly implement separate context
 // for histograms and then combining contexts
-void drawHistogram( Figure figure ) {
-	if (figure.histData.length > 0) {
-		// Create bin
-		auto bins = figure.histData.toBins!size_t(
-				max( 11, min( 31, figure.histData.length/100 ) ) );
-
-		if ( figure.lf.adaptationMode == axes.AdaptationMode.full ) {
-			// Adjust plotBounds 
-			figure.lf.plotBounds = bins.optimalBounds( 0.99 );
-			debug writeln( "Adjusting histogram to bounds: ", 
-					figure.lf._plotBounds );
-		}
-		// Empty current events/plot (this is the hacky bit)
-		figure.lf.fullRedraw = true;
-		figure.lf._events.length = 0;
-		figure.lf._eventCache.length = 0;
-		figure.lf.plot;
-
-		// Plot Bins
-        figure.lf._plot.drawBins2D( bins );
-		debug writeln( "Drawn bins to histogram: ", bins );
-	}
-
-	if (figure.histPoints.length > 0) {
-		auto bins = figure.histPoints
-			.map!( (pnt) => [pnt.x,pnt.y] )
-			.toBins!(Bins!size_t)( 
-					max( 11, min( 31, figure.histData.length/100 ) ) );
-		debug writeln( "Drawing 2D histogram: ", bins );
-		if ( figure.lf.adaptationMode == axes.AdaptationMode.full ) {
-			// Adjust plotBounds 
-			figure.lf.plotBounds = Bounds( bins.min, bins.max,
-					bins[0].min, bins[0].max);
-			debug writeln( "Adjusting 2D histogram to bounds: ", 
-					figure.lf._plotBounds );
-		}
-		// Empty current events/plot (this is the hacky bit)
-		figure.lf.fullRedraw = true;
-		figure.lf._events.length = 0;
-		figure.lf._eventCache.length = 0;
-		figure.lf.plot;
-
-		figure.lf._plot.drawBins3D( bins );
-	}
+void drawHistogram(Figure figure)
+{
+    if (figure.histData.length > 0)
+    {
+        // Create bin
+        auto bins = figure.histData.toBins!size_t(max(11, min(31, figure.histData
+            .length / 100)));
+        if (figure.lf.adaptationMode == axes.AdaptationMode.full)
+        {
+            // Adjust plotBounds 
+            figure.lf.plotBounds = bins.optimalBounds(0.99);
+            debug writeln("Adjusting histogram to bounds: ", figure.lf
+                ._plotBounds);
+        }
+        
+        // Empty current events/plot (this is the hacky bit)
+        figure.lf.fullRedraw = true;
+        figure.lf._events.length = 0;
+        figure.lf._eventCache.length = 0;
+        figure.lf.plot;
+        // Plot Bins
+        figure.lf._plot.drawBins2D(bins);
+        debug writeln("Drawn bins to histogram: ", bins);
+    }
+    if (figure.histPoints.length > 0)
+    {
+        auto bins = figure.histPoints.map!((pnt) => [pnt.x, pnt.y]).toBins!(Bins!size_t)(max(11,
+            min(31, figure.histData.length / 100)));
+        debug writeln("Drawing 2D histogram: ", bins);
+        if (figure.lf.adaptationMode == axes.AdaptationMode.full)
+        {
+            // Adjust plotBounds 
+            figure.lf.plotBounds = Bounds(bins.min, bins.max, bins[0].min, bins[0]
+                .max);
+            debug writeln("Adjusting 2D histogram to bounds: ", figure.lf
+                ._plotBounds);
+        }
+        
+        // Empty current events/plot (this is the hacky bit)
+        figure.lf.fullRedraw = true;
+        figure.lf._events.length = 0;
+        figure.lf._eventCache.length = 0;
+        figure.lf.plot;
+        figure.lf._plot.drawBins3D(bins);
+    }
 }

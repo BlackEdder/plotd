@@ -25,31 +25,33 @@ module cli.algorithm;
 
 import std.range : ElementType, isInputRange, front;
 
-version( unittest ) {
-	import std.stdio : writeln;
+version(unittest)
+{
+    import std.stdio : writeln;
+
 }
-
-
-auto groupBy(alias func, R)(R values)
-    if (isInputRange!R)
+auto groupBy(alias func, R)(R values) if (isInputRange!R)
 {
     alias K = typeof(func(values.front));
     alias V = ElementType!R[];
     V[K] grouped;
-    foreach(value; values) grouped[func(value)] ~= value;
+    foreach (value; values)
+        grouped[func(value)] ~= value;
     return grouped;
 }
 
-unittest {
-	struct Test {
-		string a;
-		double b;
-	}
+unittest
+{
+    struct Test
+    {
+        string a;
+        double b;
+    }
 
-	auto values = [Test( "a", 1 ), Test( "a", 2 ), Test( "b", 3 )];
-	auto grouped = values.groupBy!( (a) => a.a );
-	assert( grouped["a"].length == 2 );
-	assert( grouped["a"][1].b == 2 );
-	assert( grouped["b"].length == 1 );
-	assert( grouped["b"][0].b == 3 );
+    auto values = [Test("a", 1), Test("a", 2), Test("b", 3)];
+    auto grouped = values.groupBy!((a) => a.a);
+    assert(grouped["a"].length == 2);
+    assert(grouped["a"][1].b == 2);
+    assert(grouped["b"].length == 1);
+    assert(grouped["b"][0].b == 3);
 }

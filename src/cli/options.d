@@ -25,34 +25,35 @@ module cli.options;
 
 import std.conv : to;
 import std.string : split;
-
 import docopt : ArgValue;
-
 import axes = plotd.axes : AdaptationMode;
 import plotd.primitives : Bounds;
 
-version( unittest ) {
-	import std.algorithm : equal;
-	import std.stdio : writeln;
-	import docopt : docopt;
-}
+version(unittest)
+{
+    import std.algorithm : equal;
+    import std.stdio : writeln;
+    import docopt : docopt;
 
+}
 import cli.column;
-
 /// Merge given associative arrays
-V[K] merge( K, V )( V[K] aaBase, in V[K] aa ) {
-	foreach ( k, v; aa )
-		aaBase[k] = v;
-	return aaBase;
+V[K] merge(K, V)(V[K] aaBase, in V[K] aa)
+{
+    foreach (k, v; aa)
+        aaBase[k] = v;
+    return aaBase;
 }
+
 
 ///
-unittest {
-	auto aa1 = ["x" : 1.0, "y": 2.0];
-	auto aa2 = ["y":3.0];
-	assert( aa1.merge( aa2 ) == ["x" : 1.0, "y": 3.0] );
-	aa2 = ["y":3.0, "z":4.0];
-	assert( aa1.merge( aa2 ) == ["x" : 1.0, "y": 3.0, "z":4.0] );
+unittest
+{
+    auto aa1 = ["x" : 1.0, "y" : 2.0];
+    auto aa2 = ["y" : 3.0];
+    assert(aa1.merge(aa2) == ["x" : 1.0, "y" : 3.0]);
+    aa2 = ["y" : 3.0, "z" : 4.0];
+    assert(aa1.merge(aa2) == ["x" : 1.0, "y" : 3.0, "z" : 4.0]);
 }
 
 auto helpText = "Usage: plotcli [-f] [-o OUTPUT] [-d FORMAT] [-b BOUNDS] [--xlabel XLABEL] [--ylabel YLABEL] [--margin-bounds MARGINBOUNDS] [--image IMAGEFORMAT]
@@ -89,7 +90,6 @@ Data format:
   Extrapolating (..): plotcli will try to extrapolate from your previous options. This also works for simple plot ids. I.e. if you want a separate histogram for each column: ha,hb,.. results in ha,hb,hc,hd,he etc. Other examples: y,.. -> y,y,y,y etc. x,y,y,.. -> x,y,y,y,y etc.
 
 ";
-
 /* Future options
 
 	--adaptive MODE (not adaptive, scrolling, full) First two need bounds or alternatively adaptive-cache for initial bounds 
@@ -98,79 +98,79 @@ Data format:
 	--debug 		Output lines that are not successfully parsed
 	*/
 
-struct Settings {
-	Formats formats;
-	string outputFile = "plotcli";
-	bool follow = false;
-	auto adaptationMode = axes.AdaptationMode.full;
-	Bounds plotBounds = Bounds( 0, 1, 0, 1 );
-	Bounds marginBounds = Bounds( 70, 400, 70, 400 );
-	string xlabel = "x";
-	string ylabel = "y";
+struct Settings
+{
+    Formats formats;
+    string outputFile = "plotcli";
+    bool follow = false;
+    auto adaptationMode = axes.AdaptationMode.full;
+    Bounds plotBounds = Bounds(0, 1, 0, 1);
+    Bounds marginBounds = Bounds(70, 400, 70, 400);
+    string xlabel = "x";
+    string ylabel = "y";
     string imageFormat = "png";
 }
 
-unittest {
-	Settings settings;
-	assert( settings.formats.empty );
-	assert( settings.outputFile == "plotcli" );
+unittest
+{
+    Settings settings;
+    assert(settings.formats.empty);
+    assert(settings.outputFile == "plotcli");
 }
 
-Settings updateSettings( Settings settings, ArgValue[string] options ) {
-	if ( !options["-d"].isNull ) 
-	{
-		settings.formats = parseDataFormat( options["-d"].to!string );
-	}
-	if ( !options["-o"].isNull )
-		settings.outputFile = options["-o"].to!string;
-	if ( !options["--image"].isNull )
-		settings.imageFormat = options["--image"].to!string;
-	if ( options["-f"].isTrue )
-		settings.follow = true;
-	if ( !options["-b"].isNull ) {
-		settings.adaptationMode = axes.AdaptationMode.none;
-		settings.plotBounds = Bounds( options["-b"].to!string );
-	}
-	if ( !options["--margin-bounds"].isNull ) {
-		settings.marginBounds = Bounds( options["--margin-bounds"].to!string );
-	}	
-	if ( !options["--xlabel"].isNull ) 
-		settings.xlabel = options["--xlabel"].to!string;
-	if ( !options["--ylabel"].isNull ) 
-		settings.ylabel = options["--ylabel"].to!string;
-	return settings;
+Settings updateSettings(Settings settings, ArgValue[string] options)
+{
+    if (!options["-d"].isNull)
+    {
+        settings.formats = parseDataFormat(options["-d"].to!string);
+    }
+    if (!options["-o"].isNull)
+        settings.outputFile = options["-o"].to!string;
+    if (!options["--image"].isNull)
+        settings.imageFormat = options["--image"].to!string;
+    if (options["-f"].isTrue)
+        settings.follow = true;
+    if (!options["-b"].isNull)
+    {
+        settings.adaptationMode = axes.AdaptationMode.none;
+        settings.plotBounds = Bounds(options["-b"].to!string);
+    }
+    if (!options["--margin-bounds"].isNull)
+    {
+        settings.marginBounds = Bounds(options["--margin-bounds"].to!string);
+    }
+    if (!options["--xlabel"].isNull)
+        settings.xlabel = options["--xlabel"].to!string;
+    if (!options["--ylabel"].isNull)
+        settings.ylabel = options["--ylabel"].to!string;
+    return settings;
 }
 
-unittest {
-	Settings settings;
-	auto args = docopt(helpText, [], true, "plotcli");
-	assert( args["-d"].isNull );
-	settings = settings.updateSettings( 
-			docopt(helpText, [], true, "plotcli") );
-	assert( settings.formats.empty );
-	assert( settings.outputFile == "plotcli" );
-
-	settings = settings.updateSettings( 
-			docopt(helpText, ["-d", "x,y"], true, "plotcli") );
-	assert( settings.formats.front.mode == "x" );
-	assert( settings.outputFile == "plotcli" );
-
-	settings = settings.updateSettings( 
-			docopt(helpText, ["-o", "name"], true, "plotcli") );
-	assert( settings.outputFile == "name" );
-	assert( settings.follow == false );
-
-	settings = settings.updateSettings( 
-			docopt(helpText, ["-f"], true, "plotcli") );
-	assert( settings.follow == true );
-	settings = settings.updateSettings( 
-			docopt(helpText, ["-o", "name"], true, "plotcli") );
-	assert( settings.follow == true );
-
-	// Bounds
-	assert( settings.adaptationMode == AdaptationMode.full );
-	settings = settings.updateSettings( 
-			docopt(helpText, ["-b", "-10,9,12,15"], true, "plotcli") );
-	assert( settings.adaptationMode == AdaptationMode.none );
-	assert( settings.plotBounds == Bounds( -10,9,12,15 ) );
+unittest
+{
+    Settings settings;
+    auto args = docopt(helpText, [], true, "plotcli");
+    assert(args["-d"].isNull);
+    settings = settings.updateSettings(docopt(helpText, [], true, "plotcli"));
+    assert(settings.formats.empty);
+    assert(settings.outputFile == "plotcli");
+    settings = settings.updateSettings(docopt(helpText, ["-d", "x,y"], true,
+        "plotcli"));
+    assert(settings.formats.front.mode == "x");
+    assert(settings.outputFile == "plotcli");
+    settings = settings.updateSettings(docopt(helpText, ["-o", "name"], true,
+        "plotcli"));
+    assert(settings.outputFile == "name");
+    assert(settings.follow == false);
+    settings = settings.updateSettings(docopt(helpText, ["-f"], true, "plotcli"));
+    assert(settings.follow == true);
+    settings = settings.updateSettings(docopt(helpText, ["-o", "name"], true,
+        "plotcli"));
+    assert(settings.follow == true);
+    // Bounds
+    assert(settings.adaptationMode == AdaptationMode.full);
+    settings = settings.updateSettings(docopt(helpText, ["-b", "-10,9,12,15"],
+        true, "plotcli"));
+    assert(settings.adaptationMode == AdaptationMode.none);
+    assert(settings.plotBounds == Bounds(-10, 9, 12, 15));
 }

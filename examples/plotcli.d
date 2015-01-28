@@ -20,69 +20,66 @@
 
 	 -------------------------------------------------------------------
 	 */
+
 import std.stdio : readln, writeln;
 import std.datetime : Clock, SysTime;
-
 import core.thread : Thread;
 import core.time : dur;
 import docopt;
-
-
 import cli.figure : Figure;
 import cli.parsing : handleMessage, plotFigures, saveFigures;
 import cli.options : helpText, Settings, updateSettings;
-
 /**
 	Read from standard input and plot
 
 	Mainly used to pipe data into
 	*/
 
-void drawAndSave( ref Figure[string] figures, ref Settings settings ) {
-	debug writeln( "Plotting figures" );
-	plotFigures(figures, settings);
-	saveFigures(figures);
+void drawAndSave(ref Figure[string] figures, ref Settings settings)
+{
+    debug writeln("Plotting figures");
+    plotFigures(figures, settings);
+    saveFigures(figures);
 }
 
-void main( string[] args ) {
-	// Options
-	debug writeln( "Arguments: ", args );
-	auto doc = helpText;
-
-	auto arguments = docopt.docopt(doc, args[1..$], true, "plotcli");
-	Settings settings;
-	settings = settings.updateSettings( arguments );
-
-	auto msg = readln();
-
-	SysTime lastTime;
-
-	Figure[string] figures;
-
-	while( settings.follow || msg.length > 0 ) {
-		figures = handleMessage( msg, settings );
-
-		msg = readln();
-
-		bool waiting = false;
-		while ( settings.follow && msg.length == 0 ) // Got to end of file
-		{
-			if (!waiting) // Always draw once when waiting
-				drawAndSave( figures, settings );
-			waiting = true;
-			Thread.sleep( dur!("msecs")( 100 ) );
-			msg = readln();
-		}
-
-		auto curr = Clock.currTime;
-		if (settings.follow) {
-			if ( curr - lastTime > dur!("msecs")( 500 ) ) {
-				drawAndSave( figures, settings );
-				lastTime = curr;
-			}
-		}
-	}
-	plotFigures(figures, settings);
-	scope(exit) saveFigures(figures);
-	scope(failure) saveFigures(figures);
+void main(string[] args)
+{
+    // Options
+    debug writeln("Arguments: ", args);
+    auto doc = helpText;
+    auto arguments = docopt.docopt(doc, args[1 .. $], true, "plotcli");
+    Settings settings;
+    settings = settings.updateSettings(arguments);
+    auto msg = readln();
+    SysTime lastTime;
+    Figure[string] figures;
+    while (settings.follow || msg.length > 0)
+    {
+        figures = handleMessage(msg, settings);
+        msg = readln();
+        bool waiting = false;
+        while (settings.follow && msg.length == 0)
+             // Got to end of file
+            
+            {
+                if (!waiting)
+                 // Always draw once when waiting
+                drawAndSave(figures, settings);
+            waiting = true;
+            Thread.sleep(dur!("msecs")(100));
+            msg = readln();
+        }
+        auto curr = Clock.currTime;
+        if (settings.follow)
+        {
+            if (curr - lastTime > dur!("msecs")(500))
+            {
+                drawAndSave(figures, settings);
+                lastTime = curr;
+            }
+        }
+    }
+    plotFigures(figures, settings);
+    scope(exit) saveFigures(figures);
+    scope(failure) saveFigures(figures);
 }
