@@ -44,17 +44,9 @@ Which will create a new binary in bin/plotcli which you can copy anywhere in you
 
 ## Usage:
 
-### NAME
-
-plotcli − manual page for plotcli plotcli
-
-### SYNOPSIS
-
 **plotcli** [*-f*] [*-o OUTPUT*] [*-d FORMAT*] [*-b BOUNDS*] [*--xlabel
 XLABEL*] [*--ylabel YLABEL*] [*--margin-bounds MARGINBOUNDS*] [*--image
 IMAGEFORMAT*]
-
-### DESCRIPTION
 
 Plotcli is a plotting program that will plot data from provided data
 streams (files). It will ignore any lines it doesn’t understand, making
@@ -64,12 +56,9 @@ provided within the stream by using the prefix \#plotcli (e.g. \#plotcli
 
 ### OPTIONS
 
-+--------------------+--------------------+--------------------+--------------------+
-|                    | **−f**             |                    | Follow the stream, |
-|                    |                    |                    | i.e. keep          |
-|                    |                    |                    | listening for new  |
-|                    |                    |                    | lines.             |
-+--------------------+--------------------+--------------------+--------------------+
+**−f**
+
+Follow the stream, i.e. keep listening for new lines.
 
 **−d** FORMAT
 
@@ -86,11 +75,9 @@ Outputfile (without extension).
 Give specific bounds for the plot in a comma separated list
 (min\_x,max\_x,min\_y,max\_y).
 
-+--------------------------+--------------------------+--------------------------+
-|                          | **−−xlabel** XLABEL      |                          |
-+--------------------------+--------------------------+--------------------------+
-|                          | **−−ylabel** YLABEL      |                          |
-+--------------------------+--------------------------+--------------------------+
+**−−xlabel** XLABEL
+
+**−−ylabel** YLABEL
 
 **−−margin−bounds** MARGINBOUNDS
 
@@ -106,18 +93,12 @@ Format of the resulting image (png/pdf/svg).
 Using **−d** it is possible to specify what each column in your data
 file represents. Supported formats are:
 
-+----------------+----------------+----------------+----------------+----------------+
-|                | x,y            |                | The x and y    |                |
-|                |                |                | coordinate for |                |
-|                |                |                | points         |                |
-+----------------+----------------+----------------+----------------+----------------+
-
-lx,ly Line data h Histogram data hx,hy 2D Histogram data .. Extrapolate
-from previous options, i.e. x,y,.. −\> x,y,x,y,.. id Default data id to
-use for this row of data (it is also possible to provide a column
-specific id (see Data ids below)) pn Default plot name to use for this
-row of data (it is also possible to provide a column specific id (see
-Plot ids below))
+x,y: The x and y coordinate for points
+lx,ly: Line data h Histogram data 
+hx,hy: 2D Histogram data 
+..: Extrapolate from previous options, i.e. x,y,.. −\> x,y,x,y,.. 
+id: Default data id to use for this row of data (it is also possible to provide a column specific id (see Data ids below)) 
+pn: Default plot name to use for this row of data (it is also possible to provide a column specific id (see Plot ids below))
 
 Examples: x,y,y or h,x,y. When there are more ys provided than xs (or
 vice versa) the last x will be matched to all remaining ys.
