@@ -42,6 +42,7 @@ Options:
   --xlabel XLABEL
   --ylabel YLABEL
   --margin-bounds MARGINBOUNDS  Specific bounds (in pixel size) for the margins. Format (all in pixels): xmargin,xwidth,ymargin,yheight. Default values 70,400,70,400.
+  --image IMAGEFORMAT  Format of the resulting image (png/pdf/svg).
 
 Data format:
   Using -d it is possible to specify what each column in your data file represents. Supported formats are:
