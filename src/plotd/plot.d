@@ -107,6 +107,12 @@ PlotState!T createPlotState(alias string T)( string name, Bounds plotBounds,
         plot.surface = createPlotSurfacePDF( plot.name, 
                 plot.marginBounds.max_x.to!int, 
                 plot.marginBounds.max_y.to!int );
+    }
+    else if (T == "svg" && CAIRO_HAS_SVG_SURFACE) 
+    {
+        plot.surface = createPlotSurfaceSVG( plot.name, 
+                plot.marginBounds.max_x.to!int, 
+                plot.marginBounds.max_y.to!int );
     } else {
         plot.surface = createPlotSurface( plot.marginBounds.max_x.to!int, 
                 plot.marginBounds.max_y.to!int );

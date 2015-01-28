@@ -26,6 +26,7 @@ import std.conv;
 
 import cconfig = cairo.c.config;
 import cpdf = cairo.pdf;
+import csvg = cairo.svg;
 import cairo = cairo;
 
 import plotd.axes : Axis, adjustTickWidth, tickLength;
@@ -64,6 +65,23 @@ cairo.Surface createPlotSurfacePDF( string name, int width = 400,
     else
     {
         writeln( "CairoD was compiled without pdf support. Creating png surface instead" );
+        return createPlotSurface( width, height );
+    }
+}
+
+cairo.Surface createPlotSurfaceSVG( string name, int width = 400, 
+        int height = 400 ) {
+    static if (cconfig.CAIRO_HAS_SVG_SURFACE)
+    {
+        cairo.Surface surface = new csvg.SVGSurface(
+                name, width, height );
+        auto context = cairo.Context( surface );
+        clearContext( context );
+        return surface;
+    }
+    else
+    {
+        writeln( "CairoD was compiled without svg support. Creating png surface instead" );
         return createPlotSurface( width, height );
     }
 }

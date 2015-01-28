@@ -110,6 +110,7 @@ interface PlotInterface
 enum plotFormat = q{ 
 class %sPlot : PlotInterface
 {
+    // Don't create in constructor, otherwise full_redraw static if becomes inefficient 
     void create( string name, Bounds plotBounds, Bounds marginBounds )
     {
         _plot = createPlotState!"%s"( name, plotBounds,
@@ -170,6 +171,11 @@ mixin( format( plotFormat, "PNG", "png", "png" ) );
 static if ( CAIRO_HAS_PDF_SURFACE ) 
 {
     mixin( format( plotFormat, "PDF", "pdf", "pdf" ) );
+}
+
+static if ( CAIRO_HAS_SVG_SURFACE ) 
+{
+    mixin( format( plotFormat, "SVG", "svg", "svg" ) );
 }
 
 /// Only plot when needed not before
@@ -251,18 +257,20 @@ class LazyFigure {
     void plot() {
         if ( fullRedraw ) 
         {
+            _plot = new PNGPlot; // Constructor does not create yet, so we can do this
             static if ( CAIRO_HAS_PDF_SURFACE ) 
+            {
                 if (_imageFormat == "pdf") // TODO make if format is ...
                 {
                     _plot = new PDFPlot;
                 }
-                else
-                {
-                    _plot = new PNGPlot;
-                }
-            else
+            }
+            static if ( CAIRO_HAS_SVG_SURFACE )
             {
-                _plot = new PNGPlot;
+                if (_imageFormat == "svg") // TODO make if format is ...
+                {
+                    _plot = new SVGPlot;
+                }
             }
             _plot.create( _name, _plotBounds, _marginBounds );
             foreach( event; _eventCache )
