@@ -21,10 +21,26 @@ plotcli as follows:
 ```
 git clone http://github.com/BlackEdder/plotd.git
 cd plotd
-dub build -c plotcli -b release
+dub build -b release
 ```
 
 This will create a binary in bin/plotcli which you can copy anywhere in your path.
+
+### PDF and SVG support
+
+By default cairoD disables pdf and svg support. To use it any way you need to enable it in the following way (assuming that you are in the plotd directory created in the previous instructions):
+
+```
+mkdir extern && cd extern
+https://github.com/jpf91/cairoD.git
+sed -i 's/PDF_SURFACE = false/PDF_SURFACE = true/g' cairoD/src/cairo/c/config.d
+sed -i 's/SVG_SURFACE = false/SVG_SURFACE = true/g' cairoD/src/cairo/c/config.d
+dub add-local cairoD
+cd ..
+dub build -b release --force
+
+
+```
 
 ## Usage:
 
