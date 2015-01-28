@@ -40,6 +40,8 @@ cd ..
 dub build -b release --force
 ```
 
+Which will create a new binary in bin/plotcli which you can copy anywhere in your path.
+
 ## Usage:
 
 ```
