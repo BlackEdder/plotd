@@ -4,6 +4,7 @@
 docs*
 __*
 .*.swp
+.*.swo
 bin/
 dub.selections.json
 *.png
@@ -12,3 +13,7 @@ dub.selections.json
 .stversions/
 *.plotcli
 tmp/
+*.svg
+*.pdf
+extern
+test*
