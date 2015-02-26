@@ -30,7 +30,7 @@ import cli.parsing : Event;
 //import plotd.plot : PlotState, createPlotState;
 //import plotd.primitives : Bounds, Color, ColorRange, Point;
 import axes = plotd.axes : AdaptationMode;
-import plotd.binning : Bins, optimalBounds, toBins;
+import data.binning : Bins, optimalBounds, toBins;
 import draw = plotd.drawing;
 import plotd.plot;
 import plotd.primitives;

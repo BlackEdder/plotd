@@ -34,7 +34,7 @@ import std.string;
 import std.regex : ctRegex, match, split;
 import docopt;
 import axes = plotd.axes : AdaptationMode;
-import plotd.binning;
+import data.binning;
 import plotd.drawing;
 import plotd.plot;
 import plotd.primitives;

@@ -21,7 +21,7 @@
 	 -------------------------------------------------------------------
 	 */
 
-module plotd.binning;
+module data.binning;
 
 import std.algorithm : reduce;
 import std.array;
