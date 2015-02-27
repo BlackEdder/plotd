@@ -16,7 +16,7 @@
 			"name": "plotcli",
 			"workingDirectory": "./",
 			"targetType": "executable",
-			"sourceFiles": ["examples/plotcli.d"],
+			"sourceFiles": ["examples/app.d"],
 			"targetName": "plotcli",
 			"targetPath": "bin",
 		},

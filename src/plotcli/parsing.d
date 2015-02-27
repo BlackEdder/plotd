@@ -21,7 +21,7 @@
 	 -------------------------------------------------------------------
 	 */
 
-module cli.parsing;
+module plotcli.parsing;
 
 import std.algorithm;
 import std.conv : ConvException, to;
@@ -34,14 +34,14 @@ import std.string;
 import std.regex : ctRegex, match, split;
 import docopt;
 import axes = plotd.axes : AdaptationMode;
-import data.binning;
+import plotd.data.binning;
 import plotd.drawing;
 import plotd.plot;
 import plotd.primitives;
-import cli.algorithm : groupBy;
-import cli.column;
-import cli.figure : drawHistogram, Figure, getColor, PlotInterface;
-import cli.options : helpText, Settings, updateSettings;
+import plotcli.algorithm : groupBy;
+import plotcli.column;
+import plotcli.figure : drawHistogram, Figure, getColor, PlotInterface;
+import plotcli.options : helpText, Settings, updateSettings;
 
 version(unittest)
 {

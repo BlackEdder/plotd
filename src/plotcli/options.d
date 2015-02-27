@@ -21,7 +21,7 @@
 	 -------------------------------------------------------------------
 	 */
 
-module cli.options;
+module plotcli.options;
 
 import std.conv : to;
 import std.string : split;
@@ -36,7 +36,7 @@ version(unittest)
     import docopt : docopt;
 
 }
-import cli.column;
+import plotcli.column;
 /// Merge given associative arrays
 V[K] merge(K, V)(V[K] aaBase, in V[K] aa)
 {

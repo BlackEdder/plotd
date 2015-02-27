@@ -30,7 +30,7 @@ import csvg = cairo.svg;
 import cairo = cairo;
 import plotd.axes : Axis, adjustTickWidth, tickLength;
 import plotd.primitives;
-import data.binning;
+import plotd.data.binning;
 
 version(unittest)
 {

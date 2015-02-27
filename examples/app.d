@@ -26,9 +26,9 @@ import std.datetime : Clock, SysTime;
 import core.thread : Thread;
 import core.time : dur;
 import docopt;
-import cli.figure : Figure;
-import cli.parsing : handleMessage, plotFigures, saveFigures;
-import cli.options : helpText, Settings, updateSettings;
+import plotcli.figure : Figure;
+import plotcli.parsing : handleMessage, plotFigures, saveFigures;
+import plotcli.options : helpText, Settings, updateSettings;
 /**
 	Read from standard input and plot
 

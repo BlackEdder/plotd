@@ -21,16 +21,16 @@
 	 -------------------------------------------------------------------
 	 */
 
-module cli.figure;
+module plotcli.figure;
 
 import std.algorithm : map;
 import std.string : toUpper, format;
 import cairo.c.config;
-import cli.parsing : Event;
+import plotcli.parsing : Event;
 //import plotd.plot : PlotState, createPlotState;
 //import plotd.primitives : Bounds, Color, ColorRange, Point;
 import axes = plotd.axes : AdaptationMode;
-import data.binning : Bins, optimalBounds, toBins;
+import plotd.data.binning : Bins, optimalBounds, toBins;
 import draw = plotd.drawing;
 import plotd.plot;
 import plotd.primitives;

@@ -21,7 +21,7 @@
 	 -------------------------------------------------------------------
 	 */
 
-module cli.column;
+module plotcli.column;
 
 import std.conv : to;
 import std.regex : ctRegex, match, matchFirst;

@@ -1,7 +1,7 @@
 /*
    Functions to calculate summary statistics
    */
-module data.summary;
+module plotd.data.summary;
 
 import std.conv : to;
 import std.math : floor, ceil;

@@ -21,7 +21,7 @@
 	 -------------------------------------------------------------------
 	 */
 
-module cli.algorithm;
+module plotcli.algorithm;
 
 import std.range : ElementType, isInputRange, front;
 
