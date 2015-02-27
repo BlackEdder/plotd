@@ -23,13 +23,6 @@
 		{
 			"name": "plotd",
 			"targetType": "library",
-		},
-		{
-			"name": "plot1",
-			"targetType": "executable",
-			"sourceFiles": ["examples/plot1.d"],
-			"targetName": "plot1",
-			"targetPath": "bin",
-		}
-	]
+		}	
+    ]
 }
