@@ -35,7 +35,7 @@ version(unittest)
 }
 struct Format
 {
-    string mode; /// x,y,lx,ly,h
+    string mode; /// x,y,lx,ly,h,b
     string dataID; /// empty is the default value
     string plotID; /// plotName/id 
 }
@@ -43,7 +43,7 @@ struct Format
 Format parseColumnFormat(string mode)
 {
     Format colMode;
-    auto columnRegex = ctRegex!(r"(lx|ly|x|y|hx|hy|hz|h|..)(\d*)(.*)");
+    auto columnRegex = ctRegex!(r"(lx|ly|x|y|hx|hy|hz|h|b|..)(\d*)(.*)");
     auto m = mode.match(columnRegex);
     colMode.mode = m.captures[1];
     if (m.captures[2].length > 0)

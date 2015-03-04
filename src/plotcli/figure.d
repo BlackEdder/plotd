@@ -31,6 +31,8 @@ import plotcli.parsing : Event;
 //import plotd.primitives : Bounds, Color, ColorRange, Point;
 import axes = plotd.axes : AdaptationMode;
 import plotd.data.binning : Bins, optimalBounds, toBins;
+import plotd.data.summary : limits;
+
 import draw = plotd.drawing;
 import plotd.plot;
 import plotd.primitives;
@@ -45,6 +47,8 @@ class Figure
     Point[] histPoints;
     size_t columnCount = 0;
     LazyFigure lf;
+
+    double[] boxData;
     this()
     {
         lf = new LazyFigure;
@@ -107,6 +111,7 @@ interface PlotInterface
     void drawBins2D(Bins!size_t bins);
     void drawBins3D(Bins!(Bins!(size_t)) bins);
     void drawBins(BINS)(BINS bins);
+    void drawBoxPlot( in double x, double[] limits );
 }
 
 enum plotFormat = q{ 
@@ -163,6 +168,11 @@ class %sPlot : PlotInterface
     void drawBins(BINS)( BINS bins )
     {
         plotd.plot.drawBins!BINS( bins, _plot );
+    }
+
+    void drawBoxPlot( in double x, double[] limits )
+    {
+        plotd.plot.drawBoxPlot( x, limits, _plot );
     }
 
     private:
@@ -377,3 +387,32 @@ void drawHistogram(Figure figure)
         figure.lf._plot.drawBins3D(bins);
     }
 }
+
+void drawBoxPlot(Figure figure)
+{
+    if (figure.boxData.length > 0)
+    {
+
+        auto limits = figure.boxData.limits([0.02, 0.25, 
+                    0.5, 0.75, 0.98] );
+        if (figure.lf.adaptationMode == axes.AdaptationMode.full)
+        {
+            // Adjust plotBounds 
+            figure.lf.plotBounds = Bounds( 0,2,limits[0]-
+                (limits[2]-limits[0]),
+                limits[4]+(limits[4]-limits[2]) );
+            debug writeln("Adjusting boxplot to bounds: ", figure.lf
+                ._plotBounds);
+        }
+ 
+        // Empty current events/plot (this is the hacky bit)
+        figure.lf.fullRedraw = true;
+        figure.lf._events.length = 0;
+        figure.lf._eventCache.length = 0;
+        figure.lf.plot;
+        // Plot Box 
+        figure.lf._plot.drawBoxPlot( 1.0, limits );
+        debug writeln("Drawn boxdata in plot: ", limits);
+    }
+}
+ 

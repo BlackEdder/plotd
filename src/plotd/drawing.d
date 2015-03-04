@@ -353,26 +353,26 @@ CONTEXT drawBox(CONTEXT)(CONTEXT context, size_t x,
     if ( slice.length == 5 )
     {
         // Draw the outer lines
-        context = drawLine( Point( x-0.20, y[0] ),
-                Point( x+0.20, y[0] ), context );
-        context = drawLine( Point( x-0.20, y[4] ),
-                Point( x+0.20, y[4] ), context );
+        context = drawLine( Point( x-0.20, slice[0] ),
+                Point( x+0.20, slice[0] ), context );
+        context = drawLine( Point( x-0.20, slice[4] ),
+                Point( x+0.20, slice[4] ), context );
 
         slice = slice[1..4];
     }
     if ( slice.length == 3 )
     {
         // Draw the box
-        context = drawRectangle( Point( x - 0.25, y[0] ),
-                Point( x + 0.25, y[2] ) );
+        context = drawRectangle( Point( x - 0.25, slice[0] ),
+                Point( x + 0.25, slice[2] ), context );
 
         slice = slice[1..2];
     }
     if ( slice.length == 1 )
     {
         // Draw the median
-        context = drawLine( Point( x-0.35, y[0] ),
-                Point( x+0.35, y[0] ), context );
+        context = drawLine( Point( x-0.35, slice[0] ),
+                Point( x+0.35, slice[0] ), context );
     }
     return context;
 }

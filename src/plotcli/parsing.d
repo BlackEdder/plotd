@@ -40,7 +40,7 @@ import plotd.plot;
 import plotd.primitives;
 import plotcli.algorithm : groupBy;
 import plotcli.column;
-import plotcli.figure : drawHistogram, Figure, getColor, PlotInterface;
+import plotcli.figure : drawHistogram, drawBoxPlot, Figure, getColor, PlotInterface;
 import plotcli.options : helpText, Settings, updateSettings;
 
 version(unittest)
@@ -128,6 +128,7 @@ struct ParsedRow
     Point[] linePoints;
     Point[] histPoints;
     double[] histData;
+    double[] boxData;
 }
 
 
@@ -183,6 +184,8 @@ ParsedRow applyColumnData(ColumnData[] cMs, size_t columnID)
             return "line";
         if (cm.mode.front.to!string == "h")
             return "hist";
+        if (cm.mode.front.to!string == "b")
+            return "box";
         return "point";
     }
 
@@ -231,6 +234,8 @@ ParsedRow applyColumnData(ColumnData[] cMs, size_t columnID)
                 {
                     if (type == "hist")
                         parsed.histData ~= cM.value;
+                    else if (type == "box")
+                        parsed.boxData ~= cM.value;
                 }
             }
             if (xyGroup.length > 0)
@@ -305,6 +310,10 @@ unittest
     assert(pr.histData == [1.1, 2.1]);
     pr = applyColumnData([cm("hx", 1.1), cm("hy", 2.1)], 0);
     assert(pr.histPoints == [Point(1.1, 2.1)]);
+
+    // Box data
+    pr = applyColumnData([cm("b", 1.1), cm("b", 2.1)], 0);
+    assert(pr.boxData == [1.1, 2.1]);
 }
 
 
@@ -455,6 +464,9 @@ Figure[string] handleMessage(string msg, ref Settings settings)
                 // Histograms
                 figures[plotID].histData ~= parsedRow.histData;
                 figures[plotID].histPoints ~= parsedRow.histPoints;
+
+                // Box plot
+                figures[plotID].boxData ~= parsedRow.boxData;
             }
             figures[plotID].columnCount += 1;
         }
@@ -470,6 +482,7 @@ void plotFigures(Figure[string] figures, Settings settings)
     foreach (plotID, figure; figures)
     {
         drawHistogram(figure);
+        drawBoxPlot(figure);
         figure.lf.plot();
     }
 }
