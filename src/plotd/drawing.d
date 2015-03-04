@@ -68,6 +68,7 @@ cairo.Surface createPlotSurfacePDF(string name, int width = 400, int height = 40
     }
     else
     {
+        import std.stdio : writeln;
         writeln("CairoD was compiled without pdf support. Creating png surface instead");
         return createPlotSurface(width, height);
     }
@@ -84,6 +85,7 @@ cairo.Surface createPlotSurfaceSVG(string name, int width = 400, int height = 40
     }
     else
     {
+        import std.stdio : writeln;
         writeln("CairoD was compiled without svg support. Creating png surface instead");
         return createPlotSurface(width, height);
     }
