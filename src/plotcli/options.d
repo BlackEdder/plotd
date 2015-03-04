@@ -77,6 +77,7 @@ Data format:
   lx,ly Line data
   h     Histogram data
   hx,hy 2D Histogram data 
+  b     Boxplot data
   ..	  Extrapolate from previous options, i.e. x,y,.. -> x,y,x,y,..
   id    Default data id to use for this row of data (it is also possible to provide a column specific id (see Data ids below))
   pn    Default plot name to use for this row of data (it is also possible to provide a column specific id (see Plot ids below))
