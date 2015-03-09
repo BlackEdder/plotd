@@ -466,7 +466,7 @@ Figure[string] handleMessage(string msg, ref Settings settings)
                 figures[plotID].histPoints ~= parsedRow.histPoints;
 
                 // Box plot
-                figures[plotID].boxData ~= parsedRow.boxData;
+                figures[plotID].boxData ~= [parsedRow.boxData];
             }
             figures[plotID].columnCount += 1;
         }

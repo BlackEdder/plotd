@@ -32,6 +32,7 @@ import plotcli.parsing : Event;
 import axes = plotd.axes : AdaptationMode;
 import plotd.data.binning : Bins, optimalBounds, toBins;
 import plotd.data.summary : limits;
+import plotd.data.transform : sloppyTranspose;
 
 import draw = plotd.drawing;
 import plotd.plot;
@@ -48,7 +49,7 @@ class Figure
     size_t columnCount = 0;
     LazyFigure lf;
 
-    double[] boxData;
+    double[][] boxData;
     this()
     {
         lf = new LazyFigure;
@@ -393,14 +394,27 @@ void drawBoxPlot(Figure figure)
     if (figure.boxData.length > 0)
     {
 
-        auto limits = figure.boxData.limits([0.02, 0.25, 
+        // transpose
+        double[][] data = sloppyTranspose( figure.boxData );
+
+        // Calculate limits and find min/max
+        double[][] limits;
+        AdaptiveBounds bnds;
+        foreach( i, d; data )
+        {
+            auto lims = d.limits([0.02, 0.25, 
                     0.5, 0.75, 0.98] );
+            bnds.adapt( Point( i-0.5, (lims[0]-
+                (lims[2]-lims[0])) ) );
+            bnds.adapt( Point( i+0.5, (lims[4]+
+                (lims[4]-lims[2]) ) ) );
+            limits ~= [lims];
+        }
+
         if (figure.lf.adaptationMode == axes.AdaptationMode.full)
         {
             // Adjust plotBounds 
-            figure.lf.plotBounds = Bounds( 0,2,limits[0]-
-                (limits[2]-limits[0]),
-                limits[4]+(limits[4]-limits[2]) );
+            figure.lf.plotBounds = bnds;
             debug writeln("Adjusting boxplot to bounds: ", figure.lf
                 ._plotBounds);
         }
@@ -410,9 +424,13 @@ void drawBoxPlot(Figure figure)
         figure.lf._events.length = 0;
         figure.lf._eventCache.length = 0;
         figure.lf.plot;
-        // Plot Box 
-        figure.lf._plot.drawBoxPlot( 1.0, limits );
-        debug writeln("Drawn boxdata in plot: ", limits);
+
+        // Plot Box
+        foreach( i, lim; limits )
+        {
+            figure.lf._plot.drawBoxPlot( i, lim );
+            debug writeln("Drawn boxdata in plot: ", lim);
+        }
     }
 }
  
