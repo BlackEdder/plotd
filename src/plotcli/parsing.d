@@ -467,7 +467,8 @@ Figure[string] handleMessage(string msg, ref Settings settings)
 
                 // Box plot
                 // TODO use dataID in some way
-                figures[plotID].boxData ~= [parsedRow.boxData];
+                if (parsedRow.boxData.length > 0)
+                    figures[plotID].boxData ~= [parsedRow.boxData];
             }
             figures[plotID].columnCount += 1;
         }
@@ -482,8 +483,8 @@ void plotFigures(Figure[string] figures, Settings settings)
 {
     foreach (plotID, figure; figures)
     {
-        drawHistogram(figure);
         drawBoxPlot(figure);
+        drawHistogram(figure);
         figure.lf.plot();
     }
 }

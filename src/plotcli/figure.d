@@ -393,7 +393,6 @@ void drawBoxPlot(Figure figure)
 {
     if (figure.boxData.length > 0)
     {
-
         // transpose
         double[][] data = sloppyTranspose( figure.boxData );
 
