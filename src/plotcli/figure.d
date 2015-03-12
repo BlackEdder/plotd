@@ -21,16 +21,19 @@
 	 -------------------------------------------------------------------
 	 */
 
-module cli.figure;
+module plotcli.figure;
 
 import std.algorithm : map;
 import std.string : toUpper, format;
 import cairo.c.config;
-import cli.parsing : Event;
+import plotcli.parsing : Event;
 //import plotd.plot : PlotState, createPlotState;
 //import plotd.primitives : Bounds, Color, ColorRange, Point;
 import axes = plotd.axes : AdaptationMode;
-import plotd.binning : Bins, optimalBounds, toBins;
+import plotd.data.binning : Bins, optimalBounds, toBins;
+import plotd.data.summary : limits;
+import plotd.data.transform : sloppyTranspose;
+
 import draw = plotd.drawing;
 import plotd.plot;
 import plotd.primitives;
@@ -45,6 +48,8 @@ class Figure
     Point[] histPoints;
     size_t columnCount = 0;
     LazyFigure lf;
+
+    double[][] boxData;
     this()
     {
         lf = new LazyFigure;
@@ -107,6 +112,7 @@ interface PlotInterface
     void drawBins2D(Bins!size_t bins);
     void drawBins3D(Bins!(Bins!(size_t)) bins);
     void drawBins(BINS)(BINS bins);
+    void drawBoxPlot( in double x, double[] limits );
 }
 
 enum plotFormat = q{ 
@@ -163,6 +169,11 @@ class %sPlot : PlotInterface
     void drawBins(BINS)( BINS bins )
     {
         plotd.plot.drawBins!BINS( bins, _plot );
+    }
+
+    void drawBoxPlot( in double x, double[] limits )
+    {
+        plotd.plot.drawBoxPlot( x, limits, _plot );
     }
 
     private:
@@ -377,3 +388,48 @@ void drawHistogram(Figure figure)
         figure.lf._plot.drawBins3D(bins);
     }
 }
+
+void drawBoxPlot(Figure figure)
+{
+    if (figure.boxData.length > 0)
+    {
+        // transpose
+        double[][] data = sloppyTranspose( figure.boxData );
+
+        // Calculate limits and find min/max
+        double[][] limits;
+        AdaptiveBounds bnds;
+        foreach( i, d; data )
+        {
+            auto lims = d.limits([0.02, 0.25, 
+                    0.5, 0.75, 0.98] );
+            bnds.adapt( Point( i-0.5, (lims[0]-
+                (lims[2]-lims[0])) ) );
+            bnds.adapt( Point( i+0.5, (lims[4]+
+                (lims[4]-lims[2]) ) ) );
+            limits ~= [lims];
+        }
+
+        if (figure.lf.adaptationMode == axes.AdaptationMode.full)
+        {
+            // Adjust plotBounds 
+            figure.lf.plotBounds = bnds;
+            debug writeln("Adjusting boxplot to bounds: ", figure.lf
+                ._plotBounds);
+        }
+ 
+        // Empty current events/plot (this is the hacky bit)
+        figure.lf.fullRedraw = true;
+        figure.lf._events.length = 0;
+        figure.lf._eventCache.length = 0;
+        figure.lf.plot;
+
+        // Plot Box
+        foreach( i, lim; limits )
+        {
+            figure.lf._plot.drawBoxPlot( i, lim );
+            debug writeln("Drawn boxdata in plot: ", lim);
+        }
+    }
+}
+ 

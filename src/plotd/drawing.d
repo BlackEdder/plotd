@@ -30,7 +30,7 @@ import csvg = cairo.svg;
 import cairo = cairo;
 import plotd.axes : Axis, adjustTickWidth, tickLength;
 import plotd.primitives;
-import plotd.binning;
+import plotd.data.binning;
 
 version(unittest)
 {
@@ -68,6 +68,7 @@ cairo.Surface createPlotSurfacePDF(string name, int width = 400, int height = 40
     }
     else
     {
+        import std.stdio : writeln;
         writeln("CairoD was compiled without pdf support. Creating png surface instead");
         return createPlotSurface(width, height);
     }
@@ -84,6 +85,7 @@ cairo.Surface createPlotSurfaceSVG(string name, int width = 400, int height = 40
     }
     else
     {
+        import std.stdio : writeln;
         writeln("CairoD was compiled without svg support. Creating png surface instead");
         return createPlotSurface(width, height);
     }
@@ -135,6 +137,15 @@ cairo.Context plotContextFromSurface(cairo.Surface surface, Bounds plotBounds,
 
   */
 
+CONTEXT drawRectangle(CONTEXT)( in Point lowerLeft, in Point upperRight,
+        CONTEXT context )
+{
+    context.rectangle(lowerLeft.x, lowerLeft.y,
+            upperRight.x-lowerLeft.x, upperRight.y - lowerLeft.y);
+    context.fill();
+    return context;
+}
+
 CONTEXT drawPoint(CONTEXT)(const Point point, CONTEXT context)
 {
     auto width_height = context.deviceToUserDistance(cairo.Point!double(6.0, 6.0));
@@ -144,7 +155,7 @@ CONTEXT drawPoint(CONTEXT)(const Point point, CONTEXT context)
     return context;
 }
 
-CONTEXT drawLine(CONTEXT)(const Point from, const Point to, CONTEXT context)
+CONTEXT drawLine(CONTEXT)(in Point from, in Point to, CONTEXT context)
 {
     context.moveTo(from.x, from.y);
     context.lineTo(to.x, to.y);
@@ -330,6 +341,38 @@ CONTEXT drawBins(T : size_t, CONTEXT)(CONTEXT context, Bins!T bins)
             .to!double), context);
         context = drawLine(Point(x + bins.width, count.to!double), Point(x + bins
             .width, 0), context);
+    }
+    return context;
+}
+
+/// Draw a boxplot box
+CONTEXT drawBox(CONTEXT)(CONTEXT context, size_t x,
+        double[] ys )
+{
+    auto slice = ys.dup;
+    if ( slice.length == 5 )
+    {
+        // Draw the outer lines
+        context = drawLine( Point( x-0.20, slice[0] ),
+                Point( x+0.20, slice[0] ), context );
+        context = drawLine( Point( x-0.20, slice[4] ),
+                Point( x+0.20, slice[4] ), context );
+
+        slice = slice[1..4];
+    }
+    if ( slice.length == 3 )
+    {
+        // Draw the box
+        context = drawRectangle( Point( x - 0.25, slice[0] ),
+                Point( x + 0.25, slice[2] ), context );
+
+        slice = slice[1..2];
+    }
+    if ( slice.length == 1 )
+    {
+        // Draw the median
+        context = drawLine( Point( x-0.35, slice[0] ),
+                Point( x+0.35, slice[0] ), context );
     }
     return context;
 }

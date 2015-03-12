@@ -16,20 +16,13 @@
 			"name": "plotcli",
 			"workingDirectory": "./",
 			"targetType": "executable",
-			"sourceFiles": ["examples/plotcli.d"],
+			"sourceFiles": ["examples/app.d"],
 			"targetName": "plotcli",
 			"targetPath": "bin",
 		},
 		{
 			"name": "plotd",
 			"targetType": "library",
-		},
-		{
-			"name": "plot1",
-			"targetType": "executable",
-			"sourceFiles": ["examples/plot1.d"],
-			"targetName": "plot1",
-			"targetPath": "bin",
-		}
-	]
+		}	
+    ]
 }

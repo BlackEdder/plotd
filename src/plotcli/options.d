@@ -21,7 +21,7 @@
 	 -------------------------------------------------------------------
 	 */
 
-module cli.options;
+module plotcli.options;
 
 import std.conv : to;
 import std.string : split;
@@ -36,7 +36,7 @@ version(unittest)
     import docopt : docopt;
 
 }
-import cli.column;
+import plotcli.column;
 /// Merge given associative arrays
 V[K] merge(K, V)(V[K] aaBase, in V[K] aa)
 {
@@ -77,6 +77,7 @@ Data format:
   lx,ly Line data
   h     Histogram data
   hx,hy 2D Histogram data 
+  b     Boxplot data
   ..	  Extrapolate from previous options, i.e. x,y,.. -> x,y,x,y,..
   id    Default data id to use for this row of data (it is also possible to provide a column specific id (see Data ids below))
   pn    Default plot name to use for this row of data (it is also possible to provide a column specific id (see Plot ids below))

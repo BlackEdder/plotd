@@ -234,6 +234,14 @@ void drawBins(BINS, alias string T)(BINS bins, PlotState!T plot)
     plot.plotContext = plotd.drawing.drawBins(plot.plotContext, bins);
 }
 
+///
+void drawBoxPlot(alias string T)(in double x, double[] limits, 
+        PlotState!T plot)
+{
+    plot.plotContext = plotd.drawing.drawBox(plot.plotContext, 
+            x.to!size_t, limits);
+}
+
 
 /// Save plot to a file if format is "png" does nothing otherwise
 void save(alias string T)(PlotState!T plot)
