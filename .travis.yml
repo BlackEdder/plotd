@@ -5,6 +5,7 @@ before_install:
     - dub add-local cairoD
 
 language: d
+sudo: false
 
 d:
     - dmd
