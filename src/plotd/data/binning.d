@@ -23,7 +23,7 @@
 
 module plotd.data.binning;
 
-import std.algorithm : reduce;
+import std.algorithm : min, max, reduce;
 import std.array;
 import std.conv : to;
 import std.range;
@@ -32,12 +32,11 @@ import plotd.primitives : Bounds;
 version(unittest)
 {
     import std.stdio;
-
+    import std.algorithm : equal;
 }
 version(assert)
 {
     import std.stdio;
-
 }
 
 /**

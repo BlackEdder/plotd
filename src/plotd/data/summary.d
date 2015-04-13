@@ -15,7 +15,8 @@ version( unittest )
 /// Return the limits indicated with different alphas
 RANGE limits( RANGE )( RANGE range, double[] alphas )
 {
-    auto sorted = range.sort;
+    import std.algorithm : sort;
+    auto sorted = range.sort();
     RANGE lims;
     foreach( a; alphas ) {
         lims ~= sorted[ floor( a*sorted.length ).to!size_t ];
