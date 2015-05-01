@@ -32,7 +32,7 @@ import std.string;
 
 version(unittest)
 {
-    import std.algorithm : take;
+    import std.range : take;
 
 }
 

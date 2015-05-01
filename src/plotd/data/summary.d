@@ -3,6 +3,7 @@
    */
 module plotd.data.summary;
 
+import std.algorithm : sort;
 import std.conv : to;
 import std.math : floor, ceil;
 
@@ -15,7 +16,7 @@ version( unittest )
 /// Return the limits indicated with different alphas
 RANGE limits( RANGE )( RANGE range, double[] alphas )
 {
-    auto sorted = range.sort;
+    auto sorted = sort( range );
     RANGE lims;
     foreach( a; alphas ) {
         lims ~= sorted[ floor( a*sorted.length ).to!size_t ];
