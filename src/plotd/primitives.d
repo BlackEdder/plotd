@@ -33,7 +33,6 @@ import std.string;
 version(unittest)
 {
     import std.range : take;
-
 }
 
 /// Color class using rgba representation internally

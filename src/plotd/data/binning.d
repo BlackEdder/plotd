@@ -33,12 +33,11 @@ version(unittest)
 {
     import std.stdio;
     import std.algorithm : equal;
-
 }
+
 version(assert)
 {
     import std.stdio;
-
 }
 
 /**
