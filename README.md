@@ -109,42 +109,42 @@ etc. Other examples: y,.. −\> y,y,y,y etc. x,y,y,.. −\> x,y,y,y,y etc.
 
 [This example](https://github.com/BlackEdder/plotd/blob/master/examples/1/data.txt) creates lines from each column. With the x coordinate given by the row number.
 
-![lines](http://blackedder.github.io/plotd/images/example1.png)
-
 ```
 plotcli -o example1 < examples/1/data.txt
 ```
+
+![lines](http://blackedder.github.io/plotd/images/example1.png)
 
 ### Histogram
 
 [This example](https://github.com/BlackEdder/plotd/blob/master/examples/2/data.txt) creates lines from each column. With the x coordinate given by the row number.
 The following example creates 4 histograms, one for each column. See below for the histogram of the first column. You can see the other columns by following the links: [2](http://blackedder.github.io/plotd/images/example2b.png), [3](http://blackedder.github.io/plotd/images/example2c.png) and [4](http://blackedder.github.io/plotd/images/example2d.png).
 
-![histogram 1](http://blackedder.github.io/plotd/images/example2a.png)
-
 ```
 plotcli -o example2 < examples/2/data.txt
 ```
+
+![histogram 1](http://blackedder.github.io/plotd/images/example2a.png)
 
 ### 3D Histogram
 
 [Here](https://github.com/BlackEdder/plotd/blob/master/examples/3/data.txt) the first two columns are used as the x and y data for a 3D histogram.
 
-![histogram](http://blackedder.github.io/plotd/images/example3.png)
-
 ```
 plotcli -o example3 < examples/3/data.txt
 ```
+
+![histogram](http://blackedder.github.io/plotd/images/example3.png)
 
 ### Boxplot
 
 [Here](https://github.com/BlackEdder/plotd/blob/master/examples/4/data.txt) each column is turned into a boxplot.
 
-![Boxplot](http://blackedder.github.io/plotd/images/example4.png)
-
 ```
 plotcli -o example4 < examples/4/data.txt
 ```
+
+![Boxplot](http://blackedder.github.io/plotd/images/example4.png)
 
 ## Further tips
 
