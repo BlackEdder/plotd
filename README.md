@@ -26,22 +26,6 @@ dub build -b release
 
 This will create a binary in bin/plotcli which you can copy anywhere in your path.
 
-### PDF and SVG support
-
-By default cairoD disables pdf and svg support. To use it any way you need to enable it in the following way (assuming that you are in the plotd directory created in the previous instructions):
-
-```
-mkdir extern && cd extern
-git clone https://github.com/jpf91/cairoD.git
-sed -i 's/PDF_SURFACE = false/PDF_SURFACE = true/g' cairoD/src/cairo/c/config.d
-sed -i 's/SVG_SURFACE = false/SVG_SURFACE = true/g' cairoD/src/cairo/c/config.d
-dub add-local cairoD
-cd ..
-dub build -b release --force
-```
-
-Which will create a new binary in bin/plotcli which you can copy anywhere in your path.
-
 ## Usage:
 
 **plotcli** [*-f*] [*-o OUTPUT*] [*-d FORMAT*] [*-b BOUNDS*] [*--xlabel
