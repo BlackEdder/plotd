@@ -6,7 +6,7 @@
 	"license": "GPL-3.0",
 	"libs": ["cairo"],
 	"dependencies": {
-        "cairod": "~>0.0.1-alpha.2+1.10.2",
+        "ggplotd": "~>0.4.0",
         "dunit": "~>1.0.11",
 		"dmocks-revived": "~master",
 		"docopt": ">=0.6.1-b.4"
