@@ -105,11 +105,47 @@ etc. Other examples: y,.. −\> y,y,y,y etc. x,y,y,.. −\> x,y,y,y,y etc.
 
 ## Examples
 
-See the [wiki for examples](https://github.com/BlackEdder/plotd/wiki). All examples in the directories can be run directly from the command line, i.e.
+### Lines
+
+This example creates lines from each column. With the x coordinate given by the row number.
+
+![lines](http://blackedder.github.io/plotd/images/example1.png)
+
 ```
-plotcli < examples/1/data.txt
+plotcli -o example1 < examples/1/data.txt
 ```
-This will create a png file in the current directory.
+
+### Histogram
+
+The following example creates 4 histograms, one for each column. See below for the histogram of the first column. You can see the other columns by following the links: [2](http://blackedder.github.io/plotd/images/example2b.png), [3](http://blackedder.github.io/plotd/images/example2c.png) and [4](http://blackedder.github.io/plotd/images/example2d.png).
+
+![histogram 1](http://blackedder.github.io/plotd/images/example2a.png)
+
+```
+plotcli -o example2 < examples/2/data.txt
+```
+
+### 3D Histogram
+
+Here the first two columns are used as the x and y data for a 3D histogram.
+
+![histogram](http://blackedder.github.io/plotd/images/example3.png)
+
+```
+plotcli -o example3 < examples/3/data.txt
+```
+
+### Boxplot
+
+Here each column is turned into a boxplot.
+
+![Boxplot](http://blackedder.github.io/plotd/images/example4.png)
+
+```
+plotcli -o example4 < examples/4/data.txt
+```
+
+## Further tips
 
 Of course plotcli can easily be used together with other command line tools. For example I used the following command 
 ```
