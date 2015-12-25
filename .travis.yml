@@ -1,13 +1,16 @@
 language: d
+script: "./travis.sh"
 sudo: false
 
+# Below is needed for cairoD configure.d script
 install:
   - curl -fsSLO https://raw.githubusercontent.com/D-Programming-Language/tools/v2.068.2/rdmd.d
   - ${DMD} rdmd.d
   - mv rdmd $(dirname $(which ${DMD}))
 
-d:
-    - dmd
-    - dmd-2.066.1
-    - ldc
-    - gdc
+matrix:
+  include:
+  - d: dmd
+    env:
+      secure: erukIkEkAI4JeWhvejnTYzZruURBf4dvqXQQm8NK7HOy1Kk28HYMezhVuyNDy7xF6C8vbd8lpY73b1OvwgPDsWJKxxvtcZo8cTYGiNvXGN1Elc0dKvvqf3u7PhMhy/hjnmI22qldp8RemgsoNWcYPtZSHqp9oY63NQXT55YLpUU=
+  - d: ldc
