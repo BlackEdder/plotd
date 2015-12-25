@@ -4,7 +4,7 @@ set -e -o pipefail
 
 dub test --compiler=${DC}
 
-#if [[ $TRAVIS_BRANCH == 'master' ]] ; then
+if [[ $TRAVIS_BRANCH == 'master' ]] ; then
     if [ ! -z "$GH_TOKEN" ]; then
         git checkout master
         dub build -b release --compiler=${DC}
@@ -25,4 +25,4 @@ dub test --compiler=${DC}
         git push --force --quiet "https://${GH_TOKEN}@github.com/${TRAVIS_REPO_SLUG}" master:gh-pages > /dev/null 2>&1
         #git push --force "https://${GH_TOKEN}@github.com/${TRAVIS_REPO_SLUG}" HEAD:gh-pages
     fi
-#fi
+fi
