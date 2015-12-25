@@ -1,29 +1,15 @@
 {
-	"name": "plotd",
+	"name": "plotcli",
 	"description": "Plot streams of data from the command line.",
 	"copyright": "Copyright © 2014, Edwin van Leeuwen",
 	"authors": ["Edwin van Leeuwen"],
 	"license": "GPL-3.0",
 	"libs": ["cairo"],
+    "sourcePaths": ["source"],
+    "targetPath": "bin",
 	"dependencies": {
         "ggplotd": "~>0.4",
         "dunit": "~>1.0.11",
-		"dmocks-revived": "~master",
 		"docopt": ">=0.6.1-b.4"
-	},
-	"workingDirectory": "./",
-	"configurations": [
-		{
-			"name": "plotcli",
-			"workingDirectory": "./",
-			"targetType": "executable",
-			"sourceFiles": ["examples/app.d"],
-			"targetName": "plotcli",
-			"targetPath": "bin",
-		},
-		{
-			"name": "plotd",
-			"targetType": "library",
-		}	
-    ]
+	}
 }
