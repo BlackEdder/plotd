@@ -35,6 +35,9 @@ struct FollowRange(RANGE) if (isInputRange!RANGE)
 
     void popFront()
     {
+        if (this.empty)
+            assert(0, "FollowRange is empty");
+
         import std.range : empty, popFront, front;
         // This one either blocks till next line, or sets "" after timeout
         if (_range.empty && _follow)
