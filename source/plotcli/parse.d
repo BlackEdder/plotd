@@ -15,7 +15,7 @@ struct FollowRange(RANGE) if (isInputRange!RANGE)
 
     this( RANGE range, bool follow = true )
     {
-        import std.range : empty, popFront, front;
+        import std.range : empty, front;
         // TODO add non follow mode, and pollingDelay, timeoutDelay 
         _range = range;
         _follow = follow;
@@ -29,12 +29,18 @@ struct FollowRange(RANGE) if (isInputRange!RANGE)
         return eof;
     }
 
+    @property ref auto front() {
+        return frontValue;
+    }
+
     void popFront()
     {
         import std.range : empty, popFront, front;
         // This one either blocks till next line, or sets "" after timeout
         if (_range.empty && _follow)
             Thread.sleep(dur!("msecs")(100));
+        if (_range.empty && !_follow)
+            eof = true;
 
         if (!_range.empty)
         {
@@ -48,10 +54,6 @@ struct FollowRange(RANGE) if (isInputRange!RANGE)
             else
                 eof = true;
         }
-    }
-
-    @property ref auto front() {
-        return frontValue;
     }
 
 private:
@@ -92,13 +94,41 @@ unittest
     assertEqual([1.0,2.0,3.0], f2.array);
 }
 
-
-auto readFileByLine()
+auto readStdinByLine( bool follow = true )
 {
-    // Returns an voldermort type that will read the new line on popFront.
-    // Also add the ability to if file end -> wait for new line being added and or
-    //      if certain time passed by -> return empty line.
-    // For testing purposes could implement general followRange inputrange, 
-    // that will
-    // follow an inputrange. When it is empty wait till not empty any more...
+    struct ReadLines
+    {
+        import std.stdio : readln;
+
+        @property bool empty() {
+            import std.range : empty;
+            if (msgs.empty) {
+                auto msg = readln();
+                if (msg.length > 0)
+                    msgs ~= msg;
+            }
+            return msgs.empty;
+        }
+
+        @property ref auto front() {
+            import std.range : front;
+            if (!initialized) {
+                initialized = true;
+            }
+            return msgs.front;
+        }
+        
+        void popFront() {
+            import std.range : popFront;
+            msgs.popFront;
+            // This range behaves different, because stdin can be filled up
+            // So we read on a call to empty
+        }
+
+        bool initialized = false;
+        string[] msgs;
+    }
+
+    return FollowRange!ReadLines( ReadLines(), follow );
+    //return ReadLines();
 }
