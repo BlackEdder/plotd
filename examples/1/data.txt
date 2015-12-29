@@ -2,13 +2,13 @@ Example that plots four random lines
 
 Use ploctli < data.txt to produce a plotcli.png file
 
-It is possible to define the data format directly from the command line
-as well using: plotcli -d ly,ly,ly,ly < data.txt
+It is possible to define the data format directly from the command line as
+well using: plotcli -y 1,2,3,4 --type line  < data.txt
 
-The l signifies that we are plotting lines. Since no x is specified the line
-number is basically used as x variable
+The type signifies that we are plotting lines. Since no x is specified the
+line number (row) is used as x variable
 
-#plotcli -d ly,ly,ly,ly
+#plotcli -y 1,2,3,4 --type line
 -0.246465,1.1349,1.37636,2.33029
 0.17212,1.23672,1.77301,1.96037
 0.000651441,0.724035,1.5267,2.03115
