@@ -1,6 +1,7 @@
 module plotcli.parse;
 
 import std.range : isInputRange;
+import std.regex : ctRegex;
 
 version( unittest )
 {
@@ -108,7 +109,7 @@ auto readStdinByLine( bool follow = true )
             if (msgs.empty) {
                 auto msg = readln();
                 if (msg.length > 0)
-                    msgs ~= msg;
+                    msgs ~= msg[0..$-1]; // Strip linebreak (TODO find standard way)
             }
             return msgs.empty;
         }
@@ -181,13 +182,14 @@ unittest
     assert(("-b \"arg b\" -f").splitArgs.length == 3);
 }
 
-import std.algorithm : map, filter;
-import std.array : array;
-import std.algorithm : strip;
-import std.regex : ctRegex, regex, replaceFirst, split;
-private auto csvRegex = ctRegex!(`,\s*|\s`);
+//private auto csvRegex = ctRegex!(`,\s*|\s`);
+private auto csvRegex = ctRegex!(`,\s*`);
 string[] toRange(string line)
 {
+    import std.algorithm : map, filter;
+    import std.array : array;
+    import std.algorithm : strip;
+    import std.regex : regex, replaceFirst, split;
     // Cut of any comments
     line = line.replaceFirst(regex("#.*"), "");
     return line.split(csvRegex).map!((d) => d.strip(' ')).array.filter!("a!=\"\"")
@@ -201,9 +203,22 @@ unittest
     assert(("#bla").toRange == []);
     assert(("0.5, 2").toRange == ["0.5", "2"]);
     assert(("bla, 2").toRange == ["bla", "2"]);
-    assert(("1\t2").toRange == ["1", "2"]);
-    assert(("1 2").toRange == ["1", "2"]);
+    /*assert(("1\t2").toRange == ["1", "2"]);
+    assert(("1 2").toRange == ["1", "2"]);*/
     assert(("nan, 2").toRange == ["nan", "2"]);
 }
 
+bool areNumeric(RANGE)(RANGE r, int[] colIDs) {
+    import std.algorithm : all;
+    import std.string : isNumeric;
+    import std.stdio;
+    return colIDs.all!((a) => r[a].isNumeric);
+}
 
+unittest 
+{
+    assert( ["1","1.1"].areNumeric( [0,1] ));
+    assert( ["0","1.1"].areNumeric( [0,1] ));
+    assert( !["a","1.1"].areNumeric( [0,1] ) );
+    assert( ["a","1.1"].areNumeric( [1] ) );
+}
