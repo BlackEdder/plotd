@@ -26,7 +26,9 @@ void main(string[] args)
     int lineCount = 0;
     import std.range : Appender;
     import ggplotd.colour : ColourID;
+    import ggplotd.ggplotd : GGPlotD;
     Appender!(Tuple!(double, "x", double, "y", ColourID, "colour")[]) aes;
+    GGPlotD gg;
     foreach( msg; readStdinByLine( false ) ) {
         import std.regex : match;
         import std.conv : to;
@@ -75,4 +77,7 @@ void main(string[] args)
             }
         }
     }
+    import ggplotd.geom : geomLine;
+    gg.put( geomLine!(typeof(aes.data))( aes.data ) );
+    gg.save( "plotcli.png" );
 }
