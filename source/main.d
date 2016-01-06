@@ -24,6 +24,9 @@ void main(string[] args)
     int maxCol = 0;
     // Also keep track of row number?
     int lineCount = 0;
+    import std.range : Appender;
+    import ggplotd.colour : ColourID;
+    Appender!(Tuple!(double, "x", double, "y", ColourID, "colour")[]) aes;
     foreach( msg; readStdinByLine( false ) ) {
         import std.regex : match;
         import std.conv : to;
@@ -56,6 +59,15 @@ void main(string[] args)
                 msg.writeln;
                 cols.writeln;
                 cols.length.writeln;
+
+                // Build tuples
+                foreach( i, xcol; xcols )
+                    aes.put( 
+                        Tuple!(double, "x", double, "y", ColourID, "colour")
+                            ( cols[xcol].to!double, cols[ycols[i]].to!double, 
+                                ColourID(-i) ) );
+
+
 
                 //msg.writeln;
                 // Should only increase if actual data
