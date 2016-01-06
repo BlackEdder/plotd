@@ -1,6 +1,6 @@
-#plotcli -d ha,hb,..
-h signifies a histogram. The letters behind it are figures IDs. 
-.. is automatically extrapolated to ha,hb,hc,hd
+#plotcli -x 1,2,.. -p a,b,.. --type hist
+-h signifies a histogram. -p signifies plot ids, i.e. these will be
+plotted in different plots
 
 -0.246465,1.1349,1.37636,2.33029
 0.17212,1.23672,1.77301,1.96037
