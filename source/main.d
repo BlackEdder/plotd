@@ -58,16 +58,19 @@ void main(string[] args)
             if (allCols.empty)
                 allCols = [0];
             if (cols.length > maxCol && cols.areNumeric( allCols )) {
-                msg.writeln;
-                cols.writeln;
-                cols.length.writeln;
+
+                double[] xs;
+                if (!xcols.empty)
+                    xs = xcols.map!((a) => cols[a].to!double).array;
+                else
+                    xs = (to!double(lineCount)).repeat( ycols.length ).array;
+                auto ys = ycols.map!((a) => cols[a].to!double).array;
 
                 // Build tuples
-                foreach( i, xcol; xcols )
+                foreach( i, x; xs )
                     aes.put( 
                         Tuple!(double, "x", double, "y", ColourID, "colour")
-                            ( cols[xcol].to!double, cols[ycols[i]].to!double, 
-                                ColourID(-i) ) );
+                            ( x, ys[i], ColourID(i) ) );
 
 
 
