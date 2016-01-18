@@ -137,51 +137,6 @@ auto readStdinByLine( bool follow = true )
     //return ReadLines();
 }
 
-auto helpText = "Usage: plotcli [-f] [-o OUTPUT] [-x XCOLUMNS] [-y YCOLUMNS] [--type TYPE]
-
-Plotcli is a plotting program that will plot data from provided data streams (files). It will ignore any lines it doesn't understand, making it possible to feed it \"dirty\" streams/files. All options can also be provided within the stream by using the prefix #plotcli (e.g. #plotcli -x 1 -y 2).
-
-Options:
-  -f          Follow the stream, i.e. keep listening for new lines.
-  -x XCOLUMNS String describing the columns containing x coordinates.
-  -y YCOLUMNS String describing the columns containing y coordinates.
-  -o OUTPUT	  Outputfile (without extension).
-  --type TYPE Type of data (line, point, hist)
-
-";
-
-string[] splitArgs(string args)
-{
-    import std.conv : to;
-    string[] splitted;
-    bool inner = false;
-    string curr = "";
-    foreach (s; args)
-    {
-        if (s == (" ").to!char && !inner)
-        {
-            splitted ~= curr;
-            curr = "";
-        }
-        else if (s == ("\"").to!char || s == ("\'").to!char)
-        {
-            if (inner)
-                inner = false;
-            else inner = true;
-        }
-        else curr ~= s;
-    }
-    splitted ~= curr;
-    return splitted;
-}
-
-unittest
-{
-    assert(("-b arg").splitArgs.length == 2);
-    assert(("-b \"arg b\"").splitArgs.length == 2);
-    assert(("-b \"arg b\" -f").splitArgs.length == 3);
-}
-
 //private auto csvRegex = ctRegex!(`,\s*|\s`);
 private auto csvRegex = ctRegex!(`,\s*`);
 string[] toRange(string line)

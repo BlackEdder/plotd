@@ -3,6 +3,7 @@ import std.stdio : writeln;
 import docopt;
 import ggplotd.aes;
 
+import plotcli.options;
 import plotcli.parse;
 
 import std.algorithm : map;
@@ -36,6 +37,7 @@ void main(string[] args)
         auto m = msg.match(r"^#plotcli (.*)");
         if (m)
         {
+            // REFACTOR: use Options struct similar to before (options.update( msg ))
             arguments = cachedDocopt(helpText, splitArgs(m
                 .captures[1]), true, "plotcli", false);
             if (!arguments["-x"].isNull) {
@@ -54,11 +56,14 @@ void main(string[] args)
             //assert( xcols.length == ycols.length || xcols.empty || ycols.empty );
         } else {
             auto cols = msg.toRange.array;
+            // REFACTOR: Implement a valid msg given Options function
             auto allCols = xcols ~ ycols;
             if (allCols.empty)
                 allCols = [0];
+
             if (cols.length > maxCol && cols.areNumeric( allCols )) {
 
+                // REFACTOR: IDS to Numeric Values (given xcols/ycols, cols, max(xs,ys), lineCount)
                 double[] xs;
                 if (!xcols.empty)
                     xs = xcols.map!((a) => cols[a].to!double).array;
