@@ -177,3 +177,17 @@ unittest
     assert( !["a","1.1"].areNumeric( [0,1] ) );
     assert( ["a","1.1"].areNumeric( [1] ) );
 }
+
+auto stripComments( string str )
+{
+    import std.algorithm : until;
+    import std.conv : to;
+    return str.until!((a) => a=="#"[0]).to!string;
+}
+
+unittest
+{
+    assertEqual( "Bla #dflkjaklf".stripComments, "Bla " );
+    assertEqual( "Bla".stripComments, "Bla" );
+    assertEqual( "Bla #dflkjaklf kfdajlf".stripComments, "Bla " );
+}

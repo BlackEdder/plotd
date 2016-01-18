@@ -32,36 +32,34 @@ void main(string[] args)
     foreach( msg; readStdinByLine( false ) ) {
         options = updateOptions( options, msg );
         maxCol = reduce!("max(a,b)")(1,options.xColumns ~ options.yColumns);
-        auto m = msg.match(r"^#plotcli (.*)");
-        if (!m) {
-            auto cols = msg.toRange.array;
-            // REFACTOR: Implement a valid msg given Options function
-            auto allCols = options.xColumns ~ options.yColumns;
-            if (allCols.empty)
-                allCols = [0];
+        msg = msg.stripComments;
+        auto cols = msg.toRange.array;
+        // REFACTOR: Implement a valid msg given Options function
+        auto allCols = options.xColumns ~ options.yColumns;
+        if (allCols.empty)
+            allCols = [0];
 
-            if (cols.length > maxCol && cols.areNumeric( allCols )) {
+        if (cols.length > maxCol && cols.areNumeric( allCols )) {
 
-                // REFACTOR: IDS to Numeric Values (given options.xColumns/options.yColumns, cols, max(xs,ys), lineCount)
-                double[] xs;
-                if (!options.xColumns.empty)
-                    xs = options.xColumns.map!((a) => cols[a].to!double).array;
-                else
-                    xs = (to!double(lineCount)).repeat( options.yColumns.length ).array;
-                auto ys = options.yColumns.map!((a) => cols[a].to!double).array;
+            // REFACTOR: IDS to Numeric Values (given options.xColumns/options.yColumns, cols, max(xs,ys), lineCount)
+            double[] xs;
+            if (!options.xColumns.empty)
+                xs = options.xColumns.map!((a) => cols[a].to!double).array;
+        else
+                xs = (to!double(lineCount)).repeat( options.yColumns.length ).array;
+            auto ys = options.yColumns.map!((a) => cols[a].to!double).array;
 
-                // Build tuples
-                foreach( i, x; xs )
-                    aes.put( 
-                        Tuple!(double, "x", double, "y", ColourID, "colour")
-                            ( x, ys[i], ColourID(i) ) );
-
+            // Build tuples
+            foreach( i, x; xs )
+                aes.put( 
+                Tuple!(double, "x", double, "y", ColourID, "colour")
+                ( x, ys[i], ColourID(i) ) );
 
 
-                //msg.writeln;
-                // Should only increase if actual data
-                ++lineCount;
-            }
+
+            //msg.writeln;
+            // Should only increase if actual data
+            ++lineCount;
         }
     }
     import ggplotd.geom : geomLine;
