@@ -92,6 +92,19 @@ bool validData(RANGE)( in Options options, in RANGE columns )
     return (columns.length > maxCol && columns.areNumeric(allCols));
 }
 
+unittest
+{
+    Options options;
+    assert( options.validData( ["1","a", "-2"] ) );
+    options.xColumns = [0];
+    options.yColumns = [0];
+    assert( options.validData( ["1","a", "-2"] ) );
+    options.yColumns = [0,2];
+    assert( options.validData( ["1","a", "-2"] ) );
+    assert( !options.validData( ["1","a"] ) );
+    assert( !options.validData( ["1","a", "b"] ) );
+}
+
 string[] splitArgs(string args)
 {
     import std.conv : to;
