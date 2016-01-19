@@ -1,8 +1,13 @@
 module plotcli.options;
 
-import plotcli.parse : toRange;
-
 import docopt;
+
+version(unittest)
+{
+    import dunit.toolkit;
+}
+
+import plotcli.parse : toRange;
 
 auto helpText = "Usage: plotcli [-f] [-o OUTPUT] [-x XCOLUMNS] [-y YCOLUMNS] [--type TYPE]
 
@@ -61,7 +66,16 @@ Options updateOptions(ref Options options, string message)
 
 unittest
 {
-    assert(true);
+    import std.range : empty;
+    Options options;
+    assertEqual( 
+        updateOptions( options, "#plotcli -x 1,2,4" ).xColumns,
+        [1,2,4] );
+    assert( options.yColumns.empty ); 
+    assertEqual( 
+        updateOptions( options, "#plotcli -y 3,2,4" ).yColumns,
+        [3,2,4] );
+    assertEqual( options.xColumns, [1,2,4] ); 
 }
 
 string[] splitArgs(string args)
