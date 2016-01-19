@@ -36,21 +36,18 @@ void main(string[] args)
 
         if (options.validData( cols ))
         {
-            // REFACTOR: IDS to Numeric Values (given options.xColumns/options.yColumns, cols, max(xs,ys), lineCount)
+            // REFACTOR: move whole Tuple creation to separate module/function (given options and cols)
             double[] xs;
             if (!options.xColumns.empty)
-                xs = options.xColumns.map!((a) => cols[a].to!double).array;
+                xs = options.xColumns.map!((a) => cols[a].to!double).array; 
             else
                 xs = (to!double(lineCount)).repeat(options.yColumns.length).array;
-            auto ys = options.yColumns.map!((a) => cols[a].to!double).array;
-
+            auto ys = options.yColumns.map!((a) => cols[a].to!double).array; 
             // Build tuples
             foreach (i, x; xs)
                 aes.put(Tuple!(double, "x", double, "y", ColourID,
                     "colour")(x, ys[i], ColourID(i)));
 
-            //msg.writeln;
-            // Should only increase if actual data
             ++lineCount;
         }
     }
