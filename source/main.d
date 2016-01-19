@@ -14,9 +14,7 @@ import std.regex : match;
 
 void main(string[] args)
 {
-    // Options
     debug writeln("Arguments: ", args);
-    // In general we add it all to "aes". The aes also has column for figure output, and geomType. When plotting we group by figure, then type and then pass all the aes to each type.. The "aes" is a tuple appender that takes default types + x,y.. How do we deal with numeric/strings?
 
     Options options;
 
@@ -33,17 +31,11 @@ void main(string[] args)
     foreach (msg; readStdinByLine(false))
     {
         options = updateOptions(options, msg);
-        maxCol = reduce!("max(a,b)")(1, options.xColumns ~ options.yColumns);
         msg = msg.stripComments;
         auto cols = msg.toRange.array;
-        // REFACTOR: Implement a valid msg given Options function
-        auto allCols = options.xColumns ~ options.yColumns;
-        if (allCols.empty)
-            allCols = [0];
 
-        if (cols.length > maxCol && cols.areNumeric(allCols))
+        if (options.validData( cols ))
         {
-
             // REFACTOR: IDS to Numeric Values (given options.xColumns/options.yColumns, cols, max(xs,ys), lineCount)
             double[] xs;
             if (!options.xColumns.empty)

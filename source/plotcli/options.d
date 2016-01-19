@@ -78,6 +78,20 @@ unittest
     assertEqual( options.xColumns, [1,2,4] ); 
 }
 
+/// Does the data fit with the given options?
+bool validData(RANGE)( in Options options, in RANGE columns )
+{
+    import std.algorithm : reduce;
+    import std.range : empty;
+    import plotcli.parse : areNumeric;
+    auto allCols = options.xColumns ~ options.yColumns;
+    if (allCols.empty)
+        allCols = [0];
+    auto maxCol = reduce!("max(a,b)")(1, options.xColumns ~ options.yColumns);
+
+    return (columns.length > maxCol && columns.areNumeric(allCols));
+}
+
 string[] splitArgs(string args)
 {
     import std.conv : to;

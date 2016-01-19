@@ -187,7 +187,7 @@ unittest
     assert(("nan, 2").toRange == ["nan", "2"]);
 }
 
-bool areNumeric(RANGE)(RANGE r, int[] colIDs)
+bool areNumeric(RANGE)(in RANGE r, in int[] colIDs)
 {
     import std.algorithm : all;
     import std.string : isNumeric;
