@@ -1,7 +1,11 @@
 module plotcli.data;
 
-
 import std.typecons : Tuple;
+
+version( unittest )
+{
+    import dunit.toolkit;
+}
 
 import ggplotd.colour : ColourID;
 
@@ -64,6 +68,24 @@ auto toTuples( string[] columns, Options options, int lineCount )
     }
 
     return Tuples( columns, options, lineCount );
+}
+
+unittest
+{
+    Options options;
+    options.yColumns = [1];
+
+    auto ts = ["1","2","3"].toTuples( options, -1 );
+    assertEqual( ts.front.x, -1 );
+    assertEqual( ts.front.y, 2 );
+
+    options.xColumns = [2];
+
+    ts = ["1","2","3"].toTuples( options, -1 );
+    assertEqual( ts.front.x, 3 );
+    assert(!ts.empty);
+    ts.popFront;
+    assert(ts.empty);
 }
 
 
