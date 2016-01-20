@@ -5,6 +5,7 @@ import ggplotd.aes;
 
 import plotcli.parse;
 import plotcli.options;
+import plotcli.data;
 
 import std.algorithm : map, reduce;
 import std.array : array;
@@ -37,16 +38,8 @@ void main(string[] args)
         if (options.validData( cols ))
         {
             // REFACTOR: move whole Tuple creation to separate module/function (given options and cols)
-            double[] xs;
-            if (!options.xColumns.empty)
-                xs = options.xColumns.map!((a) => cols[a].to!double).array; 
-            else
-                xs = (to!double(lineCount)).repeat(options.yColumns.length).array;
-            auto ys = options.yColumns.map!((a) => cols[a].to!double).array; 
-            // Build tuples
-            foreach (i, x; xs)
-                aes.put(Tuple!(double, "x", double, "y", ColourID,
-                    "colour")(x, ys[i], ColourID(i)));
+            foreach( t; cols.toTuples( options, lineCount)) 
+                aes.put(t);
 
             ++lineCount;
         }
