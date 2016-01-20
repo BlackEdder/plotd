@@ -1,5 +1,5 @@
-#plotcli -x 1,2,.. -p a,b,.. --type hist
--h signifies a histogram. -p signifies plot ids, i.e. these will be
+#plotcli -x 0,1,.. -p a,b,.. --type hist
+-p signifies plot ids, i.e. these will be
 plotted in different plots
 
 -0.246465,1.1349,1.37636,2.33029
