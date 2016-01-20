@@ -26,6 +26,7 @@ struct Options
 {
     int[] xColumns;
     int[] yColumns;
+    string basename = "plotcli";
 }
 
 import std.functional : memoize;
@@ -48,6 +49,10 @@ Options updateOptions(ref Options options, string[] args)
     {
         options.yColumns = arguments["-y"].to!string.toRange // This should be smarted and interpret ,..
         .map!((a) => a.to!int).array;
+    }
+    if (!arguments["-o"].isNull)
+    {
+        options.basename = arguments["-o"].to!string;
     }
     return options;
 }
@@ -76,6 +81,12 @@ unittest
         updateOptions( options, "#plotcli -y 3,2,4" ).yColumns,
         [3,2,4] );
     assertEqual( options.xColumns, [1,2,4] ); 
+
+    assertEqual( options.basename, "plotcli" );
+
+    assertEqual( 
+        updateOptions( options, "#plotcli -o test" ).basename,
+        "test" );
 }
 
 /// Does the data fit with the given options?

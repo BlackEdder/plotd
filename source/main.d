@@ -37,7 +37,6 @@ void main(string[] args)
 
         if (options.validData( cols ))
         {
-            // REFACTOR: move whole Tuple creation to separate module/function (given options and cols)
             foreach( t; cols.toTuples( options, lineCount)) 
                 aes.put(t);
 
@@ -47,5 +46,5 @@ void main(string[] args)
     import ggplotd.geom : geomLine;
 
     gg.put(geomLine!(typeof(aes.data))(aes.data));
-    gg.save("plotcli.png");
+    gg.save(options.basename ~ ".png");
 }
