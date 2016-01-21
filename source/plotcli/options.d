@@ -150,3 +150,44 @@ unittest
     assert(("-b \"arg b\"").splitArgs.length == 2);
     assert(("-b \"arg b\" -f").splitArgs.length == 3);
 }
+
+/// Range to correctly interpret 1,2,.. a,b,.. etc
+struct OptionRange( T )
+{
+    this( string opts )
+    {
+    }
+
+    @property bool empty()
+    {
+        return true;
+    }
+
+    @property T front()
+    {
+        import std.conv : to;
+        return T.init;
+    }
+
+    void popFront()
+    {
+    }
+}
+
+unittest
+{
+    import std.array;
+    import std.range : take;
+    assertEqual( OptionRange!int( "1,2,3" ).array, 
+        [1,2,3] );
+    assertEqual( OptionRange!string( "1,2,3" ).array, 
+        ["1","2","3"] );
+    assertEqual( OptionRange!int( "1,2,.." ).take(4).array, 
+        [1,2,3,4] );
+    assertEqual( OptionRange!string( "c,d,.." ).take(4).array, 
+        ["c","d","e","f"] );
+    assertEqual( OptionRange!string( "ac,ad,.." ).take(4).array, 
+        ["ac","ad","ae","af"] );
+    assertEqual( OptionRange!int( "1,3,.." ).take(4).array, 
+        [1,3,5,7] );
+}
