@@ -156,22 +156,65 @@ struct OptionRange( T )
 {
     this( string opts )
     {
+        import std.array : array;
+        import std.conv : to;
+        import std.regex : split;
+        import std.range : back, popBack;
+
+        splittedOpts = opts.split(csvRegex).array;
+
+        if (splittedOpts.back == "..")
+        {
+            // Calculate the delta
+            static if (is(T==string))
+            {
+                splittedOpts.popBack(); // Stop from crashing.. Will be removed in time
+            } else {
+                if (splittedOpts.length > 2)
+                    delta = splittedOpts[$-2].to!int - splittedOpts[$-3].to!int;
+            }
+        }
     }
 
     @property bool empty()
     {
-        return true;
+        import std.range : empty, front;
+        return splittedOpts.empty;
     }
 
     @property T front()
     {
         import std.conv : to;
-        return T.init;
+        import std.range : front;
+        if (splittedOpts.front == "..")
+            return extrapolatedValue;
+        return splittedOpts.front.to!T;
     }
 
     void popFront()
     {
+        import std.conv : to;
+        import std.range : empty, front, popFront;
+        auto tmpCache = splittedOpts.front;
+        if (splittedOpts.front != "..")
+        {
+            splittedOpts.popFront();
+        }
+        if (!splittedOpts.empty && splittedOpts.front == "..")
+        {
+            if (tmpCache == "..")
+                extrapolatedValue += delta;
+            else
+                extrapolatedValue = tmpCache.to!T + delta;
+        }
     }
+
+private:
+    import std.regex : ctRegex;
+    string[] splittedOpts;
+    auto csvRegex = ctRegex!(`,\s*`);
+    int delta = 0;
+    T extrapolatedValue;
 }
 
 unittest
@@ -180,14 +223,16 @@ unittest
     import std.range : take;
     assertEqual( OptionRange!int( "1,2,3" ).array, 
         [1,2,3] );
-    assertEqual( OptionRange!string( "1,2,3" ).array, 
-        ["1","2","3"] );
     assertEqual( OptionRange!int( "1,2,.." ).take(4).array, 
         [1,2,3,4] );
+    assertEqual( OptionRange!int( "1,3,.." ).take(4).array, 
+        [1,3,5,7] );
+    assertEqual( OptionRange!int( "1,.." ).take(4).array, 
+        [1,1,1,1] );
+    assertEqual( OptionRange!string( "1,2,3" ).array, 
+        ["1","2","3"] );
     assertEqual( OptionRange!string( "c,d,.." ).take(4).array, 
         ["c","d","e","f"] );
     assertEqual( OptionRange!string( "ac,ad,.." ).take(4).array, 
         ["ac","ad","ae","af"] );
-    assertEqual( OptionRange!int( "1,3,.." ).take(4).array, 
-        [1,3,5,7] );
-}
+ }
