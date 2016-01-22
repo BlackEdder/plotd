@@ -90,17 +90,43 @@ unittest
 }
 
 /// Does the data fit with the given options?
-bool validData(RANGE)( in Options options, in RANGE columns )
+bool validData(R1, R2)( R1 xColumns, R1 yColumns, in R2 columns )
 {
-    import std.algorithm : reduce;
+    import std.algorithm : max, reduce;
     import std.range : empty;
     import plotcli.parse : areNumeric;
-    auto allCols = options.xColumns ~ options.yColumns;
-    if (allCols.empty)
-        allCols = [0];
-    auto maxCol = reduce!("max(a,b)")(1, options.xColumns ~ options.yColumns);
+    if (xColumns.empty && yColumns.empty )
+    {
+        return ( columns.length > 0 && columns.areNumeric([0]));
+    }
+    auto maxCol = max(
+            reduce!("max(a,b)")(0, xColumns),
+            reduce!("max(a,b)")(0, yColumns) );
 
-    return (columns.length > maxCol && columns.areNumeric(allCols));
+    return (columns.length > maxCol 
+            && columns.areNumeric(xColumns) 
+            && columns.areNumeric(yColumns) 
+           );
+}
+
+unittest
+{
+    assert( validData( OptionRange!int(""), OptionRange!int(""), 
+                ["1","a", "-2"] ) );
+    assert( validData( OptionRange!int("0,2"), OptionRange!int(""), 
+                ["1","a", "-2"] ) );
+    assert( validData( OptionRange!int(""), OptionRange!int("0,2"), 
+                ["1","a", "-2"] ) );
+    assert( !validData( OptionRange!int("1"), OptionRange!int("0,2"), 
+                ["1","a", "-2"] ) );
+    /*assert( validData( OptionRange!int(""), OptionRange!int("0,2,.."), 
+                ["1","a", "-2"] ) );*/
+}
+
+/// Does the data fit with the given options?
+bool validData(RANGE)( Options options, in RANGE columns )
+{
+    return validData( options.xColumns, options.yColumns, columns );
 }
 
 unittest
@@ -182,11 +208,11 @@ struct OptionRange( T )
         import std.array : array;
         import std.conv : to;
         import std.regex : split;
-        import std.range : back, popBack;
+        import std.range : back, empty, popBack;
 
         splittedOpts = opts.split(csvRegex).array;
 
-        if (splittedOpts.back == "..")
+        if (!splittedOpts.empty && splittedOpts.back == "..")
         {
             // Calculate the delta
             static if (is(T==string))
@@ -266,4 +292,6 @@ unittest
         ["ac","ad","ae","af"] );
     assertEqual( OptionRange!string( "bc,.." ).take(4).array, 
         ["bc","bc","bc","bc"] );
+
+    assert( OptionRange!int( "" ).empty );
  }
