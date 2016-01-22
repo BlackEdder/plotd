@@ -151,6 +151,29 @@ unittest
     assert(("-b \"arg b\" -f").splitArgs.length == 3);
 }
 
+private string increaseString( string original, int delta )
+{
+    import std.conv : to;
+    import std.range : back;
+    if (original.length == 1)
+        return (original.back.to!char + delta)
+                        .to!char
+                        .to!string;
+    else
+        return original[0..$-1] ~ (original.back.to!char + delta)
+                        .to!char
+                        .to!string;
+
+}
+
+unittest
+{
+    assertEqual( increaseString( "a", 0 ), "a" );
+    assertEqual( increaseString( "a", 1 ), "b" );
+    assertEqual( increaseString( "c", 2 ), "e" );
+    assertEqual( increaseString( "cd", 1 ), "ce" );
+}
+
 /// Range to correctly interpret 1,2,.. a,b,.. etc
 struct OptionRange( T )
 {
@@ -168,7 +191,9 @@ struct OptionRange( T )
             // Calculate the delta
             static if (is(T==string))
             {
-                splittedOpts.popBack(); // Stop from crashing.. Will be removed in time
+                if (splittedOpts.length > 2)
+                    delta = splittedOpts[$-2].back.to!char - 
+                        splittedOpts[$-3].back.to!char;
             } else {
                 if (splittedOpts.length > 2)
                     delta = splittedOpts[$-2].to!int - splittedOpts[$-3].to!int;
@@ -194,7 +219,7 @@ struct OptionRange( T )
     void popFront()
     {
         import std.conv : to;
-        import std.range : empty, front, popFront;
+        import std.range : back, empty, front, popFront;
         auto tmpCache = splittedOpts.front;
         if (splittedOpts.front != "..")
         {
@@ -202,10 +227,14 @@ struct OptionRange( T )
         }
         if (!splittedOpts.empty && splittedOpts.front == "..")
         {
-            if (tmpCache == "..")
+            if (tmpCache != "..")
+            {
+                extrapolatedValue = tmpCache.to!T;
+            }
+            static if (is(T==string))
+                extrapolatedValue = increaseString(extrapolatedValue, delta);
+            else 
                 extrapolatedValue += delta;
-            else
-                extrapolatedValue = tmpCache.to!T + delta;
         }
     }
 
@@ -223,8 +252,8 @@ unittest
     import std.range : take;
     assertEqual( OptionRange!int( "1,2,3" ).array, 
         [1,2,3] );
-    assertEqual( OptionRange!int( "1,2,.." ).take(4).array, 
-        [1,2,3,4] );
+    assertEqual( OptionRange!int( "5,6,.." ).take(4).array, 
+        [5,6,7,8] );
     assertEqual( OptionRange!int( "1,3,.." ).take(4).array, 
         [1,3,5,7] );
     assertEqual( OptionRange!int( "1,.." ).take(4).array, 
@@ -235,4 +264,6 @@ unittest
         ["c","d","e","f"] );
     assertEqual( OptionRange!string( "ac,ad,.." ).take(4).array, 
         ["ac","ad","ae","af"] );
+    assertEqual( OptionRange!string( "bc,.." ).take(4).array, 
+        ["bc","bc","bc","bc"] );
  }
