@@ -100,8 +100,8 @@ bool validData(R1, R2)( R1 xColumns, R1 yColumns, in R2 columns )
         return ( columns.length > 0 && columns.areNumeric([0]));
     }
     auto maxCol = max(
-            reduce!("max(a,b)")(0, xColumns),
-            reduce!("max(a,b)")(0, yColumns) );
+            xColumns.minimumExpectedIndex,
+            yColumns.minimumExpectedIndex );
 
     return (columns.length > maxCol 
             && columns.areNumeric(xColumns) 
@@ -119,8 +119,8 @@ unittest
                 ["1","a", "-2"] ) );
     assert( !validData( OptionRange!int("1"), OptionRange!int("0,2"), 
                 ["1","a", "-2"] ) );
-    /*assert( validData( OptionRange!int(""), OptionRange!int("0,2,.."), 
-                ["1","a", "-2"] ) );*/
+    assert( validData( OptionRange!int(""), OptionRange!int("0,2,.."), 
+                ["1","a", "-2"] ) );
 }
 
 /// Does the data fit with the given options?
@@ -264,7 +264,7 @@ struct OptionRange( T )
         }
     }
 
-private:
+ private:
     import std.regex : ctRegex;
     string[] splittedOpts;
     auto csvRegex = ctRegex!(`,\s*`);
@@ -294,4 +294,31 @@ unittest
         ["bc","bc","bc","bc"] );
 
     assert( OptionRange!int( "" ).empty );
- }
+}
+
+
+auto minimumExpectedIndex( R : OptionRange!U, U )(R r)
+{
+    static if (is(u==string))
+        return "";
+    else
+    {
+        // TODO This is not the best way of doing it.
+        import std.algorithm : map, reduce;
+        import std.range : back;
+        if (r.empty)
+            return 0;
+        if (r.splittedOpts.back == "..")
+            return reduce!("max(a,b)")(0, r.splittedOpts[0..$-1].map!("a.to!int"));
+        else
+            return reduce!("max(a,b)")(0, r.splittedOpts[0..$].map!("a.to!int"));
+    }
+}
+
+auto minimumExpectedIndex( R )(R r)
+{
+    // TODO This is not the best way of doing it.
+    import std.algorithm : map, reduce;
+    import std.range : back;
+    return reduce!("max(a,b)")(0, r);
+}

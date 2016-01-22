@@ -189,11 +189,19 @@ unittest
 
 bool areNumeric(R1, R2)( R1 r, R2 colIDs)
 {
-    import std.algorithm : all;
+    import std.range : empty, front, popFront;
     import std.string : isNumeric;
-    import std.stdio;
 
-    return colIDs.all!((a) => r[a].isNumeric);
+    while (!colIDs.empty && colIDs.front < r.length)
+    {
+        if (!r[colIDs.front].isNumeric)
+            return false;
+        else
+        {
+            colIDs.popFront;
+        }
+    }
+    return true;
 }
 
 unittest
