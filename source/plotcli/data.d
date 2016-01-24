@@ -28,8 +28,12 @@ auto toTuples( string[] columns, Options options, int lineCount )
 
         @property bool empty()
         {
-            import std.range : empty;
-            return (xColumnIDs.empty && yColumnIDs.empty);
+            import std.range : empty, front;
+            return (
+                    (!xColumnIDs.empty && xColumnIDs.front >= _columns.length) ||
+                    (!yColumnIDs.empty && yColumnIDs.front >= _columns.length) ||
+                    (xColumnIDs.empty && yColumnIDs.empty)
+                   );
         }
 
         @property auto front()
