@@ -65,8 +65,8 @@ auto toTuples( string[] columns, Options options, int lineCount )
         }
 
         string[] _columns;
-        int[] xColumnIDs;
-        int[] yColumnIDs;
+        typeof(options.xColumns) xColumnIDs;
+        typeof(options.xColumns) yColumnIDs;
         int columnID = 0;
         int _lineCount;
     }
