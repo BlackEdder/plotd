@@ -33,6 +33,7 @@ auto toTuples( string[] columns, Options options, int lineCount )
             xColumnIDs = options.xColumns;
             yColumnIDs = options.yColumns;
             _lineCount = lineCount;
+            _options = options;
         }
 
         @property bool empty()
@@ -59,8 +60,8 @@ auto toTuples( string[] columns, Options options, int lineCount )
                 y = _columns[yColumnIDs.front].to!double;
 
             return AesDefaults.merge(Tuple!(double, "x", double, "y", ColourID,
-                "colour")( x, y,
-                    ColourID(columnID)));
+                "colour", string, "plotID")( x, y,
+                    ColourID(columnID), _options.plotIDs.front));
         }
 
         void popFront()
@@ -70,12 +71,14 @@ auto toTuples( string[] columns, Options options, int lineCount )
                 xColumnIDs.popFront;
             if (!yColumnIDs.empty)
                 yColumnIDs.popFront;
+            _options.plotIDs.popFront;
             ++columnID;
         }
 
         string[] _columns;
         typeof(options.xColumns) xColumnIDs;
         typeof(options.xColumns) yColumnIDs;
+        Options _options;
         int columnID = 0;
         int _lineCount;
     }

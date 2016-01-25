@@ -2,15 +2,17 @@ import std.stdio : writeln;
 
 import docopt;
 
-import plotcli.parse;
-import plotcli.options;
-import plotcli.data;
-
 import std.algorithm : map, reduce;
 import std.array : array;
 import std.conv : to;
-import std.range : repeat;
+import std.range : front, repeat;
 import std.regex : match;
+
+import ggplotd.aes : group;
+
+import plotcli.parse;
+import plotcli.options;
+import plotcli.data;
 
 void main(string[] args)
 {
@@ -27,7 +29,6 @@ void main(string[] args)
     import ggplotd.ggplotd : GGPlotD;
 
     Appender!(typeof(AesDefaults)[]) aes;
-    GGPlotD gg;
     foreach (msg; readStdinByLine(false))
     {
         options = updateOptions(options, msg);
@@ -42,8 +43,12 @@ void main(string[] args)
             ++lineCount;
         }
     }
-    import ggplotd.geom : geomLine;
+    import ggplotd.geom;
 
-    gg.put(geomLine!(typeof(aes.data))(aes.data));
-    gg.save(options.basename ~ ".png");
+    foreach( g; group!("plotID")( aes.data ) )
+    {
+        GGPlotD gg;
+        gg.put(geomHist!(typeof(g))(g));
+        gg.save(options.basename ~ g.front.plotID ~ ".png");
+    }
 }
