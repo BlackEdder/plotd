@@ -9,7 +9,7 @@ version(unittest)
 
 import plotcli.parse : toRange;
 
-auto helpText = "Usage: plotcli [-f] [-o OUTPUT] [-x XCOLUMNS] [-y YCOLUMNS] [--type TYPE]
+auto helpText = "Usage: plotcli [-f] [-o OUTPUT] [-x XCOLUMNS] [-y YCOLUMNS] [--type TYPE] [-p PLOTIDS]
 
 Plotcli is a plotting program that will plot data from provided data streams (files). It will ignore any lines it doesn't understand, making it possible to feed it \"dirty\" streams/files. All options can also be provided within the stream by using the prefix #plotcli (e.g. #plotcli -x 1 -y 2).
 
@@ -17,6 +17,7 @@ Options:
   -f          Follow the stream, i.e. keep listening for new lines.
   -x XCOLUMNS String describing the columns containing x coordinates.
   -y YCOLUMNS String describing the columns containing y coordinates.
+  -p PLOTID	  Extra IDs associated with each pair of x,y. Will be appended to OUTPUT
   -o OUTPUT	  Outputfile (without extension).
   --type TYPE Type of data (line, point, hist)
 
@@ -27,6 +28,7 @@ struct Options
     OptionRange!int xColumns;
     OptionRange!int yColumns;
     string basename = "plotcli";
+    OptionRange!string plotIDs = OptionRange!string(",..");
 }
 
 import std.functional : memoize;
@@ -47,6 +49,10 @@ Options updateOptions(ref Options options, string[] args)
     if (!arguments["-y"].isNull)
     {
         options.yColumns = OptionRange!int(arguments["-y"].to!string);
+    }
+    if (!arguments["-p"].isNull)
+    {
+        options.plotIDs = OptionRange!string(arguments["-p"].to!string);
     }
     if (!arguments["-o"].isNull)
     {
@@ -180,7 +186,9 @@ private string increaseString( string original, int delta )
 {
     import std.conv : to;
     import std.range : back;
-    if (original.length == 1)
+    if (original.length == 0)
+        return "";
+    else if (original.length == 1)
         return (original.back.to!char + delta)
                         .to!char
                         .to!string;
@@ -205,10 +213,10 @@ struct OptionRange( T )
     {
         import std.array : array;
         import std.conv : to;
-        import std.regex : split;
+        import std.algorithm : splitter;
         import std.range : back, empty, popBack;
 
-        splittedOpts = opts.split(csvRegex).array;
+        splittedOpts = opts.splitter(',').array;
 
         if (!splittedOpts.empty && splittedOpts.back == "..")
         {
@@ -265,7 +273,7 @@ struct OptionRange( T )
  private:
     import std.regex : ctRegex;
     string[] splittedOpts;
-    auto csvRegex = ctRegex!(`,\s*`);
+    //auto csvRegex = ctRegex!(`,\s*`);
     int delta = 0;
     T extrapolatedValue;
 }
@@ -290,6 +298,9 @@ unittest
         ["ac","ad","ae","af"] );
     assertEqual( OptionRange!string( "bc,.." ).take(4).array, 
         ["bc","bc","bc","bc"] );
+
+    assertEqual( OptionRange!string( ",.." ).take(4).array, 
+        ["","","",""] );
 
     assert( OptionRange!int( "" ).empty );
 }

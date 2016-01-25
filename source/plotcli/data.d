@@ -16,9 +16,9 @@ import ggplotd.aes : merge;
 
 auto AesDefaults = Tuple!(
     double, "x", double, "y",
-    ColourID, "colour", string, "label", double, "size",
+    ColourID, "colour", string, "plotID", string, "label", double, "size",
     double, "angle", double, "alpha", bool, "mask", double, "fill" )
-    (double.init, double.init, ColourID("black"), "", 10, 0, 1, true, 0.0);
+    (double.init, double.init, ColourID("black"), "", "", 10, 0, 1, true, 0.0);
 
 auto toTuples( string[] columns, Options options, int lineCount )
 {
