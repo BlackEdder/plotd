@@ -24,8 +24,8 @@ Options:
 
 struct Options
 {
-    int[] xColumns;
-    int[] yColumns;
+    OptionRange!int xColumns;
+    OptionRange!int yColumns;
     string basename = "plotcli";
 }
 
@@ -42,13 +42,11 @@ Options updateOptions(ref Options options, string[] args)
     auto arguments = cachedDocopt(helpText, args, true, "plotcli", false);
     if (!arguments["-x"].isNull)
     {
-        options.xColumns = arguments["-x"].to!string.toRange // This should be smarted and interpret ,..
-        .map!((a) => a.to!int).array;
+        options.xColumns = OptionRange!int(arguments["-x"].to!string);
     }
     if (!arguments["-y"].isNull)
     {
-        options.yColumns = arguments["-y"].to!string.toRange // This should be smarted and interpret ,..
-        .map!((a) => a.to!int).array;
+        options.yColumns = OptionRange!int(arguments["-y"].to!string);
     }
     if (!arguments["-o"].isNull)
     {
@@ -71,16 +69,17 @@ Options updateOptions(ref Options options, string message)
 
 unittest
 {
+    import std.array : array;
     import std.range : empty;
     Options options;
     assertEqual( 
-        updateOptions( options, "#plotcli -x 1,2,4" ).xColumns,
+        updateOptions( options, "#plotcli -x 1,2,4" ).xColumns.array,
         [1,2,4] );
     assert( options.yColumns.empty ); 
     assertEqual( 
-        updateOptions( options, "#plotcli -y 3,2,4" ).yColumns,
+        updateOptions( options, "#plotcli -y 3,2,4" ).yColumns.array,
         [3,2,4] );
-    assertEqual( options.xColumns, [1,2,4] ); 
+    assertEqual( options.xColumns.array, [1,2,4] ); 
 
     assertEqual( options.basename, "plotcli" );
 
@@ -133,10 +132,10 @@ unittest
 {
     Options options;
     assert( options.validData( ["1","a", "-2"] ) );
-    options.xColumns = [0];
-    options.yColumns = [0];
+    options.xColumns = OptionRange!int("0");
+    options.yColumns = OptionRange!int("0");
     assert( options.validData( ["1","a", "-2"] ) );
-    options.yColumns = [0,2];
+    options.yColumns = OptionRange!int("0,2");
     assert( options.validData( ["1","a", "-2"] ) );
     assert( !options.validData( ["1","a"] ) );
     assert( !options.validData( ["1","a", "b"] ) );

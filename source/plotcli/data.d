@@ -9,7 +9,7 @@ version( unittest )
 
 import ggplotd.colour : ColourID;
 
-import plotcli.options : Options;
+import plotcli.options : Options, OptionRange;
 
 auto toTuples( string[] columns, Options options, int lineCount )
 {
@@ -77,19 +77,29 @@ auto toTuples( string[] columns, Options options, int lineCount )
 unittest
 {
     Options options;
-    options.yColumns = [1];
+    options.yColumns = OptionRange!int("1");
 
     auto ts = ["1","2","3"].toTuples( options, -1 );
     assertEqual( ts.front.x, -1 );
     assertEqual( ts.front.y, 2 );
 
-    options.xColumns = [2];
+    options.xColumns = OptionRange!int("2");
 
     ts = ["1","2","3"].toTuples( options, -1 );
     assertEqual( ts.front.x, 3 );
     assert(!ts.empty);
     ts.popFront;
     assert(ts.empty);
+
+    options.xColumns = OptionRange!int("0,1,..");
+    ts = ["1","2","3"].toTuples( options, -1 );
+    assertEqual( ts.front.x, 1 );
+    ts.popFront;
+    assertEqual( ts.front.x, 2 );
+    ts.popFront;
+    assertEqual( ts.front.x, 3 );
+    ts.popFront;
+    assert( ts.empty );
 }
 
 
