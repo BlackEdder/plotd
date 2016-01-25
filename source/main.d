@@ -45,10 +45,16 @@ void main(string[] args)
     }
     import ggplotd.geom;
 
-    foreach( g; group!("plotID")( aes.data ) )
+    foreach( ps; group!("plotID")( aes.data ) )
     {
         GGPlotD gg;
-        gg.put(geomHist!(typeof(g))(g));
-        gg.save(options.basename ~ g.front.plotID ~ ".png");
+        foreach( g; group!("type")( ps ) )
+        {
+            if (g.front.type == "hist")
+                gg.put(geomHist!(typeof(g))(g));
+            else if (g.front.type == "line")
+                gg.put(geomLine!(typeof(g))(g));
+        }
+        gg.save(options.basename ~ ps.front.plotID ~ ".png");
     }
 }

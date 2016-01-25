@@ -19,7 +19,7 @@ Options:
   -y YCOLUMNS String describing the columns containing y coordinates.
   -p PLOTID	  Extra IDs associated with each pair of x,y. Will be appended to OUTPUT
   -o OUTPUT	  Outputfile (without extension).
-  --type TYPE Type of data (line, point, hist)
+  --type TYPE Type(s) of data (line, point, hist)
 
 ";
 
@@ -29,6 +29,8 @@ struct Options
     OptionRange!int yColumns;
     string basename = "plotcli";
     OptionRange!string plotIDs = OptionRange!string(",..");
+
+    OptionRange!string types = OptionRange!string("line", true);
 }
 
 import std.functional : memoize;
@@ -52,7 +54,11 @@ Options updateOptions(ref Options options, string[] args)
     }
     if (!arguments["-p"].isNull)
     {
-        options.plotIDs = OptionRange!string(arguments["-p"].to!string);
+        options.plotIDs = OptionRange!string(arguments["-p"].to!string, true);
+    }
+    if (!arguments["--type"].isNull)
+    {
+        options.types = OptionRange!string(arguments["--type"].to!string, true);
     }
     if (!arguments["-o"].isNull)
     {
@@ -209,7 +215,7 @@ unittest
 /// Range to correctly interpret 1,2,.. a,b,.. etc
 struct OptionRange( T )
 {
-    this( string opts )
+    this( string opts, bool repeat = false )
     {
         import std.array : array;
         import std.conv : to;
@@ -217,6 +223,9 @@ struct OptionRange( T )
         import std.range : back, empty, popBack;
 
         splittedOpts = opts.splitter(',').array;
+
+        if (splittedOpts.length == 1 && repeat)
+            splittedOpts ~= [".."];
 
         if (!splittedOpts.empty && splittedOpts.back == "..")
         {
@@ -301,6 +310,9 @@ unittest
 
     assertEqual( OptionRange!string( ",.." ).take(4).array, 
         ["","","",""] );
+
+    assertEqual( OptionRange!string( "a", true ).take(4).array, 
+        ["a","a","a","a"] );
 
     assert( OptionRange!int( "" ).empty );
 }
