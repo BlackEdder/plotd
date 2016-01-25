@@ -11,6 +11,15 @@ import ggplotd.colour : ColourID;
 
 import plotcli.options : Options, OptionRange;
 
+//import ggplotd.aes : DefaultValues, merge;
+import ggplotd.aes : merge;
+
+auto AesDefaults = Tuple!(
+    double, "x", double, "y",
+    ColourID, "colour", string, "label", double, "size",
+    double, "angle", double, "alpha", bool, "mask", double, "fill" )
+    (double.init, double.init, ColourID("black"), "", 10, 0, 1, true, 0.0);
+
 auto toTuples( string[] columns, Options options, int lineCount )
 {
     // TODO use generate?
@@ -49,9 +58,9 @@ auto toTuples( string[] columns, Options options, int lineCount )
             if (!yColumnIDs.empty)
                 y = _columns[yColumnIDs.front].to!double;
 
-            return Tuple!(double, "x", double, "y", ColourID,
+            return AesDefaults.merge(Tuple!(double, "x", double, "y", ColourID,
                 "colour")( x, y,
-                    ColourID(columnID));
+                    ColourID(columnID)));
         }
 
         void popFront()

@@ -1,7 +1,6 @@
 import std.stdio : writeln;
 
 import docopt;
-import ggplotd.aes;
 
 import plotcli.parse;
 import plotcli.options;
@@ -27,7 +26,7 @@ void main(string[] args)
     import ggplotd.colour : ColourID;
     import ggplotd.ggplotd : GGPlotD;
 
-    Appender!(Tuple!(double, "x", double, "y", ColourID, "colour")[]) aes;
+    Appender!(typeof(AesDefaults)[]) aes;
     GGPlotD gg;
     foreach (msg; readStdinByLine(false))
     {
@@ -38,7 +37,7 @@ void main(string[] args)
         if (options.validData( cols ))
         {
             foreach( t; cols.toTuples( options, lineCount)) 
-                aes.put(t);
+                aes.put( t );
 
             ++lineCount;
         }

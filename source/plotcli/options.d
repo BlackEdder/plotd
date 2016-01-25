@@ -188,7 +188,6 @@ private string increaseString( string original, int delta )
         return original[0..$-1] ~ (original.back.to!char + delta)
                         .to!char
                         .to!string;
-
 }
 
 unittest
