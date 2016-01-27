@@ -9,19 +9,30 @@ version(unittest)
 
 import plotcli.parse : toRange;
 
-auto helpText = "Usage: plotcli [-f] [-o OUTPUT] [-x XCOLUMNS] [-y YCOLUMNS] [--type TYPE] [-p PLOTIDS]
+string helpText() // TODO cache result because will stay the same;
+{
+    import std.string : toUpper;
+    import plotcli.data : AesDefaults;
+    auto header = "Usage: plotcli [-f] [-o OUTPUT]";
 
-Plotcli is a plotting program that will plot data from provided data streams (files). It will ignore any lines it doesn't understand, making it possible to feed it \"dirty\" streams/files. All options can also be provided within the stream by using the prefix #plotcli (e.g. #plotcli -x 1 -y 2).
+    auto bodyText = "Plotcli is a plotting program that will plot data from provided data streams (files). It will ignore any lines it doesn't understand, making it possible to feed it \"dirty\" streams/files. All options can also be provided within the stream by using the prefix #plotcli (e.g. #plotcli -x 1 -y 2).
 
 Options:
   -f          Follow the stream, i.e. keep listening for new lines.
-  -x XCOLUMNS String describing the columns containing x coordinates.
-  -y YCOLUMNS String describing the columns containing y coordinates.
-  -p PLOTID	  Extra IDs associated with each pair of x,y. Will be appended to OUTPUT
-  -o OUTPUT	  Outputfile (without extension).
-  --type TYPE Type(s) of data (line, point, hist)
+  -o OUTPUT	  Outputfile (without extension).";
 
-";
+    import std.stdio;
+    foreach( field; AesDefaults.fieldNames )
+    {
+        string dashes = "--";
+        if (field.length == 1)
+            dashes = "-";
+        header ~= " [" ~ dashes ~ field ~ " " ~ field.toUpper ~ "]";
+        bodyText ~= "\n  " ~ dashes ~ field ~ " " ~ field.toUpper ~ "\t\tColumns containing " ~ field;
+    }
+
+    return header ~ "\n\n" ~ bodyText;
+}
 
 struct Options
 {
@@ -52,9 +63,9 @@ Options updateOptions(ref Options options, string[] args)
     {
         options.yColumns = OptionRange!int(arguments["-y"].to!string);
     }
-    if (!arguments["-p"].isNull)
+    if (!arguments["--plotID"].isNull)
     {
-        options.plotIDs = OptionRange!string(arguments["-p"].to!string, true);
+        options.plotIDs = OptionRange!string(arguments["--plotID"].to!string, true);
     }
     if (!arguments["--type"].isNull)
     {
