@@ -28,7 +28,7 @@ void main(string[] args)
     import ggplotd.colour : ColourID;
     import ggplotd.ggplotd : GGPlotD;
 
-    Appender!(typeof(AesDefaults)[]) aes;
+    Appender!(typeof(aesDefaults())[]) aes;
     foreach (msg; readStdinByLine(false))
     {
         options = updateOptions(options, msg);

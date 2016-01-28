@@ -25,7 +25,7 @@ private string addDashes( string arg )
 string helpText() // TODO cache result because will stay the same;
 {
     import std.string : toUpper;
-    import plotcli.data : AesDefaults;
+    import plotcli.data : aesDefaults;
     auto header = "Usage: plotcli [-f] [-o OUTPUT]";
 
     auto bodyText = "Plotcli is a plotting program that will plot data from provided data streams (files). It will ignore any lines it doesn't understand, making it possible to feed it \"dirty\" streams/files. All options can also be provided within the stream by using the prefix #plotcli (e.g. #plotcli -x 1 -y 2).
@@ -34,8 +34,7 @@ Options:
   -f          Follow the stream, i.e. keep listening for new lines.
   -o OUTPUT	  Outputfile (without extension).";
 
-    import std.stdio;
-    foreach( field; AesDefaults.fieldNames )
+    foreach( field; aesDefaults.fieldNames )
     {
         header ~= " [" ~ field.addDashes ~ " " ~ field.toUpper ~ "]";
         bodyText ~= "\n  " ~ field.addDashes ~ " " ~ field.toUpper ~ "\t\tColumns containing " ~ field;
@@ -70,9 +69,9 @@ unittest {
 
 auto defaultOptions()
 {
-    import plotcli.data : AesDefaults;
+    import plotcli.data : aesDefaults;
     Options options;
-    foreach( field; AesDefaults.fieldNames )
+    foreach( field; aesDefaults.fieldNames )
     {
         if (field != "x" && field != "y")
             options.values[ field ] = OptionRange!string( 
@@ -103,8 +102,8 @@ Options updateOptions(ref Options options, string[] args)
         options.basename = arguments["-o"].to!string;
     }
 
-    import plotcli.data : AesDefaults;
-    foreach( field; AesDefaults.fieldNames )
+    import plotcli.data : aesDefaults;
+    foreach( field; aesDefaults.fieldNames )
     {
         if (!arguments[field.addDashes].isNull)
         {

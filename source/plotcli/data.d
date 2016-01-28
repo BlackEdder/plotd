@@ -7,21 +7,18 @@ version( unittest )
     import dunit.toolkit;
 }
 
-import ggplotd.colour : ColourID;
 
 import plotcli.options : Options, OptionRange;
 
-//import ggplotd.aes : DefaultValues, merge;
-import ggplotd.aes : merge;
 
-auto AesDefaults = Tuple!(
-    double, "x", double, "y",
-    ColourID, "colour", string, "plotID", string, "type",
-    string, "label", double, "size",
-    double, "angle", double, "alpha", bool, "mask", double, "fill" )
-    (double.init, double.init, ColourID("black"), "", "line", 
-     "", 10, 0, 1, true, 0.0);
-
+auto aesDefaults()
+{
+    import ggplotd.aes : DefaultValues, merge;
+    import ggplotd.colour : ColourID;
+    return DefaultValues.merge(Tuple!(double, "x", double, "y",
+        ColourID, "colour", string, "plotID", string, "type" )
+        ( double.init, double.init, ColourID("black"), "", "line") ); 
+}
 
 auto toTuples( string[] columns, Options options, int lineCount )
 {
@@ -55,12 +52,14 @@ auto toTuples( string[] columns, Options options, int lineCount )
         {
             import std.conv : to;
             import std.range : empty, front;
+            import ggplotd.aes : DefaultValues, merge;
+            import ggplotd.colour : ColourID;
             import plotcli.parse : isInteger;
 
-            auto tuple = AesDefaults.merge(Tuple!(double, "x", double, "y",
+            auto tuple = aesDefaults().merge(Tuple!(double, "x", double, "y",
                 ColourID, "colour" )
                 ( lineCount.to!double, lineCount.to!double, ColourID(columnID) ) 
-            ); 
+            );
 
             foreach( i, field; tuple.fieldNames )
             {
