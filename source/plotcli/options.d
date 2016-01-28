@@ -7,6 +7,11 @@ version(unittest)
     import dunit.toolkit;
 }
 
+version(assert)
+{
+    import std.stdio : writeln;
+}
+
 import plotcli.parse : toRange;
 
 private string addDashes( string arg )
@@ -39,16 +44,44 @@ Options:
     return header ~ "\n\n" ~ bodyText;
 }
 
-struct Options
+private struct Options
 {
-    OptionRange!int xColumns;
-    OptionRange!int yColumns;
     string basename = "plotcli";
-    OptionRange!string plotIDs = OptionRange!string(",..");
-
-    OptionRange!string types = OptionRange!string("line", true);
-
     OptionRange!string[string] values; 
+
+    Options dup()
+    {
+        Options opts;
+        opts.basename = basename;
+        foreach(k, v; values)
+            opts.values[k] = v.save;
+        return opts;
+    }
+}
+
+unittest {
+    Options opts1;
+    opts1.values["x"] = OptionRange!string("1,2");
+    assertEqual(opts1.values["x"].front, "1");
+    auto opts2 = opts1.dup;
+    opts2.values["x"].popFront;
+    assertEqual(opts1.values["x"].front, "1");
+}
+
+auto defaultOptions()
+{
+    import plotcli.data : AesDefaults;
+    Options options;
+    foreach( field; AesDefaults.fieldNames )
+    {
+        if (field != "x" && field != "y")
+            options.values[ field ] = OptionRange!string( 
+                "", true);
+        else
+            options.values[ field ] = OptionRange!string( 
+                "", true);
+    }
+    return options;
 }
 
 import std.functional : memoize;
@@ -62,23 +95,9 @@ Options updateOptions(ref Options options, string[] args)
     import std.conv : to;
 
     auto arguments = cachedDocopt(helpText, args, true, "plotcli", false);
+
+    debug writeln("Added arguments: ", arguments);
     
-    if (!arguments["-x"].isNull)
-    {
-        options.xColumns = OptionRange!int(arguments["-x"].to!string);
-    }
-    if (!arguments["-y"].isNull)
-    {
-        options.yColumns = OptionRange!int(arguments["-y"].to!string);
-    }
-    if (!arguments["--plotID"].isNull)
-    {
-        options.plotIDs = OptionRange!string(arguments["--plotID"].to!string, true);
-    }
-    if (!arguments["--type"].isNull)
-    {
-        options.types = OptionRange!string(arguments["--type"].to!string, true);
-    }
     if (!arguments["-o"].isNull)
     {
         options.basename = arguments["-o"].to!string;
@@ -117,15 +136,15 @@ unittest
 {
     import std.array : array;
     import std.range : empty;
-    Options options;
+    Options options = defaultOptions;
     assertEqual( 
-        updateOptions( options, "#plotcli -x 1,2,4" ).xColumns.array,
-        [1,2,4] );
-    assert( options.yColumns.empty ); 
+        updateOptions( options, "#plotcli -x 1,2,4" ).values["x"].array,
+        ["1","2","4"] );
+    assert( options.values["y"].empty ); 
     assertEqual( 
-        updateOptions( options, "#plotcli -y 3,2,4" ).yColumns.array,
-        [3,2,4] );
-    assertEqual( options.xColumns.array, [1,2,4] ); 
+        updateOptions( options, "#plotcli -y 3,2,4" ).values["y"].array,
+        ["3","2","4"] );
+    assertEqual( options.values["x"].array, ["1","2","4"] ); 
 
     assertEqual( options.basename, "plotcli" );
 
@@ -137,7 +156,8 @@ unittest
 /// Does the data fit with the given options?
 bool validData(R1, R2)( R1 xColumns, R1 yColumns, in R2 columns )
 {
-    import std.algorithm : max, reduce;
+    import std.algorithm : map, max, reduce;
+    import std.conv;
     import std.range : empty;
     import plotcli.parse : areNumeric;
     if (xColumns.empty && yColumns.empty )
@@ -149,39 +169,39 @@ bool validData(R1, R2)( R1 xColumns, R1 yColumns, in R2 columns )
             yColumns.minimumExpectedIndex );
 
     return (columns.length > maxCol 
-            && columns.areNumeric(xColumns) 
-            && columns.areNumeric(yColumns) 
+            && columns.areNumeric(xColumns.map!((a) => a.to!int)) 
+            && columns.areNumeric(yColumns.map!((a) => a.to!int)) 
            );
 }
 
 unittest
 {
-    assert( validData( OptionRange!int(""), OptionRange!int(""), 
+    assert( validData( OptionRange!string(""), OptionRange!string(""), 
                 ["1","a", "-2"] ) );
-    assert( validData( OptionRange!int("0,2"), OptionRange!int(""), 
+    assert( validData( OptionRange!string("0,2"), OptionRange!string(""), 
                 ["1","a", "-2"] ) );
-    assert( validData( OptionRange!int(""), OptionRange!int("0,2"), 
+    assert( validData( OptionRange!string(""), OptionRange!string("0,2"), 
                 ["1","a", "-2"] ) );
-    assert( !validData( OptionRange!int("1"), OptionRange!int("0,2"), 
+    assert( !validData( OptionRange!string("1"), OptionRange!string("0,2"), 
                 ["1","a", "-2"] ) );
-    assert( validData( OptionRange!int(""), OptionRange!int("0,2,.."), 
+    assert( validData( OptionRange!string(""), OptionRange!string("0,2,.."), 
                 ["1","a", "-2"] ) );
 }
 
 /// Does the data fit with the given options?
 bool validData(RANGE)( Options options, in RANGE columns )
 {
-    return validData( options.xColumns, options.yColumns, columns );
+    return validData( options.values["x"], options.values["y"], columns );
 }
 
 unittest
 {
-    Options options;
+    auto options = defaultOptions;
     assert( options.validData( ["1","a", "-2"] ) );
-    options.xColumns = OptionRange!int("0");
-    options.yColumns = OptionRange!int("0");
+    options.values["x"] = OptionRange!string("0");
+    options.values["y"] = OptionRange!string("0");
     assert( options.validData( ["1","a", "-2"] ) );
-    options.yColumns = OptionRange!int("0,2");
+    options.values["y"] = OptionRange!string("0,2");
     assert( options.validData( ["1","a", "-2"] ) );
     assert( !options.validData( ["1","a"] ) );
     assert( !options.validData( ["1","a", "b"] ) );
@@ -226,8 +246,11 @@ private string increaseString( string original, int delta )
 {
     import std.conv : to;
     import std.range : back;
+    import std.string : isNumeric;
     if (original.length == 0)
         return "";
+    else if (original.isNumeric)
+        return (original.to!int + delta).to!string;
     else if (original.length == 1)
         return (original.back.to!char + delta)
                         .to!char
@@ -244,6 +267,7 @@ unittest
     assertEqual( increaseString( "a", 1 ), "b" );
     assertEqual( increaseString( "c", 2 ), "e" );
     assertEqual( increaseString( "cd", 1 ), "ce" );
+    assertEqual( increaseString( "19", 1 ), "20" );
 }
 
 /// Range to correctly interpret 1,2,.. a,b,.. etc
@@ -311,6 +335,11 @@ struct OptionRange( T )
             else 
                 extrapolatedValue += delta;
         }
+    }
+
+    @property auto save()
+    {
+        return this;
     }
 
  private:

@@ -32,19 +32,20 @@ auto toTuples( string[] columns, Options options, int lineCount )
             import std.range : empty, repeat;
             import std.array : array;
             _columns = columns;
-            xColumnIDs = options.xColumns;
-            yColumnIDs = options.yColumns;
             _lineCount = lineCount;
             _options = options;
         }
 
         @property bool empty()
         {
+            import std.conv : to;
             import std.range : empty, front;
-            return (
-                    (!xColumnIDs.empty && xColumnIDs.front >= _columns.length) ||
-                    (!yColumnIDs.empty && yColumnIDs.front >= _columns.length) ||
-                    (xColumnIDs.empty && yColumnIDs.empty)
+            return ( 
+                    (!_options.values["x"].empty 
+                        && _options.values["x"].front.to!int >= _columns.length) 
+                || (!_options.values["y"].empty 
+                        && _options.values["y"].front.to!int >= _columns.length) 
+                || (_options.values["x"].empty && _options.values["y"].empty)
                    );
         }
 
@@ -52,35 +53,39 @@ auto toTuples( string[] columns, Options options, int lineCount )
         {
             import std.conv : to;
             import std.range : empty, front;
+            import std.string : isNumeric;
 
-            double x = lineCount.to!double;
-            double y = lineCount.to!double;
-            
-            if (!xColumnIDs.empty)
-                x = _columns[xColumnIDs.front].to!double;
-            if (!yColumnIDs.empty)
-                y = _columns[yColumnIDs.front].to!double;
+            auto tuple = AesDefaults.merge(Tuple!(double, "x", double, "y",
+                ColourID, "colour" )
+                ( lineCount.to!double, lineCount.to!double, ColourID(columnID) ) 
+            ); 
 
-            return AesDefaults.merge(Tuple!(double, "x", double, "y", ColourID,
-                "colour", string, "plotID", string, "type")( x, y,
-                    ColourID(columnID), _options.plotIDs.front, 
-                    _options.types.front ));
+            foreach( i, field; tuple.fieldNames )
+            {
+                if (field in _options.values && !_options.values[field].empty)
+                {
+                    auto f = _options.values[field].front;
+                    if (f.isNumeric)
+                    {
+                        tuple[i] = _columns[f.to!int].to!(typeof(tuple[i]));
+                    } else if (!f.empty) {
+                        tuple[i] = f.to!(typeof(tuple[i]));
+                    }
+                }
+            }
+            return tuple;
         }
 
         void popFront()
         {
             import std.range : empty, popFront;
-            if (!xColumnIDs.empty)
-                xColumnIDs.popFront;
-            if (!yColumnIDs.empty)
-                yColumnIDs.popFront;
-            _options.plotIDs.popFront;
+            foreach( k, ref v; _options.values )
+                if (!v.empty)
+                    v.popFront;
             ++columnID;
         }
 
         string[] _columns;
-        typeof(options.xColumns) xColumnIDs;
-        typeof(options.xColumns) yColumnIDs;
         Options _options;
         int columnID = 0;
         int _lineCount;
@@ -92,13 +97,13 @@ auto toTuples( string[] columns, Options options, int lineCount )
 unittest
 {
     Options options;
-    options.yColumns = OptionRange!int("1");
+    options.values["y"] = OptionRange!string("1");
 
     auto ts = ["1","2","3"].toTuples( options, -1 );
     assertEqual( ts.front.x, -1 );
     assertEqual( ts.front.y, 2 );
 
-    options.xColumns = OptionRange!int("2");
+    options.values["x"] = OptionRange!string("2");
 
     ts = ["1","2","3"].toTuples( options, -1 );
     assertEqual( ts.front.x, 3 );
@@ -106,7 +111,7 @@ unittest
     ts.popFront;
     assert(ts.empty);
 
-    options.xColumns = OptionRange!int("0,1,..");
+    options.values["x"] = OptionRange!string("0,1,..");
     ts = ["1","2","3"].toTuples( options, -1 );
     assertEqual( ts.front.x, 1 );
     ts.popFront;

@@ -1,5 +1,6 @@
-#plotcli -x 0,1,.. --plotID a,b,.. --type hist -p signifies plot ids, i.e.
-these will be plotted in different plots
+#plotcli -x 0,1,.. --plotID a,b,.. --type hist 
+
+-p signifies plot ids, i.e. these will be plotted in different plots
 
 -0.246465,1.1349,1.37636,2.33029
 0.17212,1.23672,1.77301,1.96037

@@ -18,7 +18,7 @@ void main(string[] args)
 {
     debug writeln("Arguments: ", args);
 
-    Options options;
+    auto options = defaultOptions();
 
     options = updateOptions(options, args[1 .. $]);
     int maxCol = 0;
@@ -37,8 +37,12 @@ void main(string[] args)
 
         if (options.validData( cols ))
         {
-            foreach( t; cols.toTuples( options, lineCount)) 
+            debug writeln("Accepting data: ", cols);
+            foreach( t; cols.toTuples( options.dup, lineCount)) 
+            {
+                debug writeln("Converted data to aes: ", t);
                 aes.put( t );
+            }
 
             ++lineCount;
         }
