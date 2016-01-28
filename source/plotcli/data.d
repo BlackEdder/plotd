@@ -22,11 +22,13 @@ auto AesDefaults = Tuple!(
     (double.init, double.init, ColourID("black"), "", "line", 
      "", 10, 0, 1, true, 0.0);
 
+
 auto toTuples( string[] columns, Options options, int lineCount )
 {
     // TODO use generate?
     struct Tuples
     {
+        import std.regex : ctRegex, match;
         this( string[] columns, Options options, int lineCount )
         {
             import std.range : empty, repeat;
@@ -53,7 +55,7 @@ auto toTuples( string[] columns, Options options, int lineCount )
         {
             import std.conv : to;
             import std.range : empty, front;
-            import std.string : isNumeric;
+            import plotcli.parse : isInteger;
 
             auto tuple = AesDefaults.merge(Tuple!(double, "x", double, "y",
                 ColourID, "colour" )
@@ -65,7 +67,7 @@ auto toTuples( string[] columns, Options options, int lineCount )
                 if (field in _options.values && !_options.values[field].empty)
                 {
                     auto f = _options.values[field].front;
-                    if (f.isNumeric)
+                    if (f.isInteger)
                     {
                         tuple[i] = _columns[f.to!int].to!(typeof(tuple[i]));
                     } else if (!f.empty) {

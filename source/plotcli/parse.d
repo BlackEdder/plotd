@@ -8,6 +8,22 @@ version (unittest)
     import dunit.toolkit;
 }
 
+
+bool isInteger( string str )
+{
+    import std.regex : ctRegex, match;
+    static integer = ctRegex!(r"^\s*[+-]*[0-9]+\s*$");
+    return !str.match( integer ).empty;
+}
+
+unittest
+{
+    assert( "-1".isInteger );
+    assert( "+1".isInteger );
+    assert( "1".isInteger );
+    assert( !"1.0".isInteger );
+}
+
 struct FollowRange(RANGE) if (isInputRange!RANGE)
 {
     import std.range : ElementType;

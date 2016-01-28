@@ -246,10 +246,10 @@ private string increaseString( string original, int delta )
 {
     import std.conv : to;
     import std.range : back;
-    import std.string : isNumeric;
+    import plotcli.parse : isInteger;
     if (original.length == 0)
         return "";
-    else if (original.isNumeric)
+    else if (original.isInteger)
         return (original.to!int + delta).to!string;
     else if (original.length == 1)
         return (original.back.to!char + delta)
