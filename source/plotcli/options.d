@@ -9,6 +9,14 @@ version(unittest)
 
 import plotcli.parse : toRange;
 
+private string addDashes( string arg )
+{
+    string dashes = "--";
+    if (arg.length == 1)
+        dashes = "-";
+    return dashes ~ arg;
+}
+
 string helpText() // TODO cache result because will stay the same;
 {
     import std.string : toUpper;
@@ -24,11 +32,8 @@ Options:
     import std.stdio;
     foreach( field; AesDefaults.fieldNames )
     {
-        string dashes = "--";
-        if (field.length == 1)
-            dashes = "-";
-        header ~= " [" ~ dashes ~ field ~ " " ~ field.toUpper ~ "]";
-        bodyText ~= "\n  " ~ dashes ~ field ~ " " ~ field.toUpper ~ "\t\tColumns containing " ~ field;
+        header ~= " [" ~ field.addDashes ~ " " ~ field.toUpper ~ "]";
+        bodyText ~= "\n  " ~ field.addDashes ~ " " ~ field.toUpper ~ "\t\tColumns containing " ~ field;
     }
 
     return header ~ "\n\n" ~ bodyText;
@@ -42,6 +47,8 @@ struct Options
     OptionRange!string plotIDs = OptionRange!string(",..");
 
     OptionRange!string types = OptionRange!string("line", true);
+
+    OptionRange!string[string] values; 
 }
 
 import std.functional : memoize;
@@ -55,6 +62,7 @@ Options updateOptions(ref Options options, string[] args)
     import std.conv : to;
 
     auto arguments = cachedDocopt(helpText, args, true, "plotcli", false);
+    
     if (!arguments["-x"].isNull)
     {
         options.xColumns = OptionRange!int(arguments["-x"].to!string);
@@ -75,6 +83,21 @@ Options updateOptions(ref Options options, string[] args)
     {
         options.basename = arguments["-o"].to!string;
     }
+
+    import plotcli.data : AesDefaults;
+    foreach( field; AesDefaults.fieldNames )
+    {
+        if (!arguments[field.addDashes].isNull)
+        {
+            if (field != "x" && field != "y")
+                options.values[ field ] = OptionRange!string( 
+                    arguments[field.addDashes].to!string, true);
+            else
+                options.values[ field ] = OptionRange!string( 
+                    arguments[field.addDashes].to!string, false);
+        }
+    }
+
     return options;
 }
 
