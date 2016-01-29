@@ -48,12 +48,14 @@ void main(string[] args)
         }
     }
     import ggplotd.geom;
+    import plotcli.geom;
 
     foreach( ps; group!("plotID")( aes.data ) )
     {
         GGPlotD gg;
         foreach( g; group!("type")( ps ) )
         {
+            gg.put(g.toGeom( g.front.type ));
             if (g.front.type == "hist")
                 gg.put(geomHist!(typeof(g))(g));
             else if (g.front.type == "line")
