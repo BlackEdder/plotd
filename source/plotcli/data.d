@@ -17,7 +17,7 @@ auto aesDefaults()
     import ggplotd.colour : ColourID;
     return DefaultValues.merge(Tuple!(double, "x", double, "y",
         ColourID, "colour", string, "plotID", string, "type" )
-        ( double.init, double.init, ColourID("black"), "", "line") ); 
+        ( double.init, double.init, ColourID("black"), "", "") ); 
 }
 
 auto toTuples( string[] columns, Options options, int lineCount )

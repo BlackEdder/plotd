@@ -56,6 +56,8 @@ private struct Options
             opts.values[k] = v.save;
         return opts;
     }
+
+    bool explicitly_initialised = false;
 }
 
 unittest {
@@ -80,6 +82,9 @@ auto defaultOptions()
             options.values[ field ] = OptionRange!string( 
                 "", true);
     }
+
+    options.values["y"] = OptionRange!string( "0", true );
+    options.values["y"].delta = 1;
     return options;
 }
 
@@ -110,9 +115,16 @@ Options updateOptions(ref Options options, string[] args)
             if (field != "x" && field != "y")
                 options.values[ field ] = OptionRange!string( 
                     arguments[field.addDashes].to!string, true);
-            else
+            else {
+                if (!options.explicitly_initialised)
+                {
+                    options.values["y"] = OptionRange!string("",false);
+                    options.explicitly_initialised = true;
+                }
+
                 options.values[ field ] = OptionRange!string( 
                     arguments[field.addDashes].to!string, false);
+            }
         }
     }
 
@@ -140,6 +152,7 @@ unittest
         updateOptions( options, "#plotcli -x 1,2,4" ).values["x"].array,
         ["1","2","4"] );
     assert( options.values["y"].empty ); 
+
     assertEqual( 
         updateOptions( options, "#plotcli -y 3,2,4" ).values["y"].array,
         ["3","2","4"] );
@@ -150,6 +163,26 @@ unittest
     assertEqual( 
         updateOptions( options, "#plotcli -o test" ).basename,
         "test" );
+}
+
+unittest
+{
+    // Test whether setting new value properly overrides defaults
+    auto opts = defaultOptions;
+    assertEqual( opts.values["y"].front, "0" );
+    assertEqual( opts.values["y"].minimumExpectedIndex, 0 );
+    assert( !opts.values["y"].empty );
+
+    auto optsdup = opts.dup;
+    optsdup.values["y"].popFront;
+    assertEqual( optsdup.values["y"].front, "1" );
+
+    // After change override it
+    assert( updateOptions( opts, "#plotcli -x 0" ).values["y"].empty );
+
+    assertEqual( updateOptions( opts, "#plotcli -y 3" ).values["y"].front, "3" );
+    // If set explicitly (above) don't override it
+    assert( !updateOptions( opts, "#plotcli -x 0" ).values["y"].empty );
 }
 
 /// Does the data fit with the given options?
@@ -185,6 +218,11 @@ unittest
                 ["1","a", "-2"] ) );
     assert( validData( OptionRange!string(""), OptionRange!string("0,2,.."), 
                 ["1","a", "-2"] ) );
+
+    auto opy = OptionRange!string("0");
+    opy.delta = 1;
+    assert( validData( OptionRange!string(""), opy, 
+                ["1","a", "-2"] ) );
 }
 
 /// Does the data fit with the given options?
@@ -196,7 +234,7 @@ bool validData(RANGE)( Options options, in RANGE columns )
 unittest
 {
     auto options = defaultOptions;
-    assert( options.validData( ["1","a", "-2"] ) );
+    assert( !options.validData( ["1","a", "-2"] ) );
     options.values["x"] = OptionRange!string("0");
     options.values["y"] = OptionRange!string("0");
     assert( options.validData( ["1","a", "-2"] ) );
