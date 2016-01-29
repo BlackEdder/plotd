@@ -56,14 +56,6 @@ void main(string[] args)
         foreach( g; group!("type")( ps ) )
         {
             gg.put(g.toGeom( g.front.type ));
-            if (g.front.type == "hist")
-                gg.put(geomHist!(typeof(g))(g));
-            else if (g.front.type == "line")
-                gg.put(geomLine!(typeof(g))(g));
-            else if (g.front.type == "hist3d")
-                gg.put(geomHist3D!(typeof(g))(g));
-            else if (g.front.type == "box")
-                gg.put(geomBox!(typeof(g))(g));
         }
         gg.save(options.basename ~ ps.front.plotID ~ ".png");
     }
