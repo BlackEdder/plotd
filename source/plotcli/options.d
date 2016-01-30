@@ -105,7 +105,7 @@ Options updateOptions(ref Options options, string[] args)
 
     debug writeln("Added arguments: ", arguments);
     
-    if (!arguments["-f"].isNull)
+    if (arguments["-f"])
     {
         options.follow = true;
     }
