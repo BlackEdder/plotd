@@ -46,12 +46,15 @@ Options:
 private struct Options
 {
     string basename = "plotcli";
-    OptionRange!string[string] values; 
+    bool follow = false;
 
+    OptionRange!string[string] values; 
     Options dup()
     {
         Options opts;
         opts.basename = basename;
+        opts.follow = follow;
+        opts.explicitly_initialised = explicitly_initialised;
         foreach(k, v; values)
             opts.values[k] = v.save;
         return opts;
@@ -102,6 +105,11 @@ Options updateOptions(ref Options options, string[] args)
 
     debug writeln("Added arguments: ", arguments);
     
+    if (!arguments["-f"].isNull)
+    {
+        options.follow = true;
+    }
+
     if (!arguments["-o"].isNull)
     {
         options.basename = arguments["-o"].to!string;
