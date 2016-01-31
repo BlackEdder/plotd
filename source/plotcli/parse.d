@@ -24,8 +24,8 @@ unittest
     assert( !"1.0".isInteger );
 }
 
-//private auto csvRegex = ctRegex!(`,\s*|\s`);
-private auto csvRegex = ctRegex!(`,\s*`);
+private auto csvRegex = ctRegex!(`,\s*|\s`);
+//private auto csvRegex = ctRegex!(`,\s*`);
 string[] toRange(string line)
 {
     import std.algorithm : map, filter;
@@ -45,8 +45,8 @@ unittest
     assert(("#bla").toRange == []);
     assert(("0.5, 2").toRange == ["0.5", "2"]);
     assert(("bla, 2").toRange == ["bla", "2"]);
-    /*assert(("1\t2").toRange == ["1", "2"]);
-    assert(("1 2").toRange == ["1", "2"]);*/
+    assert(("1\t2").toRange == ["1", "2"]);
+    assert(("1 2").toRange == ["1", "2"]);
     assert(("nan, 2").toRange == ["nan", "2"]);
 }
 
