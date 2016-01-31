@@ -91,6 +91,12 @@ auto defaultOptions()
     return options;
 }
 
+unittest
+{
+    auto opts = defaultOptions();
+    assert(!opts.follow);
+}
+
 import std.functional : memoize;
 
 alias cachedDocopt = memoize!(docopt.docopt);
@@ -105,7 +111,7 @@ Options updateOptions(ref Options options, string[] args)
 
     debug writeln("Added arguments: ", arguments);
     
-    if (arguments["-f"])
+    if (arguments["-f"].to!string == "true")
     {
         options.follow = true;
     }
@@ -160,6 +166,7 @@ unittest
         updateOptions( options, "#plotcli -x 1,2,4" ).values["x"].array,
         ["1","2","4"] );
     assert( options.values["y"].empty ); 
+    assert( !options.follow ); 
 
     assertEqual( 
         updateOptions( options, "#plotcli -y 3,2,4" ).values["y"].array,

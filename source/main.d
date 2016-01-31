@@ -15,7 +15,11 @@ void main(string[] args)
 
     auto childTid = spawn(&run, thisTid, args.idup);
 
-    foreach (msg; readStdinByLine(false))
+    import plotcli.options : defaultOptions, updateOptions;
+    auto options = defaultOptions();
+    options = updateOptions(options, args.dup[1 .. $]);
+
+    foreach (msg; readStdinByLine(options.follow))
     {
         send(childTid, msg);
     }
