@@ -25,7 +25,11 @@
             "name": "examples",
             "targetType": "executable",
             "mainSourceFile": "examples/generator.d",
-            "targetName": "generator"
+            "targetName": "generator",
+            "dependencies": {
+                "dstats": "~>1.0.3"
+            }
+
         },
         {
             "name": "unittest",
