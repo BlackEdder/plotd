@@ -19,9 +19,22 @@ void main(string[] args)
     auto options = defaultOptions();
     options = updateOptions(options, args.dup[1 .. $]);
 
-    foreach (msg; readStdinByLine(options.follow))
+    import core.thread : Thread;
+    import core.time : dur;
+    import std.stdio : readln;
+    import std.string : chop;
+    auto reading = true;
+    while(reading)
     {
-        send(childTid, msg);
+        auto msg = readln();
+        send(childTid, msg.chop);
+        if (msg.length == 0)
+        {
+            if (options.follow)
+                Thread.sleep( 100.dur!"msecs" );
+            else
+                reading = false;
+        }
     }
     send( childTid, "#plotcli --quit" );
     auto wasSuccessful = receiveOnly!(bool);
