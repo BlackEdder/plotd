@@ -6,10 +6,30 @@
 	"license": "GPL-3.0",
 	"libs": ["cairo"],
     "sourcePaths": ["source"],
+    "excludedSourceFiles": ["source/main.d"],
     "targetPath": "bin",
 	"dependencies": {
         "ggplotd": ">=0.4.4",
         "dunit": "~>1.0.11",
 		"docopt": ">=0.6.1-b.4"
-	}
+	},
+    "targetType": "library",
+    "configurations": [
+		{
+			"name": "default",
+			"targetType": "executable",
+            "targetName": "plotcli",
+            "mainSourceFile": "source/main.d"
+		},
+        {
+            "name": "examples",
+            "targetType": "executable",
+            "mainSourceFile": "examples/generator.d",
+            "targetName": "generator"
+        },
+        {
+            "name": "unittest",
+            "targetType": "library"
+        }
+    ]
 }
