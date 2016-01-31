@@ -37,7 +37,7 @@ void drawActor(Tid ownerTid, immutable string[] args)
 
         if (MonoTime.currTime - drawTime > 100.dur!"msecs" || finished)
         {
-            draw(options, aes);
+            draw(aes);
             drawTime = MonoTime.currTime;
         }
     }
@@ -68,7 +68,7 @@ void handleReceivedMessage(string message, ref Options options,
     }
 }
 
-void draw(in Options options, Appender!(typeof(aesDefaults())[]) aes)
+void draw(Appender!(typeof(aesDefaults())[]) aes)
 {
     import std.range : empty, front;
     import ggplotd.ggplotd : GGPlotD;
@@ -84,7 +84,7 @@ void draw(in Options options, Appender!(typeof(aesDefaults())[]) aes)
             {
                 gg.put(g.toGeom(g.front.type));
             }
-            gg.save(options.basename ~ ps.front.plotID ~ ".png");
+            gg.save(ps.front.plotname ~ ps.front.plotID ~ ".png");
         }
     }
 }

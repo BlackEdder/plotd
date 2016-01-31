@@ -26,13 +26,12 @@ string helpText() // TODO cache result because will stay the same;
 {
     import std.string : toUpper;
     import plotcli.data : aesDefaults;
-    auto header = "Usage: plotcli [-f] [-o OUTPUT]";
+    auto header = "Usage: plotcli [-f]";
 
     auto bodyText = "Plotcli is a plotting program that will plot data from provided data streams (files). It will ignore any lines it doesn't understand, making it possible to feed it \"dirty\" streams/files. All options can also be provided within the stream by using the prefix #plotcli (e.g. #plotcli -x 1 -y 2).
 
 Options:
-  -f          Follow the stream, i.e. keep listening for new lines.
-  -o OUTPUT	  Outputfile (without extension).";
+  -f          Follow the stream, i.e. keep listening for new lines.";
 
     foreach( field; aesDefaults.fieldNames )
     {
@@ -45,14 +44,12 @@ Options:
 
 private struct Options
 {
-    string basename = "plotcli";
     bool follow = false;
 
     OptionRange!string[string] values; 
     Options dup()
     {
         Options opts;
-        opts.basename = basename;
         opts.follow = follow;
         opts.explicitly_initialised = explicitly_initialised;
         foreach(k, v; values)
@@ -116,11 +113,6 @@ Options updateOptions(ref Options options, string[] args)
         options.follow = true;
     }
 
-    if (!arguments["-o"].isNull)
-    {
-        options.basename = arguments["-o"].to!string;
-    }
-
     import plotcli.data : aesDefaults;
     foreach( field; aesDefaults.fieldNames )
     {
@@ -172,12 +164,6 @@ unittest
         updateOptions( options, "#plotcli -y 3,2,4" ).values["y"].array,
         ["3","2","4"] );
     assertEqual( options.values["x"].array, ["1","2","4"] ); 
-
-    assertEqual( options.basename, "plotcli" );
-
-    assertEqual( 
-        updateOptions( options, "#plotcli -o test" ).basename,
-        "test" );
 }
 
 unittest
