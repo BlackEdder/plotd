@@ -5,7 +5,6 @@ version( assert )
     import std.stdio : writeln;
 }
 import plotcli.draw : drawActor;
-import plotcli.parse : readStdinByLine;
 
 void main(string[] args)
 {
