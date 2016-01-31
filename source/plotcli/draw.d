@@ -12,10 +12,10 @@ version(assert)
 import plotcli.options : Options;
 import plotcli.data : aesDefaults;
 
-void run(Tid ownerTid, immutable string[] args)
+void drawActor(Tid ownerTid, immutable string[] args)
 {
     import core.time : dur, MonoTime;
-    import std.concurrency : receiveTimeout, send;
+    import std.concurrency : receive, send;
 
     import plotcli.options : defaultOptions, updateOptions;
     auto options = defaultOptions();
@@ -27,19 +27,18 @@ void run(Tid ownerTid, immutable string[] args)
     bool finished = false;
     while (!finished)
     {
-        auto received = receiveTimeout(100.dur!"msecs", (string msg) {
+        receive( (string msg) {
             debug writeln("Received msg: ", msg);
-            handleReceivedMessage(msg, options, aes, lineCount);
+            if (msg == "#plotcli --quit") {
+                finished = true;
+            } else 
+                handleReceivedMessage(msg, options, aes, lineCount);
         });
 
-        if (MonoTime.currTime - drawTime > 100.dur!"msecs" || !received)
+        if (MonoTime.currTime - drawTime > 100.dur!"msecs" || finished)
         {
             draw(options, aes);
             drawTime = MonoTime.currTime;
-        }
-        if (!received)// && !options.follow)
-        {
-            finished = true;
         }
     }
     send(ownerTid, true);

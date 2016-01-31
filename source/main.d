@@ -4,7 +4,7 @@ version( assert )
 {
     import std.stdio : writeln;
 }
-import plotcli.draw : run;
+import plotcli.draw : drawActor;
 import plotcli.parse : readStdinByLine;
 
 void main(string[] args)
@@ -13,7 +13,7 @@ void main(string[] args)
 
     import std.concurrency : spawn, thisTid, send;
 
-    auto childTid = spawn(&run, thisTid, args.idup);
+    auto childTid = spawn(&drawActor, thisTid, args.idup);
 
     import plotcli.options : defaultOptions, updateOptions;
     auto options = defaultOptions();
@@ -23,6 +23,7 @@ void main(string[] args)
     {
         send(childTid, msg);
     }
+    send( childTid, "#plotcli --quit" );
     auto wasSuccessful = receiveOnly!(bool);
     assert(wasSuccessful);
 }
