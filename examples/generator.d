@@ -8,6 +8,14 @@ import dstats.random;
 
 void multiple()
 {
+    writeln("This example shows an hypothetical example where you want to plot different things. For example if you run a simulation and are logging two different results. For example from completely separate parts of your simulation code. Run it with generator multiple | plotcli");
+    foreach( i; iota(0,1000 ) )
+    {
+        writeln( "#plotcli -x 0 -y 1 --type point --plotID a" );
+        writeln( 0.01*i*rNorm( 1,1 ), ",", 0.01*i*rNorm( 3, 1 ) );
+        writeln( "#plotcli -x 0 --type hist --plotID b" );
+        writeln( rNorm( 0,1 ) );
+    }
 }
 
 void mixing_types()
