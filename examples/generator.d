@@ -11,7 +11,7 @@ void multiple()
     writeln("This example shows an hypothetical example where you want to plot different things. For example if you run a simulation and are logging two different results. For example from completely separate parts of your simulation code. Run it with generator multiple | plotcli");
     foreach( i; iota(0,1000 ) )
     {
-        writeln( "#plotcli -x 0 -y 1 --type point --plotID a" );
+        writeln( "#plotcli -x 0 -y 1 --type hist3d --plotID a" );
         writeln( 0.01*i*rNorm( 1,1 ), ",", 0.01*i*rNorm( 3, 1 ) );
         writeln( "#plotcli -x 0 --type hist --plotID b --fill 0.5" );
         writeln( rNorm( 0,1 ) );
