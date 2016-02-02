@@ -4,6 +4,11 @@ import core.time : MonoTime;
 import std.concurrency : Tid;
 import std.range : Appender;
 
+version(unittest)
+{
+    import dunit.toolkit;
+}
+
 version(assert)
 {
     import std.stdio : writeln;
@@ -50,9 +55,10 @@ void handleReceivedMessage(string message, ref Options options,
     import std.array : array;
     import plotcli.data : toTuples;
     import plotcli.parse : toRange, stripComments;
-    import plotcli.options : updateOptions, validData;
+    import plotcli.options : containOptions, parseOptions, validData;
 
-    options = updateOptions(options, message);
+    if (message.containOptions)
+        options = parseOptions(message);
     message = message.stripComments;
     auto cols = message.toRange.array;
 
@@ -66,6 +72,19 @@ void handleReceivedMessage(string message, ref Options options,
         }
         ++lineCount;
     }
+}
+
+unittest
+{
+    import plotcli.options : defaultOptions, OptionRange;
+    auto opts = defaultOptions;
+    opts.values["plotname"] = OptionRange!string( "bla" );
+    assertEqual( opts.values["plotname"].front, "bla" );
+    auto aes = Appender!(typeof(aesDefaults())[])();
+    auto lc = 0;
+    handleReceivedMessage("#plotcli -x 0", opts,
+        aes, lc);
+    assert( opts.values["plotname"].empty );
 }
 
 void draw(Appender!(typeof(aesDefaults())[]) aes)

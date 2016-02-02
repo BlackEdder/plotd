@@ -14,9 +14,8 @@ void main(string[] args)
 
     auto childTid = spawn(&drawActor, thisTid, args.idup);
 
-    import plotcli.options : defaultOptions, updateOptions;
-    auto options = defaultOptions();
-    options = updateOptions(options, args.dup[1 .. $]);
+    import plotcli.options : parseOptions;
+    auto options = parseOptions(args.dup[1 .. $]);
 
     import core.thread : Thread;
     import core.time : dur;

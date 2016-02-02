@@ -142,11 +142,32 @@ Options updateOptions(ref Options options, string message)
     import std.regex : match;
 
     auto m = message.match(r"^#plotcli (.*)");
-    if (m)
+    if (containOptions(message))
     {
         options = updateOptions(options, splitArgs(m.captures[1]));
     }
     return options;
+}
+
+bool containOptions( string message )
+{
+    import std.stdio;
+    if (message.length < 9)
+        return false;
+    return (message[0..9] == "#plotcli ");
+}
+
+unittest
+{
+    assert( "#plotcli bla".containOptions );
+    assert( !"#plotclibla".containOptions );
+    assert( !"#pl".containOptions );
+}
+ 
+auto parseOptions(T)( T msg )
+{
+    auto opts = defaultOptions();
+    return updateOptions( opts, msg );
 }
 
 unittest

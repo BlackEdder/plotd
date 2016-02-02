@@ -13,7 +13,7 @@ void multiple()
     {
         writeln( "#plotcli -x 0 -y 1 --type point --plotID a" );
         writeln( 0.01*i*rNorm( 1,1 ), ",", 0.01*i*rNorm( 3, 1 ) );
-        writeln( "#plotcli -x 0 --type hist --plotID b" );
+        writeln( "#plotcli -x 0 --type hist --plotID b --fill 0.5" );
         writeln( rNorm( 0,1 ) );
     }
 }
