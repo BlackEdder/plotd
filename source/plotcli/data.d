@@ -21,6 +21,16 @@ auto aesDefaults()
         ( double.init, double.init, ColourID("black"), "", "", "plotcli") ); 
 }
 
+private int safeToIndex( string str )
+{
+    import std.conv : to;
+    import std.range : empty;
+    if (str.empty)
+        return -1;
+    else
+        return str.to!int;
+}
+
 auto toTuples( string[] columns, Options options, int lineCount )
 {
     // TODO use generate?
@@ -42,9 +52,11 @@ auto toTuples( string[] columns, Options options, int lineCount )
             import std.range : empty, front;
             return ( 
                     (!_options.values["x"].empty 
-                        && _options.values["x"].front.to!int >= _columns.length) 
+                        && _options.values["x"].front.safeToIndex 
+                            >= _columns.length.to!int) 
                 || (!_options.values["y"].empty 
-                        && _options.values["y"].front.to!int >= _columns.length) 
+                        && _options.values["y"].front.safeToIndex 
+                            >= _columns.length.to!int) 
                 || (_options.values["x"].empty && _options.values["y"].empty)
                    );
         }
@@ -122,6 +134,18 @@ unittest
     assertEqual( ts.front.x, 3 );
     ts.popFront;
     assert( ts.empty );
+
+    import plotcli.options : defaultOptions;
+    options = defaultOptions();
+    options.values["x"] = OptionRange!string("0,0,1,0,1");
+    options.values["y"] = OptionRange!string(",2,,,");
+    ts = ["0.04", "3.22", "-0.27"].toTuples( options, -1 );
+    import std.stdio;
+    assertEqual( ts.front.x, 0.04 );
+    assertEqual( ts.front.y, -1 );
+    ts.popFront;
+    assertEqual( ts.front.x, 0.04 );
+    assertEqual( ts.front.y, -0.27 );
 }
 
 

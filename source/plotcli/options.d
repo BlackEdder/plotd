@@ -210,10 +210,10 @@ unittest
 /// Does the data fit with the given options?
 bool validData(R1, R2)( R1 xColumns, R1 yColumns, in R2 columns )
 {
-    import std.algorithm : map, max, reduce;
+    import std.algorithm : map, max, reduce, filter;
     import std.conv;
     import std.range : empty;
-    import plotcli.parse : areNumeric;
+    import plotcli.parse : areNumeric, isInteger;
     if (xColumns.empty && yColumns.empty )
     {
         return ( columns.length > 0 && columns.areNumeric([0]));
@@ -223,8 +223,10 @@ bool validData(R1, R2)( R1 xColumns, R1 yColumns, in R2 columns )
             yColumns.minimumExpectedIndex );
 
     return (columns.length > maxCol 
-            && columns.areNumeric(xColumns.map!((a) => a.to!int)) 
-            && columns.areNumeric(yColumns.map!((a) => a.to!int)) 
+            && columns.areNumeric(xColumns.filter!((a) => a.isInteger)
+                                          .map!((a) => a.to!int)) 
+            && columns.areNumeric(yColumns.filter!((a) => a.isInteger)
+                                          .map!((a) => a.to!int)) 
            );
 }
 
@@ -264,6 +266,11 @@ unittest
     assert( options.validData( ["1","a", "-2"] ) );
     assert( !options.validData( ["1","a"] ) );
     assert( !options.validData( ["1","a", "b"] ) );
+
+    options = defaultOptions();
+    options.values["x"] = OptionRange!string("0,0,1,0,1");
+    options.values["y"] = OptionRange!string(",2,,,");
+    assert( options.validData(["0.04", "3.22", "-0.27"]));
 }
 
 string[] splitArgs(string args)
@@ -442,20 +449,22 @@ unittest
 
 auto minimumExpectedIndex( R : OptionRange!U, U )(R r)
 {
-    static if (is(u==string))
-        return "";
-    else
-    {
-        // TODO This is not the best way of doing it.
-        import std.algorithm : map, reduce;
-        import std.range : back;
-        if (r.empty)
-            return 0;
-        if (r.splittedOpts.back == "..")
-            return reduce!("max(a,b)")(0, r.splittedOpts[0..$-1].map!("a.to!int"));
-        else
-            return reduce!("max(a,b)")(0, r.splittedOpts[0..$].map!("a.to!int"));
-    }
+    // TODO This is not the best way of doing it.
+    import std.algorithm : filter, map, reduce;
+    import std.range : back;
+    import plotcli.parse : isInteger;
+
+    if (r.empty)
+        return 0;
+
+    auto rs = r.splittedOpts[0..$];
+    if (r.splittedOpts.back == "..")
+        rs = r.splittedOpts[0..$-1];
+
+    return reduce!("max(a,b)")(0, 
+        rs
+        .filter!((a) => a.isInteger)
+        .map!("a.to!int"));
 }
 
 auto minimumExpectedIndex( R )(R r)
@@ -464,4 +473,9 @@ auto minimumExpectedIndex( R )(R r)
     import std.algorithm : map, reduce;
     import std.range : back;
     return reduce!("max(a,b)")(0, r);
+}
+
+unittest
+{
+    assertEqual( OptionRange!string( ",2,," ).minimumExpectedIndex, 2 );
 }
