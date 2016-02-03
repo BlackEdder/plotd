@@ -12,7 +12,7 @@ void multiple()
     foreach( i; iota(0,1000 ) )
     {
         writeln( "#plotcli -x 0 -y 1 --type hist3d --plotID a" );
-        writeln( 0.01*i*rNorm( 1,1 ), ",", 0.01*i*rNorm( 3, 1 ) );
+        writeln( 0.01*i*rNorm( 1,1 ), " ", 0.01*i*rNorm( 3, 1 ) );
         writeln( "#plotcli -x 0 --type hist --plotID b --fill 0.5" );
         writeln( rNorm( 0,1 ) );
     }
@@ -22,16 +22,12 @@ void mixing_types()
 {
 }
 
-void tab_separator()
-{
-}
-
 void long_running()
 {
     writeln( "This is an example for piping a long running process to plotcli. Suggested way of running is: generator long | plotcli -x 0,1 --type hist --fill .5. Note that a pipe by default buffers, to get a smoother experience use unbuffer generator long | plotcli -x 0,1 --type hist --fill .5. Unbuffer can be found in the expect-dev package on ubuntu/debian.\n\nThe generated plot is plotcli.png. With a proper image viewer (e.g. eog/eye-of-gnome) you can open it and it will automatically reload when the figure is updated." );
     foreach( i; iota(0,1000) )
     {
-        writeln( rNorm(0,1), ",", rNorm( -3,1 ) );
+        writeln( rNorm(0,1), "\t", rNorm( -3,1 ) );
         Thread.sleep( dur!("msecs")( uniform(0,250) ) );
     }
 }
@@ -50,9 +46,6 @@ void main(string[] args)
             case "types":
                 mixing_types();
                 break;
-            case "tab":
-                tab_separator();
-                break;
             case "long":
                 long_running();
                 break;
@@ -61,6 +54,6 @@ void main(string[] args)
                 break;
         }
     } else {
-        writeln( "Generate the data for different examples. The first line will always suggest the way to pipe the example to plotcli. The currently supported data examples are: multiple, types, tab and long.\n\nRun each with: generator name, i.e. generator multiple" );
+        writeln( "Generate the data for different examples. The first line will always suggest the way to pipe the example to plotcli. The currently supported data examples are: multiple, types and long.\n\nRun each with: generator name, i.e. generator multiple" );
     }
 }

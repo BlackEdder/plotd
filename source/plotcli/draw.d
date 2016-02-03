@@ -96,7 +96,7 @@ void draw(Appender!(typeof(aesDefaults())[]) aes)
 
     if (!aes.data.empty)
     {
-        foreach (ps; group!("plotID")(aes.data))
+        foreach (ps; group!("plotID","plotname")(aes.data))
         {
             GGPlotD gg;
             foreach (g; group!("type")(ps))
