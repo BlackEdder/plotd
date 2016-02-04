@@ -87,6 +87,10 @@ auto toTuples( string[] columns, Options options, int lineCount )
                     }
                 }
             }
+            // I hoped special cases for types would not have been needed
+            // but I do not see a better way/we want to group by column
+            if (tuple.type == "box")
+                tuple.y = columnID.to!double;
             return tuple;
         }
 
