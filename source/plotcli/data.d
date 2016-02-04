@@ -17,8 +17,8 @@ auto aesDefaults()
     import ggplotd.colour : ColourID;
     return DefaultValues.merge(Tuple!(double, "x", double, "y",
         ColourID, "colour", string, "plotID", string, "type", 
-        string, "plotname" )
-        ( double.init, double.init, ColourID("black"), "", "", "plotcli") ); 
+        string, "plotname", string, "format" )
+        ( double.init, double.init, ColourID("black"), "", "", "plotcli", "png") ); 
 }
 
 private int safeToIndex( string str )

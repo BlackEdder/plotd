@@ -103,7 +103,8 @@ void draw(Appender!(typeof(aesDefaults())[]) aes)
             {
                 gg.put(g.toGeom(g.front.type));
             }
-            gg.save(ps.front.plotname ~ ps.front.plotID ~ ".png");
+            gg.save(ps.front.plotname ~ ps.front.plotID ~ "." ~
+                 ps.front.format);
         }
     }
 }
