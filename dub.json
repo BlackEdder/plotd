@@ -22,6 +22,16 @@
             "mainSourceFile": "source/main.d"
 		},
         {
+			"name": "plotcli-gtk",
+			"targetType": "executable",
+            "targetName": "plotcli",
+            "mainSourceFile": "source/main.d",
+            "subConfigurations": {
+                "ggplotd":"ggplotd-gtk"
+            },
+            "versions": ["plotcliGTK"]
+		},
+        {
             "name": "examples",
             "targetType": "executable",
             "mainSourceFile": "examples/generator.d",
@@ -29,7 +39,6 @@
             "dependencies": {
                 "dstats": "~>1.0.3"
             }
-
         },
         {
             "name": "unittest",
