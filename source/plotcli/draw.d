@@ -94,6 +94,13 @@ void draw(Appender!(typeof(aesDefaults())[]) aes)
     import ggplotd.aes : group;
     import plotcli.geom : toGeom;
 
+    version(plotcliGTK)
+    {
+        import core.thread : Thread;
+        import ggplotd.gtk : GTKWindow;
+        static GTKWindow[string] windows;
+    }
+
     if (!aes.data.empty)
     {
         foreach (ps; group!("plotID","plotname","format")(aes.data))
@@ -103,8 +110,27 @@ void draw(Appender!(typeof(aesDefaults())[]) aes)
             {
                 gg.put(g.toGeom(g.front.type));
             }
-            gg.save(ps.front.plotname ~ ps.front.plotID ~ "." ~
-                 ps.front.format);
+            version(plotcliGTK)
+            {
+                if (ps.front.format == "gtk")
+                {
+                    auto name = ps.front.plotname ~ ps.front.plotID;
+                    if (name !in windows)
+                    {
+                        auto window = new GTKWindow();
+                        new Thread( 
+                            () { window.run("plotcli"); } ).start();
+                        windows[name] = window;
+                    }
+                    windows[name].clearWindow();
+                    windows[name].drawGG( gg, 470, 470 );
+                } else {
+                    gg.save(ps.front.plotname ~ ps.front.plotID ~ "." ~
+                        ps.front.format);
+                }
+            } else
+                gg.save(ps.front.plotname ~ ps.front.plotID ~ "." ~
+                    ps.front.format);
         }
     }
 }
