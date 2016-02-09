@@ -43,6 +43,14 @@
         {
             "name": "unittest",
             "targetType": "library"
+        },
+        {
+            "name": "unittest-gtk",
+            "targetType": "library",
+            "subConfigurations": {
+                "ggplotd":"ggplotd-gtk"
+            },
+            "versions": ["plotcliGTK"]
         }
     ]
 }

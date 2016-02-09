@@ -3,7 +3,7 @@
 set -e -o pipefail
 
 dub test --compiler=${DC}
-dub test -c plotcli-gtk --compiler=${DC}
+dub test -c unittest-gtk --compiler=${DC}
 
 if [[ $TRAVIS_BRANCH == 'master' ]] ; then
     if [ ! -z "$GH_TOKEN" ]; then
