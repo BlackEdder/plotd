@@ -24,19 +24,19 @@ private string addDashes( string arg )
 
 string helpText() // TODO cache result because will stay the same;
 {
-    import std.string : toUpper;
+    import std.string : toUpper, leftJustify;
     import plotcli.data : aesDefaults;
     auto header = "Usage: plotcli [-f]";
 
     auto bodyText = "Plotcli is a plotting program that will plot data from provided data streams (files). It will ignore any lines it doesn't understand, making it possible to feed it \"dirty\" streams/files. All options can also be provided within the stream by using the prefix #plotcli (e.g. #plotcli -x 1 -y 2).
 
 Options:
-  -f          Follow the stream, i.e. keep listening for new lines.";
+  -f                   Follow the stream, i.e. keep listening for new lines.";
 
     foreach( field; aesDefaults.fieldNames )
     {
         header ~= " [" ~ field.addDashes ~ " " ~ field.toUpper ~ "]";
-        bodyText ~= "\n  " ~ field.addDashes ~ " " ~ field.toUpper ~ "\t\tSpecify " ~ field ~ " either by indices or labels/names";
+        bodyText ~= "\n  " ~ leftJustify(field.addDashes ~ " " ~ field.toUpper,20)~ " Specify " ~ field ~ " either by indices or labels/names";
     }
 
     return header ~ "\n\n" ~ bodyText ~ "\n\nExamples:\n\tMost options allow you to specify indices or labels. If you provide integers (e.g. 0,2) they are interpreted as a column index (starting value 0), and that column is used as the values. For example passing `-x 0,1` will use the values from column 0 and 1 as x values. Any other value is used as a label. For example `--plotname name1,name2` will cause two plots to be created with the names name1 and name2. 
