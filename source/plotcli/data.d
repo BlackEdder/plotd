@@ -10,15 +10,18 @@ version( unittest )
 
 import plotcli.options : Options, OptionRange;
 
-
+/** 
+ Default values to use for many of the settings.
+*/
 auto aesDefaults()
 {
     import ggplotd.aes : DefaultValues, merge;
     import ggplotd.colour : ColourID;
     return DefaultValues.merge(Tuple!(double, "x", double, "y",
         ColourID, "colour", string, "plotID", string, "type", 
-        string, "plotname", string, "format" )
-        ( double.init, double.init, ColourID("black"), "", "", "plotcli", "png") ); 
+        string, "plotname", string, "format", string, "xlabel", string, "ylabel" )
+        ( double.init, double.init, ColourID("black"), "", "", "plotcli", 
+        "png", "x", "y") ); 
 }
 
 private int safeToIndex( string str )

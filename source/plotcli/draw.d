@@ -92,6 +92,7 @@ void draw(Appender!(typeof(aesDefaults())[]) aes)
     import std.range : empty, front;
     import ggplotd.ggplotd : GGPlotD;
     import ggplotd.aes : group;
+    import ggplotd.axes : xaxisLabel, yaxisLabel;
     import plotcli.geom : toGeom;
 
     version(plotcliGTK)
@@ -109,6 +110,8 @@ void draw(Appender!(typeof(aesDefaults())[]) aes)
             foreach (g; group!("type")(ps))
             {
                 gg.put(g.toGeom(g.front.type));
+                gg.put( xaxisLabel( ps.front.xlabel ) );
+                gg.put( yaxisLabel( ps.front.ylabel ) );
             }
             version(plotcliGTK)
             {
