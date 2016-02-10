@@ -36,10 +36,11 @@ Options:
     foreach( field; aesDefaults.fieldNames )
     {
         header ~= " [" ~ field.addDashes ~ " " ~ field.toUpper ~ "]";
-        bodyText ~= "\n  " ~ field.addDashes ~ " " ~ field.toUpper ~ "\t\tColumns containing " ~ field;
+        bodyText ~= "\n  " ~ field.addDashes ~ " " ~ field.toUpper ~ "\t\tSpecify " ~ field ~ " either by indices or labels/names";
     }
 
-    return header ~ "\n\n" ~ bodyText;
+    return header ~ "\n\n" ~ bodyText ~ "\n\nExamples:\n\tMost options allow you to specify indices or labels. If you provide integers (e.g. 0,2) they are interpreted as a column index (starting value 0), and that column is used as the values. For example passing `-x 0,1` will use the values from column 0 and 1 as x values. Any other value is used as a label. For example `--plotname name1,name2` will cause two plots to be created with the names name1 and name2. 
+    Specifying a single value for each option, except x and y, will result in that value to be used for all different lines/column. For example `-x 0,1 --type box` will use the first and second column for box plots. Finally one can also use `..` to indicate keep repeating/increasing. So `-x 0,2,..` will cause all even columns to be used. Similarly `-x 0,1,2 -y 3,..` will result in the first three columns being used for x values, but the 4 column being used for y values. In general it is also possible to keep values empty if they are not needed, e.g. `-x 0,1,2 -y ,2 --type box,line,box`.\n";
 }
 
 private struct Options

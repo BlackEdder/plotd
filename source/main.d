@@ -12,10 +12,10 @@ void main(string[] args)
 
     import std.concurrency : spawn, thisTid, send;
 
-    auto childTid = spawn(&drawActor, thisTid, args.idup);
-
     import plotcli.options : parseOptions;
     auto options = parseOptions(args.dup[1 .. $]);
+
+    auto childTid = spawn(&drawActor, thisTid, args.idup);
 
     import core.thread : Thread;
     import core.time : dur;
