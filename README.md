@@ -34,7 +34,7 @@ It is also possible to compile plotd with gtk support by running
 dub build -c plotcli-gtk -b release
 ```
 
-Now you can specify `--format gtk` and plotcli will open a window that it will draw to.
+Now you can specify `--format gtk` and plotcli will open a window that will show the resulting plot.
 
 ## Usage:
 
@@ -43,7 +43,7 @@ Plotcli has a --help switch which explains the options available. You can also s
 
 ### Types of plots
 
-Plotcli is build on ggplotd and supports the same plot types as ggplotd does. For a complete list you can 
+Some of the most commonly used types of plots supported by plotcli are: point, line, hist, hist3d and box. Because plotcli is build on ggplotd it supports the whole range of types supported by ggplotd. Therefore, for a complete list you can browse its documentation here: http://blackedder.github.io/ggplotd/geom.html. Any function that starts with geom is a type supported by plotcli. To get the type name you remove the geom from the function name and take the lowercase version. E.g. geomBox results in box, geomHist3D in hist3d etc.
 
 ## Examples
 
