@@ -19,6 +19,7 @@ if [[ $TRAVIS_BRANCH == 'master' ]] ; then
         mkdir images
         #cp ../*.{png,svg,pdf} images/
         cp ../*.png images/
+        bin/plotcli --help > images/help.txt
         git init
         git config user.name "Travis-CI"
         git config user.email "travis@nodemeatspace.com"
