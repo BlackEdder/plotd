@@ -9,10 +9,11 @@ if [[ $TRAVIS_BRANCH == 'master' ]] ; then
     if [ ! -z "$GH_TOKEN" ]; then
         git checkout master
         dub build -b release --compiler=${DC}
-        bin/plotcli -o example1 < examples/1/data.txt
-        bin/plotcli -o example2 < examples/2/data.txt
-        bin/plotcli -o example3 < examples/3/data.txt
-        bin/plotcli -o example4 < examples/4/data.txt
+        bin/plotcli < examples/1/data.txt
+        bin/plotcli < examples/2/data.txt
+        bin/plotcli < examples/3/data.txt
+        bin/plotcli < examples/4/data.txt
+        bin/plotcli < examples/5/data.txt
         dub build -b docs --compiler=${DC}
         cd docs
         mkdir images

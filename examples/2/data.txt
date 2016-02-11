@@ -1,4 +1,4 @@
-#plotcli -x 0,1,.. --plotID a,b,.. --type hist 
+#plotcli -x 0,1,.. --plotID a,b,.. --type hist --plotname example2
 
 -p signifies plot ids, i.e. these will be plotted in different plots
 

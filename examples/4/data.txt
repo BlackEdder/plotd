@@ -1,4 +1,5 @@
-#plotcli -x 0,1,.. --label a,b,.. --type box --fill 0.5
+#plotcli -x 0,1,.. --label a,b,.. --type box --fill 0.5 --plotname
+example4
 
 -0.246465,1.1349,1.37636,2.33029
 0.17212,1.23672,1.77301,1.96037
