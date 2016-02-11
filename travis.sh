@@ -28,5 +28,20 @@ if [[ $TRAVIS_BRANCH == 'master' ]] ; then
         #git push --force --quiet "https://${GH_TOKEN}@github.com/${TRAVIS_REPO_SLUG}" HEAD:gh-pages > /dev/null 2>&1
         git push --force --quiet "https://${GH_TOKEN}@github.com/${TRAVIS_REPO_SLUG}" master:gh-pages > /dev/null 2>&1
         #git push --force "https://${GH_TOKEN}@github.com/${TRAVIS_REPO_SLUG}" HEAD:gh-pages
+        cd ..
+    fi
+
+    cd bin
+    if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then 
+        dub build --compiler=$DC -b release
+        tar caf plotcli-osx.tar.gz plotcli
+        dub build --compiler=$DC -b release -c plotcli-gtk
+        tar caf plotcli-osx-gtk.tar.gz plotcli
+    fi
+    if [[ "$TRAVIS_OS_NAME" == "linux" && "$DC" == "ldc" ]]; then 
+        dub build --compiler=$DC -b release
+        tar caf plotcli-linux.tar.gz plotcli
+        dub build --compiler=$DC -b release -c plotcli-gtk
+        tar caf plotcli-linux-gtk.tar.gz plotcli
     fi
 fi
