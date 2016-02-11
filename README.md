@@ -41,6 +41,10 @@ Now you can specify `--format gtk` and plotcli will open a window that it will d
 Plotcli has a --help switch which explains the options available. You can also see its output 
 ![here](http://blackedder.github.io/plotd/images/help.txt)
 
+### Types of plots
+
+Plotcli is build on ggplotd and supports the same plot types as ggplotd does. For a complete list you can 
+
 ## Examples
 
 ### Lines
