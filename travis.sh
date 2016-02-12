@@ -30,8 +30,10 @@ if [[ $TRAVIS_BRANCH == 'master' ]] ; then
         #git push --force "https://${GH_TOKEN}@github.com/${TRAVIS_REPO_SLUG}" HEAD:gh-pages
         cd ..
     fi
+fi
 
-    git checkout master
+if [ -n "$TRAVIS_TAG" ]; then
+    git checkout $TRAVIS_TAG
     if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then 
         dub build --compiler=$DC -b release
         strip bin/plotcli
