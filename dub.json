@@ -1,5 +1,5 @@
 {
-	"name": "plotcli",
+	"name": "plotd",
 	"description": "Plot streams of data from the command line.",
 	"copyright": "Copyright © 2014, Edwin van Leeuwen",
 	"authors": ["Edwin van Leeuwen"],
