@@ -39,7 +39,7 @@ if [ -n "$TRAVIS_TAG" ]; then
         strip bin/plotcli
         tar -czf plotcli-osx.tar.gz -C bin/ plotcli
         dub build --compiler=$DC -b release -c plotcli-gtk
-        strip bin/plotcli
+        # strip bin/plotcli # Stripping gtk builds currently causes problems (at least on linux). Disabling for now.
         tar -czf plotcli-osx-gtk.tar.gz -C bin/ plotcli
     fi
     if [[ "$TRAVIS_OS_NAME" == "linux" && "$DC" == "ldc2" ]]; then 
@@ -47,7 +47,7 @@ if [ -n "$TRAVIS_TAG" ]; then
         strip bin/plotcli
         tar caf plotcli-linux.tar.gz -C bin/ plotcli
         dub build --compiler=$DC -b release -c plotcli-gtk
-        strip bin/plotcli
+        # strip bin/plotcli # Stripping gtk builds currently causes problems (at least on linux). Disabling it for now
         tar caf plotcli-linux-gtk.tar.gz -C bin/ plotcli
     fi
 fi
