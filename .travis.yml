@@ -1,12 +1,10 @@
 language: d
 script: "./travis.sh"
-sudo: required 
+sudo: required
 dist: trusty
-
 before_install:
-  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then brew update          ; fi
-  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then brew install cairo gtk+3; fi
-
+- if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then brew update          ; fi
+- if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then brew install cairo gtk+3; fi
 matrix:
   include:
   - d: dmd
@@ -16,4 +14,28 @@ matrix:
   - d: ldc
     os: linux
   - d: dmd
-    os: osx 
+    os: osx
+
+deploy:
+  - provider: releases
+    skip_cleanup: true
+    api_key:
+      secure: LqFD1B3h4b2RYlGW8fatBPdbzqOM03mteXKPQNOghrcGStDuDtDc+3h5xmfcPdgtkKML7RTJwrnBHTyvLIWuBMQV3rfFWX24zqo9pr+RDGw6NHSEmEjYdPhvXYDTc+/q6Cnz5JNAVeAoQ3w1Kc/RdCmSWsBgDMcTmkYi6KM/nfc=
+    file: 
+      - "bin/plotcli-linux-gtk.tar.gz"
+      - "bin/plotcli-linux.tar.gz"
+    on:
+      tags: true
+      repo: BlackEdder/plotd
+      condition: "$TRAVIS_OS_NAME == linux && $DC == ldc"
+  - provider: releases
+    skip_cleanup: true
+    api_key:
+      secure: LqFD1B3h4b2RYlGW8fatBPdbzqOM03mteXKPQNOghrcGStDuDtDc+3h5xmfcPdgtkKML7RTJwrnBHTyvLIWuBMQV3rfFWX24zqo9pr+RDGw6NHSEmEjYdPhvXYDTc+/q6Cnz5JNAVeAoQ3w1Kc/RdCmSWsBgDMcTmkYi6KM/nfc=
+    file: 
+      - "bin/plotcli-osx-gtk.tar.gz"
+      - "bin/plotcli-osx.tar.gz"
+    on:
+      tags: true
+      repo: BlackEdder/plotd
+      condition: "$TRAVIS_OS_NAME == osx"
