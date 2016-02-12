@@ -39,7 +39,7 @@ Now you can specify `--format gtk` and plotcli will open a window that will show
 ## Usage:
 
 Plotcli has a --help switch which explains the options available. You can also see its output 
-![here](http://blackedder.github.io/plotd/images/help.txt)
+[here](http://blackedder.github.io/plotd/images/help.txt)
 
 ### Types of plots
 
@@ -77,7 +77,7 @@ plotcli < examples/2/data.txt
 plotcli < examples/3/data.txt
 ```
 
-![histogram](http://blackedder.github.io/plotd/images/example3.png)
+![histogram](http://blackedder.github.io/plotd/images/example3a.png)
 
 ### Box plot
 

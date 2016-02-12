@@ -19,7 +19,7 @@ if [[ $TRAVIS_BRANCH == 'master' ]] ; then
         mkdir images
         #cp ../*.{png,svg,pdf} images/
         cp ../*.png images/
-        bin/plotcli --help > images/help.txt
+        ../bin/plotcli --help > images/help.txt
         git init
         git config user.name "Travis-CI"
         git config user.email "travis@nodemeatspace.com"
@@ -31,17 +31,21 @@ if [[ $TRAVIS_BRANCH == 'master' ]] ; then
         cd ..
     fi
 
-    cd bin
+    git checkout master
     if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then 
         dub build --compiler=$DC -b release
-        tar caf plotcli-osx.tar.gz plotcli
+        strip bin/plotcli
+        tar -czf plotcli-osx.tar.gz -C bin/ plotcli
         dub build --compiler=$DC -b release -c plotcli-gtk
-        tar caf plotcli-osx-gtk.tar.gz plotcli
+        strip bin/plotcli
+        tar -czf plotcli-osx-gtk.tar.gz -C bin/ plotcli
     fi
-    if [[ "$TRAVIS_OS_NAME" == "linux" && "$DC" == "ldc" ]]; then 
+    if [[ "$TRAVIS_OS_NAME" == "linux" && "$DC" == "ldc2" ]]; then 
         dub build --compiler=$DC -b release
-        tar caf plotcli-linux.tar.gz plotcli
+        strip bin/plotcli
+        tar caf plotcli-linux.tar.gz -C bin/ plotcli
         dub build --compiler=$DC -b release -c plotcli-gtk
-        tar caf plotcli-linux-gtk.tar.gz plotcli
+        strip bin/plotcli
+        tar caf plotcli-linux-gtk.tar.gz -C bin/ plotcli
     fi
 fi
