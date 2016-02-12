@@ -1,16 +1,23 @@
-#plotcli -x 0,1,.. --plotID a,b,.. --type hist --plotname example2
+Example that starts with the default (plot points) and the changes to
+lines
 
--p signifies plot ids, i.e. these will be plotted in different plots
+Use ploctli < data.txt to produce a plotcli.png file
 
--0.246465,1.1349,1.37636,2.33029
+-0.246465
 0.17212,1.23672,1.77301,1.96037
 0.000651441,0.724035,1.5267,2.03115
-0.052469,1.28042,1.10252,2.07756
+0.052469
 -0.218561,1.07324,1.58702,1.83484
-0.461657,0.96275,1.61422,2.01477
--0.0301995,0.901153,1.42976,1.83419
+0.461657,0.96275
+-0.0301995
 0.188405,1.07363,1.47592,2.03407
-0.180592,1.08957,1.57372,2.05579
+0.180592
+
+The type signifies that we are plotting lines. Since no y is specified the
+line number (row) is used as y variable
+
+#plotcli -x 0,1,.. --type line
+
 -0.301456,1.28647,1.18671,1.86986
 -0.143762,1.01361,1.38507,1.93318
 -0.201097,1.07135,1.14396,2.12374

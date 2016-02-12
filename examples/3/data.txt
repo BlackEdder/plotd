@@ -1,5 +1,4 @@
-#plotcli -d hx,hy,,
-hx and hy are 2D coordinates on a histogram
+#plotcli -x 0,2 -y 1,3 --plotID a,b --type hist3d --plotname example3
 
 -0.290817,0.90909,1.40997,2.20049
 0.082615,0.855601,1.33542,1.60548

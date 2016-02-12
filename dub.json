@@ -1,29 +1,56 @@
 {
-	"name": "plotd",
+	"name": "plotcli",
 	"description": "Plot streams of data from the command line.",
 	"copyright": "Copyright © 2014, Edwin van Leeuwen",
 	"authors": ["Edwin van Leeuwen"],
 	"license": "GPL-3.0",
 	"libs": ["cairo"],
+    "sourcePaths": ["source"],
+    "excludedSourceFiles": ["source/main.d"],
+    "targetPath": "bin",
 	"dependencies": {
-        "cairod": "~>0.0.1-alpha.2+1.10.2",
+        "ggplotd": ">=0.4.5",
         "dunit": "~>1.0.11",
-		"dmocks-revived": "~master",
 		"docopt": ">=0.6.1-b.4"
 	},
-	"workingDirectory": "./",
-	"configurations": [
+    "targetType": "library",
+    "configurations": [
 		{
-			"name": "plotcli",
-			"workingDirectory": "./",
+			"name": "default",
 			"targetType": "executable",
-			"sourceFiles": ["examples/app.d"],
-			"targetName": "plotcli",
-			"targetPath": "bin",
+            "targetName": "plotcli",
+            "mainSourceFile": "source/main.d"
 		},
-		{
-			"name": "plotd",
-			"targetType": "library",
-		}	
+        {
+			"name": "plotcli-gtk",
+			"targetType": "executable",
+            "targetName": "plotcli",
+            "mainSourceFile": "source/main.d",
+            "subConfigurations": {
+                "ggplotd":"ggplotd-gtk"
+            },
+            "versions": ["plotcliGTK"]
+		},
+        {
+            "name": "examples",
+            "targetType": "executable",
+            "mainSourceFile": "examples/generator.d",
+            "targetName": "generator",
+            "dependencies": {
+                "dstats": "~>1.0.3"
+            }
+        },
+        {
+            "name": "unittest",
+            "targetType": "library"
+        },
+        {
+            "name": "unittest-gtk",
+            "targetType": "library",
+            "subConfigurations": {
+                "ggplotd":"ggplotd-gtk"
+            },
+            "versions": ["plotcliGTK"]
+        }
     ]
 }
