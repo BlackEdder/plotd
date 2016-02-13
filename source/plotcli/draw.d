@@ -22,9 +22,10 @@ void drawActor(Tid ownerTid, immutable string[] args)
     import core.time : dur, MonoTime;
     import std.concurrency : receive, send;
 
-    import plotcli.options : defaultOptions, updateOptions;
+    import plotcli.options : containOptions, defaultOptions, updateOptions;
     auto options = defaultOptions();
     options = updateOptions(options, args.dup[1 .. $]);
+    const defOptions = options.dup;
 
     Appender!(typeof(aesDefaults())[]) aes;
     auto drawTime = MonoTime.currTime - 1.dur!"seconds";
@@ -36,8 +37,14 @@ void drawActor(Tid ownerTid, immutable string[] args)
             debug writeln("Received msg: ", msg);
             if (msg == "#plotcli --quit") {
                 finished = true;
-            } else 
+            } else {
+                if (msg.containOptions)
+                {
+                    options = defOptions.dup;
+                    options = updateOptions(options, msg);
+                }
                 handleReceivedMessage(msg, options, aes, lineCount);
+            }
         });
 
         if (MonoTime.currTime - drawTime > 100.dur!"msecs" || finished)
@@ -49,16 +56,14 @@ void drawActor(Tid ownerTid, immutable string[] args)
     send(ownerTid, true);
 }
 
-void handleReceivedMessage(string message, ref Options options,
+void handleReceivedMessage(string message, Options options,
     ref Appender!(typeof(aesDefaults())[]) aes, ref int lineCount)
 {
     import std.array : array;
     import plotcli.data : toTuples;
     import plotcli.parse : toRange, stripComments;
-    import plotcli.options : containOptions, parseOptions, validData;
+    import plotcli.options : validData;
 
-    if (message.containOptions)
-        options = parseOptions(message);
     message = message.stripComments;
     auto cols = message.toRange.array;
 
@@ -80,11 +85,6 @@ unittest
     auto opts = defaultOptions;
     opts.values["plotname"] = OptionRange!string( "bla" );
     assertEqual( opts.values["plotname"].front, "bla" );
-    auto aes = Appender!(typeof(aesDefaults())[])();
-    auto lc = 0;
-    handleReceivedMessage("#plotcli -x 0", opts,
-        aes, lc);
-    assert( opts.values["plotname"].empty );
 }
 
 void draw(Appender!(typeof(aesDefaults())[]) aes)
