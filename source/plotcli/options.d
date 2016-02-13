@@ -48,13 +48,13 @@ private struct Options
     bool follow = false;
 
     OptionRange!string[string] values; 
-    Options dup()
+    Options dup() const
     {
         Options opts;
         opts.follow = follow;
         opts.explicitly_initialised = explicitly_initialised;
         foreach(k, v; values)
-            opts.values[k] = v.save;
+            opts.values[k] = v.dup;
         return opts;
     }
 
@@ -407,6 +407,15 @@ struct OptionRange( T )
     @property auto save()
     {
         return this;
+    }
+
+    OptionRange!T dup() const
+    {
+        auto nOptionRange = OptionRange!T();
+        nOptionRange.splittedOpts = splittedOpts.dup;
+        nOptionRange.delta = delta;
+        nOptionRange.extrapolatedValue = extrapolatedValue;
+        return nOptionRange;
     }
 
  private:
