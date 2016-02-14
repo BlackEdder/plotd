@@ -140,7 +140,7 @@ void draw(Appender!(typeof(aesDefaults())[]) aes)
                 windows["main"] = window;
             }
             windows["main"].clearWindow();
-            windows["main"].draw(facets, 470, 470);
+            windows["main"].draw(facets, 1280, 768);
         }
     }
 }
