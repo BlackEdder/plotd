@@ -37,4 +37,9 @@ void main(string[] args)
     send( childTid, "#plotcli --quit" );
     auto wasSuccessful = receiveOnly!(bool);
     assert(wasSuccessful);
+
+    version(plotcliGTK) {
+        import core.thread : thread_joinAll;
+        thread_joinAll();
+    }
 }

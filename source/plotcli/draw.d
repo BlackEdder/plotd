@@ -98,8 +98,10 @@ void draw(Appender!(typeof(aesDefaults())[]) aes)
     version(plotcliGTK)
     {
         import core.thread : Thread;
+        import ggplotd.ggplotd : Facets;
         import ggplotd.gtk : GTKWindow;
         static GTKWindow[string] windows;
+        auto facets = Facets();
     }
 
     if (!aes.data.empty)
@@ -117,16 +119,7 @@ void draw(Appender!(typeof(aesDefaults())[]) aes)
             {
                 if (ps.front.format == "gtk")
                 {
-                    auto name = ps.front.plotname ~ ps.front.plotID;
-                    if (name !in windows)
-                    {
-                        auto window = new GTKWindow();
-                        new Thread( 
-                            () { window.run("plotcli"); } ).start();
-                        windows[name] = window;
-                    }
-                    windows[name].clearWindow();
-                    windows[name].drawGG( gg, 470, 470 );
+                    facets.put( gg );
                 } else {
                     gg.save(ps.front.plotname ~ ps.front.plotID ~ "." ~
                         ps.front.format);
@@ -134,6 +127,20 @@ void draw(Appender!(typeof(aesDefaults())[]) aes)
             } else
                 gg.save(ps.front.plotname ~ ps.front.plotID ~ "." ~
                     ps.front.format);
+        }
+    }
+    version(plotcliGTK) {
+        if (!facets.ggs.data.empty)
+        {
+            if ("main" !in windows )
+            {
+                auto window = new GTKWindow();
+                new Thread( 
+                  () { window.run("plotcli"); } ).start();
+                windows["main"] = window;
+            }
+            windows["main"].clearWindow();
+            windows["main"].draw(facets, 470, 470);
         }
     }
 }
