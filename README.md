@@ -14,8 +14,16 @@ Plotcli is meant to be adaptive and will automatically adapt the plot boundaries
 
 ## Installation
 
-You need to have dub and cairo installed
-(https://github.com/D-Programming-Language/dub). Then you can install
+Pre compiled binaries are available for linux and os x on the 
+[releases](https://github.com/BlackEdder/plotd/releases) page. There are two versions, one that will save the resulting plots to disk and a second one that also supports plotting to a GTK window. When you untar the provided release file it contains a single binary (plotcli) which you should copy to your path.
+
+### Dependencies
+
+The simple version just depends on cairo (libcairo2-dev in ubuntu). The gtk version also needs gtk+3 installed (libgtk-3-0 on linux, gtk+3 on OS X using homebrew).
+
+## Building
+
+Plotcli is written in the D programming language. The easiest way to install it is with [dub](https://github.com/D-Programming-Language/dub), which is distributed with the dmd (the D compiler). Then you can install
 plotcli as follows:
 
 ```
@@ -26,9 +34,9 @@ dub build -b release
 
 This will create a binary in bin/plotcli which you can copy anywhere in your path.
 
-### GTK Windows
+### GTK Application
 
-It is also possible to compile plotd with gtk support by running
+Compiling plotd with gtk support can be done in the following way:
 
 ```
 dub build -c plotcli-gtk -b release
