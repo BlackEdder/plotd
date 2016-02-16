@@ -42,8 +42,8 @@ void drawActor(Tid ownerTid, immutable string[] args)
                 {
                     options = defOptions.dup;
                     options = updateOptions(options, msg);
-                }
-                handleReceivedMessage(msg, options, aes, lineCount);
+                } else
+                    handleReceivedMessage(msg, options, aes, lineCount);
             }
         });
 
