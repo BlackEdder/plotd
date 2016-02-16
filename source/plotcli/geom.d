@@ -11,8 +11,6 @@ private string generateToGeom()
     {
         //auto name = m.stringof;
         static if (name.length > 6 && name[0..4] == "geom"
-            && name != "geomPolygon" 
-            && name != "geomLabel"
             && name != "geomAxis" )
         {
             str ~= "if (type == q{" ~ name[4..$].toLower ~ "})\n";
