@@ -103,11 +103,15 @@ The package also contains a program to produce some further examples. This progr
 
 ## Further tips
 
-Of course plotcli can easily be used together with other command line tools. For example I used the following command 
+Of course plotcli can easily be used together with other command line tools. For example I used the following command
 ```
-awk '{ print $2/$3 }' abc_data/10_samples2 | plotcli -b 0,1,0,50
+awk '{ print $2/$3 }' abc_data/10_samples2 | plotcli -x 0 --type hist
 ```
 To plot a histogram of the second column divided by the third column.
+
+### Long running pipes
+
+Note that for long running pipes they tend to buffer and only when full start forwarding the output to plotcli. In these cases it makes sense to use a program like `unbuffer` to force forwarding the results as they arrive. See `bin/generator long` for a good example.
 
 ## License
 
