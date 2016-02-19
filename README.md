@@ -2,7 +2,7 @@
 
 Plotcli is a command line application that can create plots from text/csv
 files and from piped data, making it useful during data analysis. Plotcli
-works best in combination with other command line tools such as awk or miller. Plotcli will ignore any lines it does not understand, so it is safe to use with files that contain non csv data as well. Typically I use it during simulations, where I simulate data, which I pipe to a file and then I plot it using plotcli:
+works best in combination with other command line tools such as awk or [miller](https://github.com/johnkerl/miller). Plotcli will ignore any lines it does not understand, so it is safe to use with files that contain non csv data as well. Typically I use it during simulations, where I simulate data, which I pipe to a file and then I plot it using plotcli:
 
 ```
 plotcli < path/to/file
