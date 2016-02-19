@@ -1,36 +1,36 @@
 {
-	"name": "plotd",
-	"description": "Plot streams of data from the command line.",
-	"copyright": "Copyright © 2014, Edwin van Leeuwen",
-	"authors": ["Edwin van Leeuwen"],
-	"license": "GPL-3.0",
-	"libs": ["cairo"],
+    "name": "plotd",
+    "description": "Plot streams of data from the command line.",
+    "copyright": "Copyright © 2014, Edwin van Leeuwen",
+    "authors": ["Edwin van Leeuwen"],
+    "license": "GPL-3.0",
+    "libs": ["cairo"],
     "sourcePaths": ["source"],
     "excludedSourceFiles": ["source/main.d"],
     "targetPath": "bin",
-	"dependencies": {
-        "ggplotd": ">=0.4.12",
+    "dependencies": {
+        "ggplotd": ">=0.4.13",
         "dunit": "~>1.0.11",
-		"docopt": ">=0.6.1-b.4"
-	},
+        "docopt": ">=0.6.1-b.4"
+    },
     "targetType": "library",
     "configurations": [
-		{
-			"name": "default",
-			"targetType": "executable",
+        {
+            "name": "default",
+            "targetType": "executable",
             "targetName": "plotcli",
             "mainSourceFile": "source/main.d"
-		},
+        },
         {
-			"name": "plotcli-gtk",
-			"targetType": "executable",
+            "name": "plotcli-gtk",
+            "targetType": "executable",
             "targetName": "plotcli",
             "mainSourceFile": "source/main.d",
             "subConfigurations": {
                 "ggplotd":"ggplotd-gtk"
             },
             "versions": ["plotcliGTK"]
-		},
+        },
         {
             "name": "examples",
             "targetType": "executable",

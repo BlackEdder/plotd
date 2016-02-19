@@ -93,6 +93,8 @@ void draw(Appender!(typeof(aesDefaults())[]) aes)
     import ggplotd.ggplotd : GGPlotD;
     import ggplotd.aes : group;
     import ggplotd.axes : xaxisLabel, yaxisLabel;
+    import ggplotd.colour : colourGradient;
+    import ggplotd.colourspace : XYZ;
     import plotcli.geom : toGeom;
 
     version(plotcliGTK)
@@ -114,6 +116,7 @@ void draw(Appender!(typeof(aesDefaults())[]) aes)
                 gg.put(g.toGeom(g.front.type));
                 gg.put( xaxisLabel( ps.front.xlabel ) );
                 gg.put( yaxisLabel( ps.front.ylabel ) );
+                gg.put( colourGradient!XYZ( ps.front.colourgradient ) );
             }
             version(plotcliGTK)
             {
