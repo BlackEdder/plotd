@@ -16,11 +16,10 @@ import plotcli.options : Options, OptionRange;
 auto aesDefaults()
 {
     import ggplotd.aes : DefaultValues, merge;
-    import ggplotd.colour : ColourID;
     return DefaultValues.merge(Tuple!(double, "x", double, "y",
-        ColourID, "colour", string, "plotID", string, "type", 
+        string, "colour", string, "plotID", string, "type", 
         string, "plotname", string, "format", string, "xlabel", string, "ylabel" )
-        ( double.init, double.init, ColourID("black"), "", "", "plotcli", 
+        ( double.init, double.init, "black", "", "", "plotcli", 
         "png", "x", "y") ); 
 }
 
@@ -69,12 +68,11 @@ auto toTuples( string[] columns, Options options, int lineCount )
             import std.conv : to;
             import std.range : empty, front;
             import ggplotd.aes : DefaultValues, merge;
-            import ggplotd.colour : ColourID;
             import plotcli.parse : isInteger;
 
             auto tuple = aesDefaults().merge(Tuple!(double, "x", double, "y",
-                ColourID, "colour" )
-                ( lineCount.to!double, lineCount.to!double, ColourID(columnID) ) 
+                string, "colour" )
+                ( lineCount.to!double, lineCount.to!double, columnID.to!string ) 
             );
 
             foreach( i, field; tuple.fieldNames )
