@@ -26,12 +26,13 @@ string helpText() // TODO cache result because will stay the same;
 {
     import std.string : toUpper, leftJustify;
     import plotcli.data : aesDefaults;
-    auto header = "Usage: plotcli [-f]";
+    auto header = "Usage: plotcli [-f] [--rolling ROLLING]";
 
     auto bodyText = "Plotcli is a plotting program that will plot data from provided data streams (files). It will ignore any lines it doesn't understand, making it possible to feed it \"dirty\" streams/files. All options can also be provided within the stream by using the prefix #plotcli (e.g. #plotcli -x 1 -y 2).
 
 Options:
-  -f                   Follow the stream, i.e. keep listening for new lines.";
+  -f                   Follow the stream, i.e. keep listening for new lines.
+  --rolling ROLLING    Keep the data rolling, i.e. limit the plot to the specified number of data points.";
 
     foreach( field; aesDefaults.fieldNames )
     {
@@ -46,11 +47,13 @@ Options:
 private struct Options
 {
     bool follow = false;
+    int rolling = -1;
 
     OptionRange!string[string] values; 
     Options dup() const
     {
         Options opts;
+        opts.rolling = rolling;
         opts.follow = follow;
         opts.explicitly_initialised = explicitly_initialised;
         foreach(k, v; values)
@@ -112,6 +115,10 @@ Options updateOptions(ref Options options, string[] args)
     if (arguments["-f"].to!string == "true")
     {
         options.follow = true;
+    }
+    if (!arguments["--rolling"].isNull)
+    {
+        options.rolling = arguments["--rolling"].to!string.to!int;
     }
 
     import plotcli.data : aesDefaults;

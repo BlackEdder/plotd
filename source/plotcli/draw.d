@@ -74,6 +74,9 @@ void handleReceivedMessage(string message, Options options,
         {
             debug writeln("Converted data to aes: ", t);
             aes.put(t);
+
+            if (options.rolling > 0 && aes.data.length > options.rolling)
+                aes = Appender!(typeof(aesDefaults())[])( aes.data[($-options.rolling)..$] );
         }
         ++lineCount;
     }
