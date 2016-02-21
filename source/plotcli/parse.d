@@ -34,20 +34,21 @@ string[] toRange(string line)
     import std.regex : regex, replaceFirst, split;
 
     // Cut of any comments
-    line = line.replaceFirst(regex("#.*"), "");
-    return line.split(csvRegex).map!((d) => d.strip(' ')).array.filter!("a!=\"\"").array;
+    line = line.replaceFirst(regex(`\s*#.*`), "");
+    return line.split(csvRegex).map!((d) => d.strip(' ')).array;
 }
 
 unittest
 {
     assert(("1,2").toRange == ["1", "2"]);
-    assert(("1,2 #bla").toRange == ["1", "2"]);
+    assertEqual(("1,2 #bla").toRange, ["1", "2"]);
     assert(("#bla").toRange == []);
     assert(("0.5, 2").toRange == ["0.5", "2"]);
     assert(("bla, 2").toRange == ["bla", "2"]);
     assert(("1\t2").toRange == ["1", "2"]);
     assert(("1 2").toRange == ["1", "2"]);
     assert(("nan, 2").toRange == ["nan", "2"]);
+    assert(("nan,,2").toRange == ["nan","", "2"]);
 }
 
 bool areNumeric(R1, R2)( R1 r, R2 colIDs)
