@@ -66,7 +66,6 @@ void handleReceivedMessage(string message, Options options,
 
     message = message.stripComments;
     auto cols = message.toRange.array;
-
     if (options.validData(cols))
     {
         debug writeln("Accepting data: ", cols);

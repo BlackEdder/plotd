@@ -16,6 +16,11 @@ bool isInteger( string str )
     return !str.match( integer ).empty;
 }
 
+bool isInteger( int i )
+{
+    return true;
+}
+
 unittest
 {
     assert( "-1".isInteger );

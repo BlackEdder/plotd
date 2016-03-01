@@ -218,10 +218,11 @@ unittest
 /// Does the data fit with the given options?
 bool validData(R1, R2)( R1 xColumns, R1 yColumns, in R2 columns )
 {
-    import std.algorithm : map, max, reduce, filter;
+    import std.algorithm : max, reduce;
     import std.conv;
     import std.range : empty;
-    import plotcli.parse : areNumeric, isInteger;
+    import plotcli.parse : areNumeric;
+
     if (xColumns.empty && yColumns.empty )
     {
         return ( columns.length > 0 && columns.areNumeric([0]));
@@ -231,10 +232,8 @@ bool validData(R1, R2)( R1 xColumns, R1 yColumns, in R2 columns )
             yColumns.minimumExpectedIndex );
 
     return (columns.length > maxCol 
-            && columns.areNumeric(xColumns.filter!((a) => a.isInteger)
-                                          .map!((a) => a.to!int)) 
-            && columns.areNumeric(yColumns.filter!((a) => a.isInteger)
-                                          .map!((a) => a.to!int)) 
+            && columns.areNumeric(xColumns.toColumnIDs(columns.length.to!int-1))
+            && columns.areNumeric(yColumns.toColumnIDs(columns.length.to!int-1)) 
            );
 }
 
@@ -378,6 +377,35 @@ struct OptionRange( T )
     {
         import std.range : empty, front;
         return splittedOpts.empty;
+    }
+
+    /// Returns true if the range keeps repeating from now on
+    @property bool repeatForever()
+    {
+        import std.range : front;
+        if (this.empty)
+            return false;
+        return (splittedOpts.front == ".." && delta == 0);
+    }
+
+    auto toColumnIDs(int max)
+    {
+        import plotcli.parse : isInteger;
+        import std.conv : to;
+        int[] ids;
+        auto saved = save();
+        while (!saved.empty && !saved.repeatForever )
+        {
+            if (saved.front.isInteger)
+            {
+                auto id = saved.front.to!int;
+                if (id > max)
+                    break;
+                ids ~= id;
+            }
+            saved.popFront;
+        }
+        return ids;
     }
 
     @property T front()
