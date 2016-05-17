@@ -2,19 +2,25 @@
 
 set -e -o pipefail
 
-dub test --compiler=${DC} --build-mode=singleFile
-dub test -c unittest-gtk --compiler=${DC} --build-mode=singleFile
+BM="--build-mode=singleFile"
+
+if [[ "$DC" == "ldc2" ]]; then 
+    BM="--build-mode=separate"
+fi
+
+dub test --compiler=${DC} ${BM}
+dub test -c unittest-gtk --compiler=${DC} ${BM}
 
 if [[ $TRAVIS_BRANCH == 'master' ]] ; then
     if [ ! -z "$GH_TOKEN" ]; then
         git checkout master
-        dub build -b release --compiler=${DC} --build-mode=singleFile
+        dub build -b release --compiler=${DC} ${BM}
         bin/plotcli < examples/1/data.txt
         bin/plotcli < examples/2/data.txt
         bin/plotcli < examples/3/data.txt
         bin/plotcli < examples/4/data.txt
         bin/plotcli < examples/5/data.txt
-        dub build -b docs --compiler=${DC} --build-mode=singleFile
+        dub build -b docs --compiler=${DC} ${BM}
         cd docs
         mkdir images
         #cp ../*.{png,svg,pdf} images/
@@ -35,18 +41,18 @@ fi
 if [ -n "$TRAVIS_TAG" ]; then
     git checkout $TRAVIS_TAG
     if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then 
-        dub build --compiler=$DC -b release --build-mode=singleFile
+        dub build --compiler=$DC -b release ${BM}
         strip bin/plotcli
         tar -czf plotcli-osx.tar.gz -C bin/ plotcli
-        dub build --compiler=$DC -b release -c plotcli-gtk --build-mode=singleFile
+        dub build --compiler=$DC -b release -c plotcli-gtk ${BM}
         strip bin/plotcli
         tar -czf plotcli-osx-gtk.tar.gz -C bin/ plotcli
     fi
     if [[ "$TRAVIS_OS_NAME" == "linux" && "$DC" == "ldc2" ]]; then 
-        dub build --compiler=$DC -b release --build-mode=singleFile
+        dub build --compiler=$DC -b release ${BM}
         strip bin/plotcli
         tar caf plotcli-linux.tar.gz -C bin/ plotcli
-        dub build --compiler=$DC -b release -c plotcli-gtk --build-mode=singleFile
+        dub build --compiler=$DC -b release -c plotcli-gtk ${BM}
         strip bin/plotcli
         tar caf plotcli-linux-gtk.tar.gz -C bin/ plotcli
     fi
