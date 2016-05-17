@@ -97,7 +97,7 @@ void draw(Appender!(typeof(aesDefaults())[]) aes)
     import ggplotd.axes : xaxisLabel, yaxisLabel;
     import ggplotd.colour : colourGradient;
     import ggplotd.colourspace : XYZ;
-    import plotcli.geom : toGeom;
+    import ggplotd.geom : geomType;
 
     version(plotcliGTK)
     {
@@ -115,11 +115,11 @@ void draw(Appender!(typeof(aesDefaults())[]) aes)
             GGPlotD gg;
             foreach (g; group!("type")(ps))
             {
-                gg.put(g.toGeom(g.front.type));
                 gg.put( xaxisLabel( ps.front.xlabel ) );
                 gg.put( yaxisLabel( ps.front.ylabel ) );
                 gg.put( colourGradient!XYZ( ps.front.colourgradient ) );
             }
+            gg.put( geomType( ps ) );
             version(plotcliGTK)
             {
                 if (ps.front.format == "gtk")
