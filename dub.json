@@ -19,7 +19,7 @@
             "name": "default",
             "targetType": "executable",
             "targetName": "plotcli",
-            "mainSourceFil~mastere": "source/main.d"
+            "mainSourceFile": "source/main.d"
         },
         {
             "name": "plotcli-gtk",
