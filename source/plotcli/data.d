@@ -20,7 +20,7 @@ auto aesDefaults()
         string, "colour", string, "plotID", string, "type", 
         string, "plotname", string, "format", string, "xlabel", string, "ylabel",
         string, "colourgradient")
-        ( double.init, double.init, "black", "", "", "plotcli", 
+        ( double.init, double.init, "black", "", "point", "plotcli", 
         "png", "x", "y", "default") ); 
 }
 
