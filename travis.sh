@@ -4,7 +4,7 @@ set -e -o pipefail
 
 BM="--build-mode=singleFile"
 
-if [[ "$DC" == "ldc2" ]]; then 
+if [[ "$TRAVIS_OS_NAME" == "osx" || "$DC" == "ldc2" ]]; then 
     BM="--build-mode=separate"
 fi
 
