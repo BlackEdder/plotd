@@ -12,7 +12,7 @@ void multiple()
     writeln(help);
     foreach( i; iota(1,1000 ) )
     {
-        writeln( "#plotcli -x 0 -y 1 --type hist3d --plotID a" );
+        writeln( "#plotcli -x 0 -y 1 --type hist2d --plotID a" );
         writeln( 0.01*i*rNorm( 1,1 ), " ", 0.01*i*rNorm( 3, 1 ) );
         writeln( "#plotcli -x 0 --type hist --plotID b --fill 0.5" );
         writeln( rNorm( 0,1 ) );

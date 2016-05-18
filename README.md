@@ -51,7 +51,7 @@ Plotcli has a --help switch which explains the options available. You can also s
 
 ### Types of plots
 
-Some of the most commonly used types of plots supported by plotcli are: point, line, hist, hist3d and box. Because plotcli is build on ggplotd it supports the whole range of types supported by ggplotd. Therefore, for a complete list you can browse its documentation here: http://blackedder.github.io/ggplotd/geom.html. Any function that starts with geom is a type supported by plotcli. To get the type name you remove the geom from the function name and take the lowercase version. E.g. geomBox results in box, geomHist3D in hist3d etc.
+Some of the most commonly used types of plots supported by plotcli are: point, line, hist, hist2d, density and box. Because plotcli is build on ggplotd it supports the whole range of types supported by ggplotd. Therefore, for a complete list you can browse its documentation here: http://blackedder.github.io/ggplotd/geom.html. Any function that starts with geom is a type supported by plotcli. To get the type name you remove the geom from the function name and take the lowercase version. E.g. geomBox results in box, geomHist2D in hist2d etc.
 
 ## Examples
 
