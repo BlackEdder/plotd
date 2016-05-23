@@ -17,3 +17,4 @@ tmp/
 *.pdf
 extern
 test*
+tags
