@@ -16,12 +16,12 @@ import plotcli.options : Options, OptionRange;
 auto aesDefaults()
 {
     import ggplotd.aes : DefaultValues, merge;
-    return DefaultValues.merge(Tuple!(double, "x", double, "y",
-        string, "colour", string, "plotID", string, "type", 
+    return DefaultValues.merge(Tuple!(string, "plotID", string, "type", 
         string, "plotname", string, "format", string, "xlabel", string, "ylabel",
-        string, "colourgradient")
-        ( double.init, double.init, "black", "", "point", "plotcli", 
-        "png", "x", "y", "default") ); 
+        string, "colourgradient", double, "x", double, "y",
+        string, "colour", )
+        ( "", "point", "plotcli", 
+        "png", "x", "y", "default", double.init, double.init, "black" ) ); 
 }
 
 private int safeToIndex( string str )
