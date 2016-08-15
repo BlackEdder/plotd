@@ -98,6 +98,7 @@ void draw(Appender!(typeof(aesDefaults())[]) aes)
     import ggplotd.colour : colourGradient;
     import ggplotd.colourspace : XYZ;
     import ggplotd.geom : geomType;
+    import ggplotd.legend : continuousLegend, discreteLegend;
 
     version(plotcliGTK)
     {
@@ -118,6 +119,10 @@ void draw(Appender!(typeof(aesDefaults())[]) aes)
                 gg.put( xaxisLabel( ps.front.xlabel ) );
                 gg.put( yaxisLabel( ps.front.ylabel ) );
                 gg.put( colourGradient!XYZ( ps.front.colourgradient ) );
+                if (!ps.front.legend.empty && ps.front.legend[0..1] == "c")
+                    gg.put(continuousLegend);
+                else if (!ps.front.legend.empty && ps.front.legend[0..1] == "d")
+                    gg.put(discreteLegend);
             }
             gg.put( geomType( ps ) );
             version(plotcliGTK)

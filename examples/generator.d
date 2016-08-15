@@ -12,7 +12,7 @@ void multiple()
     writeln(help);
     foreach( i; iota(1,1000 ) )
     {
-        writeln( "#plotcli -x 0 -y 1 --type hist2d --plotID a" );
+        writeln( "#plotcli -x 0 -y 1 --type hist2d --plotID a --legend c" );
         writeln( 0.01*i*rNorm( 1,1 ), " ", 0.01*i*rNorm( 3, 1 ) );
         writeln( "#plotcli -x 0 --type hist --plotID b --fill 0.5" );
         writeln( rNorm( 0,1 ) );
@@ -22,7 +22,7 @@ void multiple()
 
 void mixing_types()
 {
-    auto help = "Example showing how to plot the same data with different plot types. Run it with generator types | plotcli -x 0,0,1,0,1 -y ,2 --type hist,point,hist,box,box --plotID a,b,a,c,c";
+    auto help = "Example showing how to plot the same data with different plot types. Run it with generator types | plotcli -x 0,0,1,0,1 -y ,2 --type hist,point,hist,box,box --plotID a,b,a,c,c --legend d,,d,d,d";
     writeln(help);
     foreach( i; iota(1,1000 ) )
     {

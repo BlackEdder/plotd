@@ -8,7 +8,7 @@ well using: plotcli -y 0,1,2,3 --type line  < data.txt
 The type signifies that we are plotting lines. Since no x is specified the
 line number (row) is used as x variable
 
-#plotcli -y 0,1,2,3 --type line --plotname example1
+#plotcli -y 0,1,2,3 --type line --plotname example1 --legend d
 -0.246465,1.1349,1.37636,2.33029
 0.17212,1.23672,1.77301,1.96037
 0.000651441,0.724035,1.5267,2.03115
