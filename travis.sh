@@ -9,7 +9,9 @@ if [[ "$TRAVIS_OS_NAME" == "osx" || "$DC" == "ldc2" ]]; then
 fi
 
 dub test --compiler=${DC} ${BM}
-dub test -c unittest-gtk --compiler=${DC} ${BM}
+if [[ "$TRAVIS_OS_NAME" != "osx" ]]; then 
+    dub test -c unittest-gtk --compiler=${DC} ${BM}
+fi
 
 if [[ $TRAVIS_BRANCH == 'master' ]] ; then
     if [ ! -z "$GH_TOKEN" ]; then
@@ -44,9 +46,9 @@ if [ -n "$TRAVIS_TAG" ]; then
         dub build --compiler=$DC -b release
         strip bin/plotcli
         tar -czf plotcli-osx.tar.gz -C bin/ plotcli
-        dub build --compiler=$DC -b release -c plotcli-gtk
-        strip bin/plotcli
-        tar -czf plotcli-osx-gtk.tar.gz -C bin/ plotcli
+        #dub build --compiler=$DC -b release -c plotcli-gtk
+        #strip bin/plotcli
+        #tar -czf plotcli-osx-gtk.tar.gz -C bin/ plotcli
     fi
     if [[ "$TRAVIS_OS_NAME" == "linux" && "$DC" == "ldc2" ]]; then 
         dub build --compiler=$DC -b release
