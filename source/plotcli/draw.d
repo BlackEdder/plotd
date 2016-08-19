@@ -92,7 +92,7 @@ unittest
 void draw(Appender!(typeof(aesDefaults())[]) aes)
 {
     import std.range : empty, front;
-    import ggplotd.ggplotd : title, GGPlotD;
+    import ggplotd.ggplotd : GGPlotD;
     import ggplotd.aes : group;
     import ggplotd.axes : xaxisLabel, yaxisLabel;
     import ggplotd.colour : colourGradient;
@@ -103,7 +103,7 @@ void draw(Appender!(typeof(aesDefaults())[]) aes)
     version(plotcliGTK)
     {
         import core.thread : Thread;
-        import ggplotd.ggplotd : Facets;
+        import ggplotd.ggplotd : title, Facets;
         import ggplotd.gtk : GTKWindow;
         static GTKWindow[string] windows;
         auto facets = Facets();
@@ -125,11 +125,12 @@ void draw(Appender!(typeof(aesDefaults())[]) aes)
                     gg.put(discreteLegend);
             }
             gg.put( geomType( ps ) );
-            gg.put( title( ps.front.plotname ) );
             version(plotcliGTK)
             {
                 if (ps.front.format == "gtk")
                 {
+                    gg.put( title(
+                        ps.front.plotname ~ "_" ~ ps.front.plotID) );
                     facets.put( gg );
                 } else {
                     gg.save(ps.front.plotname ~ ps.front.plotID ~ "." ~
