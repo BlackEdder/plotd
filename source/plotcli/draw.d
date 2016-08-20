@@ -111,6 +111,7 @@ void draw(Appender!(typeof(aesDefaults())[]) aes)
 
     if (!aes.data.empty)
     {
+        debug writeln("Starting to draw");
         foreach (ps; group!("plotID","plotname","format")(aes.data))
         {
             GGPlotD gg;
@@ -140,6 +141,7 @@ void draw(Appender!(typeof(aesDefaults())[]) aes)
                 gg.save(ps.front.plotname ~ ps.front.plotID ~ "." ~
                     ps.front.format);
         }
+        debug writeln("Done drawing");
     }
     version(plotcliGTK) {
         if (!facets.ggs.data.empty)
