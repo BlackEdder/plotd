@@ -9,9 +9,7 @@ if [[ "$TRAVIS_OS_NAME" == "osx" || "$DC" == "ldc2" ]]; then
 fi
 
 dub test --compiler=${DC} ${BM}
-#if [[ "$TRAVIS_OS_NAME" != "osx" ]]; then 
-    dub test -c unittest-gtk --compiler=${DC} ${BM}
-#fi
+dub test -c unittest-gtk --compiler=${DC} ${BM}
 
 if [[ $TRAVIS_BRANCH == 'master' ]] ; then
     if [ ! -z "$GH_TOKEN" ]; then

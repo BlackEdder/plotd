@@ -33,7 +33,7 @@ deploy:
     api_key:
       secure: LqFD1B3h4b2RYlGW8fatBPdbzqOM03mteXKPQNOghrcGStDuDtDc+3h5xmfcPdgtkKML7RTJwrnBHTyvLIWuBMQV3rfFWX24zqo9pr+RDGw6NHSEmEjYdPhvXYDTc+/q6Cnz5JNAVeAoQ3w1Kc/RdCmSWsBgDMcTmkYi6KM/nfc=
     file: 
-        #- "plotcli-osx-gtk.tar.gz"
+      - "plotcli-osx-gtk.tar.gz"
       - "plotcli-osx.tar.gz"
     on:
       tags: true
