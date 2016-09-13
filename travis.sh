@@ -44,9 +44,9 @@ if [ -n "$TRAVIS_TAG" ]; then
         dub build --compiler=$DC -b release
         strip bin/plotcli
         tar -czf plotcli-osx.tar.gz -C bin/ plotcli
-        #dub build --compiler=$DC -b release -c plotcli-gtk
-        #strip bin/plotcli
-        #tar -czf plotcli-osx-gtk.tar.gz -C bin/ plotcli
+        dub build --compiler=$DC -b release -c plotcli-gtk
+        strip bin/plotcli
+        tar -czf plotcli-osx-gtk.tar.gz -C bin/ plotcli
     fi
     if [[ "$TRAVIS_OS_NAME" == "linux" && "$DC" == "ldc2" ]]; then 
         dub build --compiler=$DC -b release
