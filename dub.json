@@ -9,9 +9,10 @@
     "excludedSourceFiles": ["source/main.d"],
     "targetPath": "bin",
     "dependencies": {
-        "ggplotd": ">=1.0.0",
+        "ggplotd": ">=1.1.0",
         "dunit": "~>1.0.11",
-        "docopt": ">=0.6.1-b.4"
+        "docopt": ">=0.6.1-b.4",
+        "color": "~>0.0.5"
     },
     "targetType": "library",
     "configurations": [
