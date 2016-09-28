@@ -1,0 +1,29 @@
+Usage: plotcli [-f] [--rolling ROLLING] [--label LABEL] [--size SIZE] [--angle ANGLE] [--alpha ALPHA] [--mask MASK] [--fill FILL] [--legend LEGEND] [--plotID PLOTID] [--type TYPE] [--plotname PLOTNAME] [--format FORMAT] [--xlabel XLABEL] [--ylabel YLABEL] [--colourgradient COLOURGRADIENT] [-x X] [-y Y] [--colour COLOUR]
+
+Plotcli is a plotting program that will plot data from provided data streams (files). It will ignore any lines it doesn't understand, making it possible to feed it "dirty" streams/files. All options can also be provided within the stream by using the prefix #plotcli (e.g. #plotcli -x 1 -y 2).
+
+Options:
+  -f                   Follow the stream, i.e. keep listening for new lines.
+  --rolling ROLLING    Keep the data rolling, i.e. limit the plot to the specified number of data points.
+  --label LABEL        Specify label either by indices or labels/names
+  --size SIZE          Specify size either by indices or labels/names
+  --angle ANGLE        Specify angle either by indices or labels/names
+  --alpha ALPHA        Specify alpha either by indices or labels/names
+  --mask MASK          Specify mask either by indices or labels/names
+  --fill FILL          Specify fill either by indices or labels/names
+  --legend LEGEND      Specify legend either by indices or labels/names
+  --plotID PLOTID      Specify plotID either by indices or labels/names
+  --type TYPE          Specify type either by indices or labels/names
+  --plotname PLOTNAME  Specify plotname either by indices or labels/names
+  --format FORMAT      Specify format either by indices or labels/names
+  --xlabel XLABEL      Specify xlabel either by indices or labels/names
+  --ylabel YLABEL      Specify ylabel either by indices or labels/names
+  --colourgradient COLOURGRADIENT Specify colourgradient either by indices or labels/names
+  -x X                 Specify x either by indices or labels/names
+  -y Y                 Specify y either by indices or labels/names
+  --colour COLOUR      Specify colour either by indices or labels/names
+
+Examples:
+	Most options allow you to specify indices or labels. If you provide integers (e.g. 0,2) they are interpreted as a column index (starting value 0), and that column is used as the values. For example passing `-x 0,1` will use the values from column 0 and 1 as x values. Any other value is used as a label. For example `--plotname name1,name2` will cause two plots to be created with the names name1 and name2. 
+    Specifying a single value for each option, except x and y, will result in that value to be used for all different lines/column. For example `-x 0,1 --type box` will use the first and second column for box plots. Finally one can also use `..` to indicate keep repeating/increasing. So `-x 0,2,..` will cause all even columns to be used. Similarly `-x 0,1,2 -y 3,..` will result in the first three columns being used for x values, but the 4 column being used for y values. In general it is also possible to keep values empty if they are not needed, e.g. `-x 0,1,2 -y ,2 --type box,line,box`.
+
